@@ -1,0 +1,64 @@
+.root {
+  position: relative;
+  width: 100%;
+}
+.hit {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 60 / 44;
+}
+.main,
+.baby {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: auto;
+  transition:
+    transform var(--dur-char) var(--ease-out),
+    opacity var(--dur-ui);
+}
+.baby {
+  width: 50%;
+  left: 25%;
+  top: 30%;
+  opacity: 0;
+}
+.root[data-anim='hide'] .main {
+  transform: translateX(-120%) scale(0.85);
+}
+.root[data-anim='split'] .main {
+  opacity: 0;
+  transform: scale(0.6);
+}
+.root[data-anim='split'] .baby {
+  opacity: 1;
+  animation: bunny-scatter 3.2s var(--ease-in-out) both;
+}
+.root[data-anim='split'] .b1 {
+  --dx: -140%;
+  --dy: -40%;
+}
+.root[data-anim='split'] .b2 {
+  --dx: 30%;
+  --dy: -90%;
+  animation-delay: 60ms;
+}
+.root[data-anim='split'] .b3 {
+  --dx: 150%;
+  --dy: -20%;
+  animation-delay: 120ms;
+}
+@keyframes bunny-scatter {
+  0% {
+    transform: translate(0, 0) scale(0.6);
+  }
+  25%,
+  70% {
+    transform: translate(var(--dx), var(--dy)) scale(1);
+  }
+  100% {
+    transform: translate(0, 0) scale(0.6);
+    opacity: 0;
+  }
+}

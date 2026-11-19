@@ -87,3 +87,9 @@
     transform: translateY(30%) scaleY(0.8);
   }
 }
+.root[data-anim='blink'] :global(.oa-lid) {
+  transform: scaleY(1) !important;
+}
+.root[data-anim='wave'] .svg {
+  animation: oa-wiggle 450ms var(--ease-in-out) 2;
+}

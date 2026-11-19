@@ -56,6 +56,7 @@ export const ACTOR_IDS = [
   'inch',
   'nimbus',
   'moth',
+  'bunny',
   'room',
 ] as const;
 export type ActorId = (typeof ACTOR_IDS)[number];
@@ -77,7 +78,9 @@ export type ActorAnim =
   | 'lookAway'
   | 'catch'
   | 'enter'
-  | 'wave';
+  | 'wave'
+  | 'split'
+  | 'blink';
 
 export const VAR_KEYS = ['curiosity', 'energy', 'trust', 'mischief', 'stimulation', 'fatigue'] as const;
 export type VarKey = (typeof VAR_KEYS)[number];

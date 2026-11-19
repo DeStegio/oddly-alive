@@ -16,6 +16,8 @@ export interface DotMotion {
   onFollowSample?: (x: number, y: number, speed: number) => void;
   /** Called when Dot has been very close to the pointer for a moment. */
   onCatch?: () => void;
+  /** Called when the pointer has been moving wildly near Dot. */
+  onFrenzy?: () => void;
 }
 
 interface DotProps {
@@ -56,6 +58,9 @@ export function Dot({
     let rect: DOMRect | null = null;
     let seen = -1;
     let frames = 0;
+    let fastFrames = 0;
+    let lungeUntil = 0;
+    let nextLunge = 0;
     return onFrame((dt, now) => {
       const bounds = boundsRef.current;
       const mover = moverRef.current;
@@ -82,9 +87,15 @@ export function Dot({
         m.follow && pointer.active && pointer.inside && pointerInBounds && recentlyMoved;
       if (following) {
         // orbit politely: keep ~70px away, drifting around the pointer
+        // ...and every so often, try to catch it (INT-014)
+        if (now > nextLunge) {
+          nextLunge = now + 6000 + Math.random() * 6000;
+          if (Math.random() < 0.55) lungeUntil = now + 800;
+        }
+        const reach = now < lungeUntil ? 0.08 : 1;
         angle += dt * 0.0012;
-        tx = px + Math.cos(angle) * 70;
-        ty = py + Math.sin(angle) * 40 - 30;
+        tx = px + Math.cos(angle) * 70 * reach;
+        ty = py + (Math.sin(angle) * 40 - 30) * reach;
       }
       if (isReducedMotion()) {
         x = tx;
@@ -108,6 +119,11 @@ export function Dot({
         const d = Math.hypot(px - x, py - y);
         closeFrames = d < 40 ? closeFrames + 1 : 0;
         if (closeFrames === 20) m.onCatch?.();
+        fastFrames = pointer.speed > 2.4 ? fastFrames + 1 : Math.max(0, fastFrames - 1);
+        if (fastFrames > 40) {
+          fastFrames = 0;
+          m.onFrenzy?.();
+        }
       }
     });
   }, [boundsRef, motion]);
@@ -119,8 +135,19 @@ export function Dot({
         <button
           type="button"
           className={`prop-btn ${styles.hit}`}
-          aria-label="Dot, a small blue sphere who follows you around"
+          aria-label="Dot, a small blue sphere who follows you around (arrow keys move him)"
           onClick={onActivate}
+          onKeyDown={(e) => {
+            // arrows nudge Dot's resting spot while Dot is focused (INT-044)
+            const step = 0.04;
+            const h = motion.current.home;
+            const moves: Record<string, [number, number]> = { ArrowLeft: [-step, 0], ArrowRight: [step, 0], ArrowUp: [0, -step], ArrowDown: [0, step] };
+            const mv = moves[e.key];
+            if (!mv) return;
+            e.preventDefault();
+            h.x = Math.min(0.95, Math.max(0.05, h.x + mv[0]));
+            h.y = Math.min(0.92, Math.max(0.2, h.y + mv[1]));
+          }}
         >
           <svg viewBox="0 0 60 60" className={styles.svg} aria-hidden="true">
             <ellipse cx="30" cy="57" rx="14" ry="2.5" fill="var(--shadow-ink)" opacity="0.2" />

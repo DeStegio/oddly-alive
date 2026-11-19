@@ -10,6 +10,8 @@ export type ActorCommand =
   | { type: 'anim'; name: ActorAnim; durationMs?: number }
   | { type: 'say'; text: string; durationMs?: number }
   | { type: 'gaze'; target: { x: number; y: number } | null; avert?: boolean; durationMs?: number }
+  /** Prop-specific nudge with a small string argument (e.g. which title letter). */
+  | { type: 'poke'; key: string }
   | { type: 'reset' };
 
 type Handler = (cmd: ActorCommand) => void;
