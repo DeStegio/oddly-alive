@@ -1,8 +1,8 @@
 import { create } from 'zustand';
 
 /**
- * Persistent-in-session object state of the rooms (what the house looks
- * like right now). "Reset World" restores these defaults.
+ * What the rooms look like right now. "Reset World" restores these defaults.
+ * Behaviors read/write them through string flags like 'living.lampOn'.
  */
 export interface LivingObjects {
   lampOn: boolean;
@@ -12,31 +12,114 @@ export interface LivingObjects {
   keyholeRevealed: boolean;
   clockSpins: number;
   plantBloom: boolean;
+  /** Stickers placed on the wall (INT-028): bounded list. */
+  stickers: number;
+  /** "Mini-incident": the room is rearranged until tidied (INT-029). */
+  rearranged: boolean;
+  /** Pim's transformation stage (INT-030). */
+  pimForm: number;
 }
 
-export const LIVING_DEFAULTS: LivingObjects = {
-  lampOn: true,
-  buttonPresses: 0,
-  pictureTilt: -3,
-  pictureNudges: 0,
-  keyholeRevealed: false,
-  clockSpins: 0,
-  plantBloom: false,
+export interface MoodObjects {
+  lastUsed: string;
+  teaPoured: number;
+}
+
+export interface SecretObjects {
+  /** Token ids placed into the three slots of the cabinet. */
+  slots: string;
+  chestOpen: boolean;
+  candleLit: boolean;
+}
+
+export interface AfterHoursObjects {
+  radioOn: boolean;
+  lightOn: boolean;
+  constellations: number;
+}
+
+export interface ObjectsState {
+  living: LivingObjects;
+  mood: MoodObjects;
+  secret: SecretObjects;
+  after: AfterHoursObjects;
+}
+
+export const OBJECT_DEFAULTS: ObjectsState = {
+  living: {
+    lampOn: true,
+    buttonPresses: 0,
+    pictureTilt: -3,
+    pictureNudges: 0,
+    keyholeRevealed: false,
+    clockSpins: 0,
+    plantBloom: false,
+    stickers: 0,
+    rearranged: false,
+    pimForm: 0,
+  },
+  mood: { lastUsed: '', teaPoured: 0 },
+  secret: { slots: '', chestOpen: false, candleLit: false },
+  after: { radioOn: false, lightOn: false, constellations: 0 },
 };
 
-export interface WorldObjectsState {
-  living: LivingObjects;
-  setLiving: (
-    patch: Partial<LivingObjects> | ((s: LivingObjects) => Partial<LivingObjects>),
-  ) => void;
+type SliceKey = keyof ObjectsState;
+
+export interface WorldObjectsState extends ObjectsState {
+  setLiving: (patch: Partial<LivingObjects> | ((s: LivingObjects) => Partial<LivingObjects>)) => void;
+  setSlice: <K extends SliceKey>(key: K, patch: Partial<ObjectsState[K]>) => void;
   resetObjects: () => void;
+  hydrateObjects: (state: Partial<ObjectsState>) => void;
 }
 
+const fresh = (): ObjectsState => JSON.parse(JSON.stringify(OBJECT_DEFAULTS)) as ObjectsState;
+
 export const useObjects = create<WorldObjectsState>()((set) => ({
-  living: { ...LIVING_DEFAULTS },
+  ...fresh(),
   setLiving: (patch) =>
-    set((s) => ({
-      living: { ...s.living, ...(typeof patch === 'function' ? patch(s.living) : patch) },
-    })),
-  resetObjects: () => set({ living: { ...LIVING_DEFAULTS } }),
+    set((s) => ({ living: { ...s.living, ...(typeof patch === 'function' ? patch(s.living) : patch) } })),
+  setSlice: (key, patch) => set((s) => ({ [key]: { ...s[key], ...patch } }) as Partial<WorldObjectsState>),
+  resetObjects: () => set(fresh()),
+  hydrateObjects: (state) =>
+    set((s) => {
+      const next: Partial<ObjectsState> = {};
+      for (const key of Object.keys(OBJECT_DEFAULTS) as SliceKey[]) {
+        const incoming = state[key];
+        if (incoming && typeof incoming === 'object') {
+          (next as Record<string, unknown>)[key] = { ...s[key], ...sanitize(OBJECT_DEFAULTS[key], incoming) };
+        }
+      }
+      return next;
+    }),
 }));
+
+/** Keep only known keys whose type matches the default. */
+function sanitize<T extends object>(defaults: T, incoming: object): Partial<T> {
+  const out: Partial<T> = {};
+  for (const k of Object.keys(defaults) as Array<keyof T>) {
+    const v = (incoming as Record<string, unknown>)[k as string];
+    if (v !== undefined && typeof v === typeof defaults[k]) out[k] = v as T[keyof T];
+  }
+  return out;
+}
+
+export function getFlag(path: string): boolean | number | string | undefined {
+  const [slice, field] = path.split('.') as [string, string | undefined];
+  const state = useObjects.getState() as unknown as Record<string, Record<string, unknown>>;
+  const v = field ? state[slice]?.[field] : undefined;
+  return typeof v === 'boolean' || typeof v === 'number' || typeof v === 'string' ? v : undefined;
+}
+
+export function setFlag(path: string, value: boolean | number | string) {
+  const [slice, field] = path.split('.') as [string, string | undefined];
+  if (!field || !(slice in OBJECT_DEFAULTS)) return;
+  const def = (OBJECT_DEFAULTS as unknown as Record<string, Record<string, unknown>>)[slice];
+  if (!def || typeof def[field] !== typeof value) return;
+  useObjects.getState().setSlice(slice as SliceKey, { [field]: value } as never);
+}
+
+/** Serializable snapshot (for memory persistence). */
+export function snapshotObjects(): ObjectsState {
+  const s = useObjects.getState();
+  return { living: s.living, mood: s.mood, secret: s.secret, after: s.after };
+}
