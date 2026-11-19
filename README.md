@@ -15,7 +15,7 @@ through behavior:
 
 There is no goal, score, tutorial or chatbot. The activity is the website itself.
 
-**Live demo:** https://destegio.github.io/oddly-alive/ (deployed with GitHub Pages; see "Deployment" below).
+**Live demo:** https://destegio.github.io/oddly-alive/. Every push to `main` builds it to the `gh-pages` branch; GitHub Pages has to be pointed at that branch once (see "Deployment").
 
 ## The rooms
 
@@ -132,6 +132,9 @@ in [`TESTING.md`](TESTING.md).
 `.github/workflows/deploy.yml` runs the checks, builds with
 `BASE_PATH=/oddly-alive/` and publishes `dist/` to the `gh-pages` branch. The
 app uses hash routing, so deep links work on static hosting with no rewrites.
+
+One-time setup: **Settings → Pages → Build and deployment → Source: Deploy
+from a branch → `gh-pages` / `(root)`**.
 
 ## Limitations
 
