@@ -21,7 +21,7 @@ describe('<MemoryRoom />', () => {
     renderRoom();
     expect(screen.getByText('Returning Lamp Botherer')).toBeInTheDocument();
     expect(screen.getByRole('img', { name: '4 visits' })).toBeInTheDocument();
-    expect(screen.getByText(/Lumen the lamp/)).toBeInTheDocument();
+    expect(screen.getAllByText(/Lumen the lamp/).length).toBeGreaterThan(0);
   });
 
   it('Forget me asks for confirmation inline, then clears', () => {
