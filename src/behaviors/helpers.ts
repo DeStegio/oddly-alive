@@ -24,8 +24,20 @@ export const face = (ctx: Ctx, id: ActorId, value: Expression, durationMs: numbe
 export const anim = (ctx: Ctx, id: ActorId, name: ActorAnim, durationMs?: number) =>
   send(ctx, id, durationMs === undefined ? { type: 'anim', name } : { type: 'anim', name, durationMs });
 
+/** Recently spoken lines per actor; a line isn't repeated while fresher ones exist. */
+const spoken = new Map<string, string[]>();
+const MEMORY_PER_ACTOR = 4;
+
+export function pickLine(id: string, lines: readonly string[], rng: Rng): string {
+  const recent = spoken.get(id) ?? [];
+  const fresh = lines.filter((l) => !recent.includes(l));
+  const line = pickOne(fresh.length ? fresh : lines, rng);
+  spoken.set(id, [...recent, line].slice(-MEMORY_PER_ACTOR));
+  return line;
+}
+
 export const say = (ctx: Ctx, id: ActorId, lines: readonly string[], durationMs = 2600) =>
-  send(ctx, id, { type: 'say', text: pickOne(lines, ctx.rng), durationMs: tempo(ctx, durationMs) });
+  send(ctx, id, { type: 'say', text: pickLine(id, lines, ctx.rng), durationMs: tempo(ctx, durationMs) });
 
 /** Build a reaction; the actor is reset on cancel so nothing is left half-done. */
 export function act(
