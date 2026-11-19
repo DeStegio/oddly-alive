@@ -78,3 +78,9 @@ export type ActorAnim =
   | 'catch'
   | 'enter'
   | 'wave';
+
+export const VAR_KEYS = ['curiosity', 'energy', 'trust', 'mischief', 'stimulation', 'fatigue'] as const;
+export type VarKey = (typeof VAR_KEYS)[number];
+
+/** Bounded (0..1) long-lived personality variables. */
+export type PersonalityVars = Record<VarKey, number>;
