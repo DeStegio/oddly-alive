@@ -1,8 +1,11 @@
-import { Suspense, type ReactNode } from 'react';
+import { Suspense, useMemo, type ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
+import { DiscoveryToast } from '../components/DiscoveryToast';
 import { Nav } from '../components/Nav';
+import { RareLayer } from '../components/RareLayer';
+import { useWorldStore } from '../state/worldStore';
 import { ErrorBoundary } from './ErrorBoundary';
-import { ROOMS, roomFromPath } from './rooms';
+import { ROOMS, roomFromPath, type RoomId } from './rooms';
 import styles from './Shell.module.css';
 
 export function SceneFallback() {
@@ -14,20 +17,25 @@ export function SceneFallback() {
   );
 }
 
-export function Shell({ children }: { children: ReactNode }) {
+export function Shell({ children, controls }: { children: ReactNode; controls?: ReactNode }) {
   const location = useLocation();
   const room = roomFromPath(location.pathname);
+  // the Secret Space keeps a mysterious label until you've been there or found the keyhole
+  const secretKnown = useWorldStore((s) => Boolean(s.roomVisits.secret) || 'keyhole' in s.discoveries);
+  const hidden = useMemo<ReadonlySet<RoomId>>(() => (secretKnown ? new Set() : new Set(['secret'])), [secretKnown]);
   return (
     <>
       <a className="skip-link" href="#scene">
         Skip to the room
       </a>
-      <Nav />
+      <Nav hiddenLabels={hidden} controls={controls} />
       <main id="scene" className={styles.main} data-room={room} tabIndex={-1}>
         <ErrorBoundary resetKey={room} label={ROOMS[room].label}>
           <Suspense fallback={<SceneFallback />}>{children}</Suspense>
         </ErrorBoundary>
       </main>
+      <RareLayer />
+      <DiscoveryToast />
     </>
   );
 }
