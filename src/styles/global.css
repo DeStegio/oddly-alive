@@ -202,3 +202,18 @@ li {
   background: var(--yellow);
   color: #24232b;
 }
+
+/* a shared tactile response for every prop: a small lift, a firm press */
+.prop-btn > svg {
+  transition: transform var(--dur-ui) var(--ease-spring);
+}
+.prop-btn:hover > svg {
+  transform: translateY(-2px);
+}
+.prop-btn:focus-visible {
+  outline-offset: 6px;
+  border-radius: 14px;
+}
+[data-motion='reduced'] .prop-btn:hover > svg {
+  transform: none;
+}
