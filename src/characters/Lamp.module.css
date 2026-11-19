@@ -1,0 +1,90 @@
+.root {
+  position: relative;
+  width: 100%;
+}
+.bubble {
+  bottom: 88%;
+  left: 70%;
+}
+.hit {
+  width: 100%;
+}
+.svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+.cone {
+  opacity: 0;
+  mix-blend-mode: multiply;
+  transition: opacity 500ms var(--ease-out);
+  pointer-events: none;
+}
+.root[data-on='true'] .cone {
+  opacity: 0.32;
+}
+:global([data-theme='night']) .root[data-on='true'] .cone {
+  mix-blend-mode: screen;
+  opacity: 0.22;
+}
+.shade {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  transition: transform var(--dur-char) var(--ease-spring);
+}
+.root[data-on='false'] .shade path:first-child {
+  fill: color-mix(in srgb, var(--yellow) 55%, #8a7f6a);
+}
+.hit:hover .shade {
+  transform: rotate(-4deg);
+}
+.hit:active .pull {
+  transform: translateY(6px);
+}
+.pull {
+  transition: transform var(--dur-tap) var(--ease-out);
+}
+.root[data-anim='wiggle'] .shade {
+  animation: oa-wiggle 600ms var(--ease-in-out);
+}
+.root[data-anim='shake'] .svg {
+  animation: oa-shake 450ms var(--ease-in-out);
+}
+.root[data-anim='dim'] .cone {
+  animation: lamp-dim 1600ms var(--ease-in-out);
+}
+.root[data-anim='bounce'] .svg {
+  animation: lamp-hop 800ms var(--ease-out);
+  transform-origin: 50% 100%;
+}
+.root[data-anim='tilt'] .shade {
+  transform: rotate(14deg);
+}
+@keyframes lamp-dim {
+  0%,
+  100% {
+    opacity: 0.32;
+  }
+  30% {
+    opacity: 0.08;
+  }
+  55% {
+    opacity: 0.26;
+  }
+  75% {
+    opacity: 0.1;
+  }
+}
+@keyframes lamp-hop {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  30% {
+    transform: translateY(-8%) rotate(-3deg);
+  }
+  60% {
+    transform: translateY(0) rotate(2deg);
+  }
+}

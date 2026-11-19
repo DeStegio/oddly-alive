@@ -1,0 +1,67 @@
+.mover {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: var(--z-characters);
+  will-change: transform;
+}
+.root {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+.hit {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+}
+.svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.body {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: oa-float 2.8s var(--ease-in-out) infinite;
+}
+.root[data-anim='jump'] .svg {
+  animation: oa-jump 650ms var(--ease-out);
+}
+.root[data-anim='spin'] .svg {
+  animation: oa-spin 700ms var(--ease-in-out);
+}
+.root[data-anim='dizzy'] .svg {
+  animation: oa-dizzy 380ms var(--ease-in-out) 4;
+}
+.root[data-anim='wiggle'] .svg {
+  animation: oa-wiggle 600ms var(--ease-in-out);
+}
+.root[data-anim='squish'] .svg {
+  animation: oa-squish 420ms var(--ease-spring);
+}
+.root[data-anim='catch'] .svg {
+  animation: dot-catch 700ms var(--ease-spring);
+}
+.root[data-anim='hide'] .svg {
+  opacity: 0.15;
+  transform: scale(0.6);
+  transition:
+    opacity var(--dur-char),
+    transform var(--dur-char) var(--ease-out);
+}
+@keyframes dot-catch {
+  0% {
+    transform: scale(1);
+  }
+  35% {
+    transform: scale(1.35, 0.7) translateY(6px);
+  }
+  70% {
+    transform: scale(0.9, 1.15) translateY(-8px);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
