@@ -1,17 +1,48 @@
-import { lazy } from 'react';
+import { lazy, useEffect } from 'react';
 import { HashRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { Controls } from '../components/Controls';
 import { Shell } from './Shell';
 import { WorldProvider } from './WorldProvider';
 
-const LivingRoom = lazy(() => import('../rooms/LivingRoom/LivingRoom'));
-const Playground = lazy(() => import('../rooms/Playground/Playground'));
-const MoodRoom = lazy(() => import('../rooms/MoodRoom/MoodRoom'));
-const SecretSpace = lazy(() => import('../rooms/SecretSpace/SecretSpace'));
-const MemoryRoom = lazy(() => import('../rooms/MemoryRoom/MemoryRoom'));
-const AfterHours = lazy(() => import('../rooms/AfterHours/AfterHours'));
+const load = {
+  living: () => import('../rooms/LivingRoom/LivingRoom'),
+  playground: () => import('../rooms/Playground/Playground'),
+  mood: () => import('../rooms/MoodRoom/MoodRoom'),
+  secret: () => import('../rooms/SecretSpace/SecretSpace'),
+  memory: () => import('../rooms/MemoryRoom/MemoryRoom'),
+  after: () => import('../rooms/AfterHours/AfterHours'),
+};
+const LivingRoom = lazy(load.living);
+const Playground = lazy(load.playground);
+const MoodRoom = lazy(load.mood);
+const SecretSpace = lazy(load.secret);
+const MemoryRoom = lazy(load.memory);
+const AfterHours = lazy(load.after);
+
+/** Once the first room is up and the page is idle, quietly fetch the others (physics last). */
+function usePrefetchRooms() {
+  useEffect(() => {
+    const idle = (fn: () => void, ms: number) => {
+      const w = window as Window & { requestIdleCallback?: (cb: () => void) => number };
+      return window.setTimeout(() => (w.requestIdleCallback ? w.requestIdleCallback(fn) : fn()), ms);
+    };
+    const a = idle(() => {
+      void load.living();
+      void load.mood();
+      void load.secret();
+      void load.memory();
+      void load.after();
+    }, 2500);
+    const b = idle(() => void load.playground(), 6000);
+    return () => {
+      window.clearTimeout(a);
+      window.clearTimeout(b);
+    };
+  }, []);
+}
 
 export function AppRoutes() {
+  usePrefetchRooms();
   return (
     <WorldProvider>
       <Shell controls={<Controls />}>
