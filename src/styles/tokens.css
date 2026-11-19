@@ -18,6 +18,8 @@
   --mood-tint: transparent;
   /* characters are paper cut-outs: their ink stays dark in every theme */
   --char-ink: #24232b;
+  /* the paper props are cut from stays light at night */
+  --cut-paper: #fffaf1;
 
   /* type */
   --font-display: 'Fraunces Variable', 'Fraunces', Georgia, 'Times New Roman', serif;

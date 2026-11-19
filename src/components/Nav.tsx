@@ -8,13 +8,15 @@ interface NavProps {
   hiddenLabels?: ReadonlySet<RoomId>;
   onNavigate?: (room: RoomId) => void;
   controls?: ReactNode;
+  /** The current room is dark by design (Secret Space, After Hours). */
+  dark?: boolean;
 }
 
 /**
  * Persistent navigation. It never moves, hides or animates away — motion and
  * secrets must never prevent leaving a scene.
  */
-export function Nav({ hiddenLabels, onNavigate, controls }: NavProps) {
+export function Nav({ hiddenLabels, onNavigate, controls, dark }: NavProps) {
   const [scrolled, setScrolled] = useState(false);
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -23,7 +25,7 @@ export function Nav({ hiddenLabels, onNavigate, controls }: NavProps) {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
   return (
-    <header className={styles.bar} data-scrolled={scrolled}>
+    <header className={styles.bar} data-scrolled={scrolled} data-dark={dark ?? false}>
       <NavLink to="/" className={styles.mark} aria-label="Oddly Alive — Living Room">
         <svg viewBox="0 0 40 40" width="34" height="34" aria-hidden="true">
           <path

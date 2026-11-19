@@ -56,7 +56,7 @@ export function Clock({ expression, thought, rootRef, gaze, onActivate, spins }:
             cx="60"
             cy="60"
             r="52"
-            fill="var(--paper)"
+            fill="var(--cut-paper)"
             stroke="var(--char-ink)"
             strokeWidth="2.5"
             vectorEffect="non-scaling-stroke"
@@ -98,8 +98,8 @@ export function Clock({ expression, thought, rootRef, gaze, onActivate, spins }:
             />
             <circle cx="60" cy="60" r="3.5" fill="var(--char-ink)" />
           </g>
-          <Eye cx={46} cy={48} r={8} pupil={3.6} lid={lid} gaze={gaze} lidColor="var(--paper)" />
-          <Eye cx={74} cy={48} r={8} pupil={3.6} lid={lid} gaze={gaze} lidColor="var(--paper)" />
+          <Eye cx={46} cy={48} r={8} pupil={3.6} lid={lid} gaze={gaze} lidColor="var(--cut-paper)" />
+          <Eye cx={74} cy={48} r={8} pupil={3.6} lid={lid} gaze={gaze} lidColor="var(--cut-paper)" />
           <path
             d={
               expression === 'asleep'

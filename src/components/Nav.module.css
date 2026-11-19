@@ -133,3 +133,19 @@
     margin-left: auto;
   }
 }
+
+/* dark rooms: borrow the night palette for the bar */
+.bar[data-dark='true'] {
+  --ink: #f3ede2;
+  --paper: #2a2838;
+  --canvas: #17151f;
+  color: #f3ede2;
+}
+.bar[data-dark='true'] .active {
+  color: #24232b;
+}
+@media (max-width: 720px) {
+  .bar[data-dark='true'] .rooms {
+    background: #17151f;
+  }
+}

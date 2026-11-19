@@ -27,7 +27,7 @@
   left: 50%;
   top: 34%;
   transform: translateX(-50%) rotate(-4deg);
-  background: var(--paper);
+  background: var(--cut-paper);
   border: var(--stroke) solid var(--char-ink);
   border-radius: 4px;
   padding: 2px 8px;
@@ -135,7 +135,7 @@
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  background: var(--paper);
+  background: var(--cut-paper);
   color: #24232b;
   border: 2px solid var(--char-ink);
   padding: 1px 6px;

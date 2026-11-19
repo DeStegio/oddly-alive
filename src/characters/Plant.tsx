@@ -112,7 +112,7 @@ export function Plant({
           ) : null}
           <path
             d="M34 140 L 106 140 L 98 214 L 42 214 Z"
-            fill="var(--paper)"
+            fill="var(--cut-paper)"
             stroke="var(--char-ink)"
             strokeWidth="2.5"
             strokeLinejoin="round"
