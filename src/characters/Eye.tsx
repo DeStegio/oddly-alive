@@ -62,7 +62,8 @@ export function Eye({
       if (g?.override) {
         tx = g.override.x * max;
         ty = g.override.y * max;
-      } else if (pointer.active) {
+      } else if (pointer.active && (pointer.inside || performance.now() - pointer.lastMove < 3500)) {
+        // after the pointer leaves the page, eyes keep looking where it was for a few seconds (INT-012)
         frames++;
         if (!rect || seenEpoch !== layoutEpoch() || frames % 30 === 0) {
           rect = el.getBoundingClientRect();

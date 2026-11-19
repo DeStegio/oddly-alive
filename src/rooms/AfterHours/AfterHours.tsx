@@ -5,6 +5,7 @@ import { ThoughtBubble } from '../../characters/ThoughtBubble';
 import { useActor } from '../../characters/useActor';
 import { useCharacter } from '../../characters/useCharacter';
 import { LivingTitle } from '../../components/LivingTitle';
+import { StarTrail } from '../../components/StarTrail';
 import { onFrame } from '../../engine/frameLoop';
 import { pointer } from '../../engine/pointer';
 import { useSettings } from '../../state/settings';
@@ -89,6 +90,7 @@ export default function AfterHours() {
 
   return (
     <section className={styles.room} data-light={after.lightOn} data-radio={after.radioOn} aria-labelledby="ah-title">
+      <StarTrail />
       <div ref={skyRef} className={styles.sky} onPointerUp={(e) => {
           if (e.target === e.currentTarget) {
             selRef.current = null;

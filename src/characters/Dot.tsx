@@ -18,6 +18,8 @@ export interface DotMotion {
   onCatch?: () => void;
   /** Called when the pointer has been moving wildly near Dot. */
   onFrenzy?: () => void;
+  /** Called when Dot starts re-tracing the pointer's recent path (INT-010). */
+  onMimic?: () => void;
 }
 
 interface DotProps {
@@ -61,6 +63,9 @@ export function Dot({
     let fastFrames = 0;
     let lungeUntil = 0;
     let nextLunge = 0;
+    const path: Array<{ x: number; y: number }> = [];
+    let lastSampleAt = -1;
+    let mimic: { pts: Array<{ x: number; y: number }>; i: number; ox: number; oy: number } | null = null;
     return onFrame((dt, now) => {
       const bounds = boundsRef.current;
       const mover = moverRef.current;
@@ -85,6 +90,28 @@ export function Dot({
       const recentlyMoved = now - pointer.lastMove < 3500;
       const following =
         m.follow && pointer.active && pointer.inside && pointerInBounds && recentlyMoved;
+      // record the pointer's path; when it stops after a long stroke, sometimes retrace it
+      if (following && pointer.lastMove !== lastSampleAt) {
+        lastSampleAt = pointer.lastMove;
+        path.push({ x: px, y: py });
+        if (path.length > 90) path.shift();
+      }
+      if (!following && mimic === null && path.length > 30 && now - pointer.lastMove > 900 && now - pointer.lastMove < 1400 && m.follow) {
+        let len = 0;
+        for (let i = 1; i < path.length; i++) len += Math.hypot(path[i]!.x - path[i - 1]!.x, path[i]!.y - path[i - 1]!.y);
+        if (len > 400 && Math.random() < 0.35) {
+          mimic = { pts: path.slice(), i: 0, ox: x - path[0]!.x, oy: y - path[0]!.y };
+          m.onMimic?.();
+        }
+        path.length = 0;
+      }
+      if (mimic && (following || mimic.i >= mimic.pts.length)) mimic = null;
+      if (mimic) {
+        const p = mimic.pts[Math.floor(mimic.i)]!;
+        tx = p.x + mimic.ox * 0.3;
+        ty = p.y + mimic.oy * 0.3;
+        mimic.i += dt / 16;
+      }
       if (following) {
         // orbit politely: keep ~70px away, drifting around the pointer
         // ...and every so often, try to catch it (INT-014)
