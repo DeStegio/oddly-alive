@@ -4,7 +4,7 @@ import { Dot, type DotMotion } from '../../characters/Dot';
 import { Lamp } from '../../characters/Lamp';
 import { Pim } from '../../characters/Pim';
 import { Plant } from '../../characters/Plant';
-import { useCharacter } from '../../characters/useCharacter';
+import { useActor } from '../../characters/useActor';
 import { useProximity } from '../../characters/useProximity';
 import { LivingTitle } from '../../components/LivingTitle';
 import { installPointerTracking } from '../../engine/pointer';
@@ -21,12 +21,12 @@ export default function LivingRoom() {
   const motion = useSettings((s) => s.motion);
 
   const roomRef = useRef<HTMLElement>(null);
-  const pim = useCharacter('pim', 'neutral');
-  const dot = useCharacter('dot', 'happy');
-  const lamp = useCharacter('lumen', 'neutral');
-  const tick = useCharacter('tick', 'sleepy');
-  const plant = useCharacter('ferdinand', 'neutral');
-  const button = useCharacter('button', 'neutral');
+  const pim = useActor('pim');
+  const dot = useActor('dot');
+  const lamp = useActor('lumen');
+  const tick = useActor('tick');
+  const plant = useActor('ferdinand');
+  const button = useActor('button');
 
   const dotMotion = useRef<DotMotion>({ follow: true, home: { x: 0.56, y: 0.56 } });
 

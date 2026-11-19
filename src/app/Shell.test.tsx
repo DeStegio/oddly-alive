@@ -10,7 +10,7 @@ function Boom(): never {
 describe('Shell', () => {
   it('renders navigation for all six rooms and a skip link', () => {
     render(
-      <MemoryRouter>
+      <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <Shell>
           <p>scene</p>
         </Shell>
