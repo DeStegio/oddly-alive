@@ -1,0 +1,123 @@
+.bar {
+  position: fixed;
+  inset: 0 0 auto 0;
+  height: var(--nav-h);
+  z-index: var(--z-nav);
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  padding: 0 var(--gutter);
+  pointer-events: none;
+}
+.bar > * {
+  pointer-events: auto;
+}
+
+.mark {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  text-decoration: none;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.15rem;
+  letter-spacing: -0.02em;
+  flex-shrink: 0;
+}
+.mark svg {
+  transition: transform var(--dur-char) var(--ease-spring);
+}
+.mark:hover svg {
+  transform: rotate(-8deg) scale(1.08);
+}
+
+.rooms {
+  margin-left: auto;
+}
+.rooms ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  gap: 6px;
+}
+
+.link {
+  display: inline-block;
+  text-decoration: none;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: var(--radius-pill);
+  border: var(--stroke) solid transparent;
+  transition:
+    background-color var(--dur-ui),
+    border-color var(--dur-ui),
+    transform var(--dur-tap) var(--ease-out);
+  white-space: nowrap;
+}
+.link:hover {
+  border-color: var(--ink);
+  background: var(--paper);
+}
+.link:active {
+  transform: translateY(1px);
+}
+.active {
+  background: var(--yellow);
+  border-color: var(--ink);
+  color: #24232b;
+  box-shadow: var(--shadow-sm);
+}
+.active:hover {
+  background: var(--yellow);
+}
+
+.short {
+  display: none;
+}
+
+.controls {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+@media (max-width: 1080px) {
+  .long {
+    display: none;
+  }
+  .short {
+    display: inline;
+  }
+}
+
+/* Mobile: rooms become a bottom dock that scrolls horizontally itself. */
+@media (max-width: 720px) {
+  .markText {
+    display: none;
+  }
+  .rooms {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: 0;
+    padding: 8px 10px calc(8px + env(safe-area-inset-bottom));
+    background: var(--canvas);
+    border-top: var(--stroke) solid var(--ink);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .rooms ul {
+    justify-content: space-between;
+    min-width: max-content;
+    gap: 4px;
+  }
+  .link {
+    padding: 8px 12px;
+  }
+  .controls {
+    margin-left: auto;
+  }
+}

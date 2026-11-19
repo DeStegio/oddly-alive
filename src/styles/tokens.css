@@ -1,0 +1,113 @@
+/* Design tokens — see DESIGN_DIRECTION.md */
+:root {
+  /* colour (day) */
+  --canvas: #f6f1e8;
+  --canvas-deep: #ede4d3;
+  --paper: #fffaf1;
+  --ink: #24232b;
+  --ink-soft: #5b5866;
+  --coral: #f57963;
+  --blue: #657be8;
+  --blue-ink: #3f55c4;
+  --yellow: #f5d873;
+  --mint: #a6d7b3;
+  --lavender: #b9a5db;
+  --shadow-ink: #24232b;
+  --wall: #f6f1e8;
+  --floor: #e9dcc4;
+  --mood-tint: transparent;
+
+  /* type */
+  --font-display: 'Fraunces Variable', 'Fraunces', Georgia, 'Times New Roman', serif;
+  --font-ui: 'Instrument Sans Variable', 'Instrument Sans', system-ui, -apple-system, 'Segoe UI',
+    sans-serif;
+  --font-mono: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+  --soft: 0;
+  --wonk: 0;
+  --title-weight: 760;
+  --fs-xs: 0.8125rem;
+  --fs-sm: 0.9375rem;
+  --fs-md: 1.0625rem;
+  --fs-lg: clamp(1.2rem, 1.1rem + 0.5vw, 1.45rem);
+  --fs-xl: clamp(1.6rem, 1.3rem + 1.3vw, 2.25rem);
+  --fs-2xl: clamp(2.25rem, 1.6rem + 3vw, 3.5rem);
+  --fs-3xl: clamp(3rem, 1.8rem + 6vw, 6.25rem);
+  --fs-4xl: clamp(3.5rem, 1.5rem + 9vw, 10rem);
+
+  /* space */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 24px;
+  --sp-6: 32px;
+  --sp-7: 48px;
+  --sp-8: 64px;
+  --sp-9: 96px;
+  --gutter: clamp(16px, 4vw, 56px);
+
+  /* shape */
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 22px;
+  --radius-pill: 999px;
+  --stroke: 2.5px;
+  --shadow-sm: 2px 3px 0 var(--shadow-ink);
+  --shadow-md: 4px 5px 0 var(--shadow-ink);
+  --shadow-lg: 7px 8px 0 var(--shadow-ink);
+
+  /* z */
+  --z-scene: 1;
+  --z-props: 10;
+  --z-characters: 20;
+  --z-bubbles: 40;
+  --z-nav: 100;
+  --z-overlay: 200;
+  --z-toast: 300;
+
+  /* motion */
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-tap: 120ms;
+  --dur-ui: 240ms;
+  --dur-char: 480ms;
+  --dur-scene: 900ms;
+
+  /* layout */
+  --nav-h: 64px;
+  --content-max: 1360px;
+
+  color-scheme: light;
+}
+
+[data-theme='night'] {
+  --canvas: #1d1b26;
+  --canvas-deep: #15141c;
+  --paper: #2a2838;
+  --ink: #f3ede2;
+  --ink-soft: #b3adbf;
+  --coral: #ff8c76;
+  --blue: #8c9dff;
+  --blue-ink: #b4c0ff;
+  --yellow: #f2d46b;
+  --mint: #7fbf97;
+  --lavender: #9d88c7;
+  --shadow-ink: #07060b;
+  --wall: #22202d;
+  --floor: #171620;
+  color-scheme: dark;
+}
+
+[data-motion='reduced'] {
+  --dur-tap: 1ms;
+  --dur-ui: 1ms;
+  --dur-char: 1ms;
+  --dur-scene: 1ms;
+}
+
+@media (max-width: 720px) {
+  :root {
+    --nav-h: 56px;
+  }
+}

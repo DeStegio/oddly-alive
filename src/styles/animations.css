@@ -1,0 +1,127 @@
+/* Shared character keyframes, applied through data-anim attributes. */
+
+@keyframes oa-jump {
+  0%,
+  100% {
+    transform: translateY(0) scale(1, 1);
+  }
+  15% {
+    transform: translateY(0) scale(1.12, 0.86);
+  }
+  45% {
+    transform: translateY(-28%) scale(0.92, 1.1);
+  }
+  75% {
+    transform: translateY(0) scale(1.1, 0.9);
+  }
+}
+
+@keyframes oa-wiggle {
+  0%,
+  100% {
+    transform: rotate(0);
+  }
+  20% {
+    transform: rotate(-7deg);
+  }
+  40% {
+    transform: rotate(6deg);
+  }
+  60% {
+    transform: rotate(-4deg);
+  }
+  80% {
+    transform: rotate(2deg);
+  }
+}
+
+@keyframes oa-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20%,
+  60% {
+    transform: translateX(-5px);
+  }
+  40%,
+  80% {
+    transform: translateX(5px);
+  }
+}
+
+@keyframes oa-squish {
+  0%,
+  100% {
+    transform: scale(1, 1);
+  }
+  30% {
+    transform: scale(1.18, 0.8);
+  }
+  60% {
+    transform: scale(0.94, 1.06);
+  }
+}
+
+@keyframes oa-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes oa-dizzy {
+  0%,
+  100% {
+    transform: rotate(0) translateX(0);
+  }
+  25% {
+    transform: rotate(-9deg) translateX(-4px);
+  }
+  75% {
+    transform: rotate(9deg) translateX(4px);
+  }
+}
+
+@keyframes oa-breathe {
+  0%,
+  100% {
+    transform: scale(1, 1);
+  }
+  50% {
+    transform: scale(1.025, 0.975);
+  }
+}
+
+@keyframes oa-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes oa-pop-in {
+  0% {
+    transform: scale(0.4) translateY(8px);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.06);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes oa-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

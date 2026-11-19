@@ -1,0 +1,35 @@
+.main {
+  position: relative;
+  min-height: 100vh;
+  min-height: 100dvh;
+  outline: none;
+}
+
+.fallback {
+  min-height: 70vh;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: var(--sp-4);
+  color: var(--ink-soft);
+  font-size: var(--fs-sm);
+}
+.fallbackDot {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--blue);
+  border: var(--stroke) solid var(--ink);
+  animation: fallback-hop 900ms var(--ease-in-out) infinite alternate;
+}
+@keyframes fallback-hop {
+  to {
+    transform: translateY(-14px) scaleY(1.08);
+  }
+}
+
+@media (max-width: 720px) {
+  .main {
+    padding-bottom: 64px;
+  }
+}
