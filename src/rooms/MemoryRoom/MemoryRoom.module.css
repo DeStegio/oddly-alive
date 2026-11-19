@@ -1,0 +1,321 @@
+.room {
+  position: relative;
+  min-height: 100vh;
+  min-height: 100svh;
+  padding: calc(var(--nav-h) + 3vh) var(--gutter) var(--sp-8);
+}
+.head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--sp-3) var(--sp-6);
+}
+.blurb {
+  max-width: 40ch;
+  color: var(--ink-soft);
+  padding-bottom: 0.6em;
+}
+
+/* a corkboard of pinned cards */
+.board {
+  margin-top: var(--sp-7);
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: var(--sp-5);
+  padding: var(--sp-6);
+  border: var(--stroke) solid var(--ink);
+  border-radius: var(--radius-lg);
+  background:
+    radial-gradient(circle at 1px 1px, rgba(36, 35, 43, 0.12) 1px, transparent 1.4px) 0 0 / 14px 14px,
+    #d9b98d;
+  box-shadow: var(--shadow-lg);
+}
+:global([data-theme='night']) .board {
+  background:
+    radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.08) 1px, transparent 1.4px) 0 0 / 14px 14px,
+    #4a3a2c;
+}
+.card {
+  position: relative;
+  background: var(--paper);
+  color: var(--ink);
+  border: var(--stroke) solid var(--char-ink);
+  border-radius: var(--radius-sm);
+  padding: var(--sp-5);
+  box-shadow: var(--shadow-md);
+}
+/* a pin */
+.card::before {
+  content: '';
+  position: absolute;
+  top: -9px;
+  left: 50%;
+  width: 16px;
+  height: 16px;
+  margin-left: -8px;
+  border-radius: 50%;
+  background: var(--coral);
+  border: 2px solid var(--char-ink);
+}
+.plate {
+  grid-column: span 5;
+  rotate: -1.2deg;
+  background: var(--yellow);
+  color: #24232b;
+}
+.visits {
+  grid-column: span 3;
+  rotate: 1deg;
+}
+.favs {
+  grid-column: span 4;
+  rotate: -0.6deg;
+}
+.secrets {
+  grid-column: span 4;
+  rotate: 0.8deg;
+}
+.activity {
+  grid-column: span 8;
+  rotate: -0.4deg;
+}
+.controls {
+  grid-column: 1 / -1;
+}
+
+.kicker {
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  opacity: 0.75;
+}
+.nickname {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: var(--fs-2xl);
+  line-height: 1;
+  margin: var(--sp-2) 0 var(--sp-3);
+}
+.small {
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+  margin-top: var(--sp-2);
+}
+.small a {
+  font-weight: 600;
+}
+.tiny {
+  font-size: var(--fs-xs);
+  color: var(--ink-soft);
+  margin-top: 6px;
+  max-width: 28ch;
+}
+.tally {
+  height: 44px;
+  max-width: 100%;
+  margin-top: var(--sp-2);
+  color: var(--ink);
+}
+.big {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: var(--fs-3xl);
+  line-height: 1;
+  margin-top: var(--sp-2);
+}
+.big span {
+  font-size: var(--fs-xl);
+  color: var(--ink-soft);
+  font-weight: 500;
+}
+.progress {
+  margin-top: var(--sp-3);
+  height: 12px;
+  border: 2px solid var(--char-ink);
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--canvas-deep);
+}
+.progress span {
+  display: block;
+  height: 100%;
+  background: var(--mint);
+  border-right: 2px solid var(--char-ink);
+}
+
+.polaroids {
+  list-style: none;
+  margin: var(--sp-4) 0 0;
+  padding: 0;
+  display: flex;
+  gap: var(--sp-3);
+  flex-wrap: wrap;
+}
+.polaroid {
+  width: 104px;
+  background: #fff;
+  color: #24232b;
+  border: 2px solid var(--char-ink);
+  padding: 6px 6px 8px;
+  box-shadow: var(--shadow-sm);
+}
+.photo {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  background: var(--lavender);
+  border: 2px solid var(--char-ink);
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 2rem;
+}
+.photo[data-kind='shape'],
+.photo[data-kind='playground'] {
+  background: var(--coral);
+}
+.photo[data-kind='mood'] {
+  background: #c9dafc;
+}
+.caption {
+  display: block;
+  margin-top: 6px;
+  font-size: 0.75rem;
+  line-height: 1.25;
+}
+
+/* single-series bar list */
+.bars {
+  list-style: none;
+  margin: var(--sp-4) 0 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+.barRow {
+  display: grid;
+  grid-template-columns: 9.5rem 1fr 3.5rem;
+  align-items: center;
+  gap: var(--sp-3);
+  font-size: var(--fs-sm);
+}
+.barRow:hover .bar {
+  filter: brightness(1.08);
+}
+.barLabel {
+  color: var(--ink-soft);
+}
+.barTrack {
+  height: 14px;
+  border-bottom: 1px solid color-mix(in srgb, var(--ink) 25%, transparent);
+}
+.bar {
+  display: block;
+  height: 100%;
+  background: var(--blue);
+  border-radius: 0 4px 4px 0;
+}
+.barValue {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.stored {
+  margin: var(--sp-3) 0;
+  padding-left: 1.2em;
+  font-size: var(--fs-sm);
+  line-height: 1.6;
+  columns: 2;
+  column-gap: var(--sp-6);
+}
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin: var(--sp-3) var(--sp-4) var(--sp-3) 0;
+  font-weight: 600;
+  cursor: pointer;
+}
+.toggle input {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--blue);
+}
+.raw {
+  margin-top: var(--sp-3);
+  max-height: 260px;
+  overflow: auto;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  background: var(--canvas-deep);
+  border: 2px solid var(--char-ink);
+  border-radius: var(--radius-sm);
+  padding: var(--sp-3);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.actions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--sp-5);
+  margin-top: var(--sp-5);
+  padding-top: var(--sp-5);
+  border-top: 2px dashed color-mix(in srgb, var(--ink) 30%, transparent);
+}
+.danger {
+  background: var(--coral);
+  color: #24232b;
+}
+.confirm {
+  font-weight: 600;
+  font-size: var(--fs-sm);
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+.notice {
+  margin-top: var(--sp-4);
+  min-height: 1.5em;
+  font-weight: 600;
+  font-size: var(--fs-sm);
+}
+
+@media (max-width: 1000px) {
+  .plate,
+  .visits,
+  .favs,
+  .secrets {
+    grid-column: span 6;
+  }
+  .activity {
+    grid-column: 1 / -1;
+  }
+}
+@media (max-width: 640px) {
+  .board {
+    grid-template-columns: 1fr;
+    padding: var(--sp-4);
+    margin-left: calc(var(--gutter) * -0.5);
+    margin-right: calc(var(--gutter) * -0.5);
+  }
+  .plate,
+  .visits,
+  .favs,
+  .secrets,
+  .activity,
+  .controls {
+    grid-column: 1;
+    rotate: 0deg;
+  }
+  .barRow {
+    grid-template-columns: 7.5rem 1fr 2.8rem;
+  }
+  .stored {
+    columns: 1;
+  }
+  .actions {
+    grid-template-columns: 1fr;
+  }
+}
