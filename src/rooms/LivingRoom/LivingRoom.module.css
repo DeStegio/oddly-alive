@@ -1,0 +1,217 @@
+.room {
+  position: relative;
+  min-height: 100vh;
+  min-height: 100svh;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.intro {
+  position: relative;
+  z-index: 2;
+  padding: calc(var(--nav-h) + 3vh) var(--gutter) 0;
+  max-width: var(--content-max);
+  pointer-events: none;
+}
+.intro > * {
+  pointer-events: auto;
+}
+.tagline {
+  margin-top: var(--sp-4);
+  margin-left: 0.4em;
+  font-size: var(--fs-lg);
+  color: var(--ink-soft);
+  max-width: 26ch;
+}
+.tagline em {
+  font-family: var(--font-display);
+  font-style: italic;
+  color: var(--ink);
+  font-weight: 500;
+}
+
+/* ---------- stage ---------- */
+.stage {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: clamp(440px, 64vh, 760px);
+  z-index: 1;
+}
+.wall {
+  position: absolute;
+  inset: 0 0 30% 0;
+}
+.floor {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 30%;
+  background: repeating-linear-gradient(
+      90deg,
+      transparent 0 calc(12.5% - 1px),
+      color-mix(in srgb, var(--char-ink) 14%, transparent) calc(12.5% - 1px) 12.5%
+    ),
+    var(--floor);
+  border-top: var(--stroke) solid var(--ink);
+}
+.dim {
+  position: absolute;
+  inset: 0;
+  z-index: 15;
+  pointer-events: none;
+  background: #14121c;
+  opacity: 0;
+  transition: opacity 600ms var(--ease-out);
+}
+.room[data-light='off'] .dim {
+  opacity: 0.38;
+}
+
+.prop {
+  position: absolute;
+  z-index: var(--z-props);
+}
+
+/* desktop composition (stage-relative) */
+.picture {
+  left: 60%;
+  top: 4%;
+  width: clamp(110px, 11vw, 180px);
+}
+.clock {
+  left: 44%;
+  top: 6%;
+  width: clamp(70px, 6.5vw, 110px);
+}
+.door {
+  right: 3%;
+  bottom: 30%;
+  width: clamp(80px, 8vw, 130px);
+  z-index: 5;
+}
+.rug {
+  left: 22%;
+  bottom: 3%;
+  width: 48%;
+  z-index: 4;
+}
+.lamp {
+  left: 9%;
+  bottom: 14%;
+  width: clamp(90px, 9vw, 150px);
+  z-index: 12;
+}
+.sofa {
+  left: 28%;
+  bottom: 13%;
+  width: 36%;
+  z-index: 8;
+}
+.pim {
+  left: 37%;
+  bottom: 32%;
+  width: clamp(110px, 11vw, 180px);
+  z-index: 9;
+}
+.button {
+  left: 66.5%;
+  bottom: 12%;
+  width: clamp(80px, 7.5vw, 120px);
+  z-index: 11;
+}
+.plant {
+  left: 78%;
+  bottom: 12%;
+  width: clamp(90px, 8vw, 140px);
+  z-index: 11;
+}
+
+/* ---------- tablet ---------- */
+@media (max-width: 1080px) {
+  .stage {
+    height: clamp(420px, 58vh, 640px);
+  }
+  .picture {
+    left: 62%;
+  }
+  .clock {
+    left: 42%;
+  }
+}
+
+/* ---------- mobile: a taller, centered vignette ---------- */
+@media (max-width: 720px) {
+  .intro {
+    padding-top: calc(var(--nav-h) + 2vh);
+  }
+  .tagline {
+    font-size: var(--fs-md);
+    margin-top: var(--sp-3);
+  }
+  .room {
+    min-height: calc(100svh - 62px);
+  }
+  .stage {
+    height: min(64svh, 580px);
+    bottom: 0;
+  }
+  .floor {
+    height: 34%;
+    background: repeating-linear-gradient(
+        90deg,
+        transparent 0 calc(25% - 1px),
+        color-mix(in srgb, var(--char-ink) 14%, transparent) calc(25% - 1px) 25%
+      ),
+      var(--floor);
+  }
+  .wall {
+    bottom: 34%;
+  }
+  .picture {
+    left: auto;
+    right: 8%;
+    top: 4%;
+    width: 30%;
+  }
+  .clock {
+    left: 10%;
+    top: 8%;
+    width: 20%;
+  }
+  .door {
+    display: none;
+  }
+  .rug {
+    left: 6%;
+    width: 88%;
+    bottom: 4%;
+  }
+  .lamp {
+    left: 1%;
+    bottom: 18%;
+    width: 22%;
+  }
+  .sofa {
+    left: 14%;
+    width: 68%;
+    bottom: 17%;
+  }
+  .pim {
+    left: 32%;
+    width: 30%;
+    bottom: 33%;
+  }
+  .button {
+    left: 54%;
+    width: 22%;
+    bottom: 2%;
+  }
+  .plant {
+    left: 78%;
+    width: 22%;
+    bottom: 16%;
+  }
+}

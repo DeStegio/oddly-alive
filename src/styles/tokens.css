@@ -16,6 +16,8 @@
   --wall: #f6f1e8;
   --floor: #e9dcc4;
   --mood-tint: transparent;
+  /* characters are paper cut-outs: their ink stays dark in every theme */
+  --char-ink: #24232b;
 
   /* type */
   --font-display: 'Fraunces Variable', 'Fraunces', Georgia, 'Times New Roman', serif;
@@ -32,7 +34,7 @@
   --fs-xl: clamp(1.6rem, 1.3rem + 1.3vw, 2.25rem);
   --fs-2xl: clamp(2.25rem, 1.6rem + 3vw, 3.5rem);
   --fs-3xl: clamp(3rem, 1.8rem + 6vw, 6.25rem);
-  --fs-4xl: clamp(3.5rem, 1.5rem + 9vw, 10rem);
+  --fs-4xl: clamp(3.75rem, 1.5rem + 11vw, 10rem);
 
   /* space */
   --sp-1: 4px;

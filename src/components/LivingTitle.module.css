@@ -1,0 +1,32 @@
+.title {
+  font-family: var(--font-display);
+  font-weight: var(--title-weight);
+  font-optical-sizing: auto;
+  font-variation-settings:
+    'SOFT' var(--soft),
+    'WONK' var(--wonk);
+  letter-spacing: -0.035em;
+  line-height: 0.86;
+  margin: 0;
+  user-select: none;
+  transition:
+    font-variation-settings 1.2s var(--ease-in-out),
+    font-weight 1.2s var(--ease-in-out);
+}
+.hero {
+  font-size: var(--fs-4xl);
+}
+.room {
+  font-size: var(--fs-3xl);
+}
+.line {
+  display: block;
+  white-space: nowrap;
+}
+.line:nth-child(2) {
+  padding-left: 0.55em;
+}
+.letter {
+  display: inline-block;
+  will-change: transform;
+}

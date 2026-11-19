@@ -111,11 +111,13 @@
   }
   .rooms ul {
     justify-content: space-between;
-    min-width: max-content;
-    gap: 4px;
+    min-width: 100%;
+    width: max-content;
+    gap: 2px;
   }
   .link {
-    padding: 8px 12px;
+    padding: 7px 9px;
+    font-size: 0.875rem;
   }
   .controls {
     margin-left: auto;
