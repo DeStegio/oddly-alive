@@ -206,6 +206,7 @@ describe('behavior engine', () => {
       discoveredCount: () => 0,
       roomVisits: () => 1,
       moodsSeen: () => 1,
+      favorite: () => null,
       flag: () => undefined,
       ...overrides,
     };

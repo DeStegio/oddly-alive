@@ -5,6 +5,7 @@ import { installSensors } from '../engine/sensors';
 import { useSettings } from '../state/settings';
 import { useWorldStore } from '../state/worldStore';
 import { roomFromPath } from './rooms';
+import { startMemory } from './memorySync';
 import { getWorld } from './worldInstance';
 
 /** Applies mood + settings to the document as attributes and CSS variables. */
@@ -37,10 +38,12 @@ export function WorldProvider({ children }: { children: ReactNode }) {
   const location = useLocation();
 
   useEffect(() => {
+    const stopMemory = startMemory(world);
     world.start();
     const removeSensors = installSensors(world);
     return () => {
       removeSensors();
+      stopMemory();
       world.stop();
     };
   }, [world]);

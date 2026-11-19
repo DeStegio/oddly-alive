@@ -15,6 +15,8 @@ import { LINES } from '../../content/lines';
 import { useSettings } from '../../state/settings';
 import { useObjects } from '../../state/world';
 import { useWorldStore } from '../../state/worldStore';
+import { Link } from 'react-router-dom';
+import { ROOMS } from '../../app/rooms';
 import { Basement } from './Basement';
 import { DoNotPress, Door, Picture, Rug, Sofa } from './Scenery';
 import styles from './LivingRoom.module.css';
@@ -37,6 +39,7 @@ export default function LivingRoom() {
   const motion = useSettings((s) => s.motion);
   const discoveries = useWorldStore((s) => Object.keys(s.discoveries).length);
   const returning = useWorldStore((s) => s.returning);
+  const lastRoom = useWorldStore((s) => s.lastVisitRoom);
 
   const roomRef = useRef<HTMLElement>(null);
   const pim = useActor('pim');
@@ -142,6 +145,11 @@ export default function LivingRoom() {
             {returning ? 'Oh, it’s you again. ' : 'It’s not broken. '}
             <em>It’s just being itself.</em>
           </p>
+          {lastRoom && lastRoom !== 'living' ? (
+            <p className={styles.lastRoom}>
+              Last time you were in the <Link to={ROOMS[lastRoom].path}>{ROOMS[lastRoom].label} →</Link>
+            </p>
+          ) : null}
         </div>
 
         <div className={styles.dim} aria-hidden="true" />

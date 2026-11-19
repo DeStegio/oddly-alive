@@ -318,3 +318,11 @@
 .floor {
   cursor: crosshair;
 }
+.lastRoom {
+  margin: var(--sp-2) 0 0 0.6em;
+  font-size: var(--fs-sm);
+}
+.lastRoom a {
+  font-weight: 700;
+  text-underline-offset: 3px;
+}

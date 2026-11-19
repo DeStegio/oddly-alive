@@ -17,6 +17,14 @@ import { applyEvent, createPersonality, decay, deriveMood, type PersonalityState
 import { createRng, randomSeed, type Rng } from './rng';
 import { ReactionScheduler } from './scheduler';
 import { VAR_KEYS, type PersonalityVars } from './types';
+import { favoriteOf } from '../content/nickname';
+
+/** Lifetime counts = previous visits + this session. */
+export function mergeCounts(a: Record<string, number>, b: Record<string, number>): Record<string, number> {
+  const out = { ...a };
+  for (const [k, v] of Object.entries(b)) out[k] = (out[k] ?? 0) + v;
+  return out;
+}
 
 export const IDLE_SHORT_MS = 12_000;
 export const IDLE_LONG_MS = 45_000;
@@ -256,6 +264,7 @@ export class World {
       discoveredCount: () => Object.keys(s.discoveries).length,
       roomVisits: (room) => s.roomVisits[room] ?? 0,
       moodsSeen: () => s.moodsSeen.length,
+      favorite: () => favoriteOf(mergeCounts(s.pastCounts, s.counts)),
       flag: (key) => getFlag(key),
     };
   }

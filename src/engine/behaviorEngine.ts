@@ -23,6 +23,8 @@ export interface WorldView {
   roomVisits(room: RoomId): number;
   /** Distinct moods witnessed this session. */
   moodsSeen(): number;
+  /** The visitor's most-interacted object across visits, if any. */
+  favorite(): string | null;
   /** Generic object-state lookup (e.g. 'living.lampOn'). */
   flag(key: string): boolean | number | string | undefined;
 }
