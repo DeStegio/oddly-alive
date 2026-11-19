@@ -141,6 +141,10 @@ export class World {
       if (this.recentClicks.length > 64) this.recentClicks.shift();
       setWorldState((s) => ({ counts: { ...s.counts, [target]: (s.counts[target] ?? 0) + 1 } }));
     }
+    if (ev.type === 'POINTER_ENTERED') {
+      const key = `hover:${ev.payload.target}`;
+      setWorldState((s) => ({ counts: { ...s.counts, [key]: (s.counts[key] ?? 0) + 1 } }));
+    }
     setWorldState((s) => ({ eventTotals: { ...s.eventTotals, [ev.type]: (s.eventTotals[ev.type] ?? 0) + 1 } }));
 
     for (const p of this.plugins) {
@@ -256,7 +260,7 @@ export class World {
 
   readonly effects: WorldEffects = {
     setFlag: (key, value) => setObjectFlag(key, value),
-    discover: (secret) => this.discoverHandler?.(secret),
+    discover: (secret) => this.discover(secret),
     nudge: (delta: Partial<PersonalityVars>) => {
       const vars = { ...this.personality.vars };
       for (const k of VAR_KEYS) {
@@ -269,8 +273,20 @@ export class World {
     sound: (name) => this.soundHandler?.(name),
   };
 
-  /** Set by the discovery registry. */
-  discoverHandler: ((secret: string) => void) | null = null;
+  /** Optional hook (the discovery registry validates ids and adds metadata). */
+  discoverHandler: ((secret: string) => boolean) | null = null;
+
+  /** Record a discovery once and announce it to the world. */
+  discover(secret: string) {
+    if (this.discoverHandler && !this.discoverHandler(secret)) return;
+    const s = getWorldState();
+    const firstTime = !(secret in s.discoveries);
+    if (firstTime) {
+      const at = Date.now();
+      setWorldState({ discoveries: { ...s.discoveries, [secret]: at }, lastDiscovery: { id: secret, at } });
+    }
+    this.emit('SECRET_DISCOVERED', { secret, firstTime });
+  }
 
   idleFor(now = this.clock.now()) {
     return now - this.personality.lastInputAt;
