@@ -1,14 +1,28 @@
 import { allBehaviors } from '../behaviors';
+import { SECRET_IDS } from '../content/secrets';
+import { createRng } from '../engine/rng';
+import { SurpriseDirector } from '../engine/surpriseDirector';
 import { World } from '../engine/world';
 
 let instance: World | null = null;
+let director: SurpriseDirector | null = null;
 
 /** The single world of the running app (tests create their own instances). */
 export function getWorld(): World {
   if (!instance) {
-    instance = new World({ behaviors: allBehaviors() });
+    const world = new World({ behaviors: allBehaviors() });
+    // only registered secrets can be discovered
+    world.discoverHandler = (id) => SECRET_IDS.has(id);
+    director = new SurpriseDirector(createRng(world.seed ^ 0x5eed), world.clock.now());
+    world.use(director);
+    instance = world;
   }
   return instance;
+}
+
+export function getDirector(): SurpriseDirector | null {
+  getWorld();
+  return director;
 }
 
 /** Test helper. */

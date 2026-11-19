@@ -1,0 +1,66 @@
+.region {
+  position: fixed;
+  left: var(--gutter);
+  bottom: 24px;
+  z-index: var(--z-toast);
+  pointer-events: none;
+}
+.toast {
+  position: relative;
+  pointer-events: auto;
+  width: min(320px, calc(100vw - 32px));
+  padding: 14px 40px 14px 18px;
+  background: var(--yellow);
+  color: #24232b;
+  border: var(--stroke) solid var(--char-ink);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  rotate: -1.5deg;
+  animation: toast-in var(--dur-char) var(--ease-spring) both;
+}
+.kicker {
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.name {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: var(--fs-xl);
+  line-height: 1.05;
+  margin-top: 2px;
+}
+.found {
+  margin-top: 4px;
+  font-size: var(--fs-sm);
+}
+.close {
+  position: absolute;
+  right: 8px;
+  top: 6px;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  background: none;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  color: #24232b;
+}
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    translate: 0 20px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+@media (max-width: 720px) {
+  .region {
+    bottom: 76px;
+    left: 16px;
+  }
+}

@@ -57,6 +57,9 @@ export const ACTOR_IDS = [
   'nimbus',
   'moth',
   'bunny',
+  'visitor',
+  'glitch',
+  'aunt',
   'room',
 ] as const;
 export type ActorId = (typeof ACTOR_IDS)[number];
