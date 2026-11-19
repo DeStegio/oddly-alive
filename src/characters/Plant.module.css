@@ -69,3 +69,7 @@
     transform: scale(1);
   }
 }
+.root[data-anim='droop'] .leaf {
+  animation: none;
+  transform: rotate(calc(var(--a) * 1.9)) scaleY(0.9);
+}

@@ -9,6 +9,8 @@
   line-height: 0.86;
   margin: 0;
   user-select: none;
+  transform: skewX(var(--skew, 0deg));
+  transform-origin: 0 100%;
   transition:
     font-variation-settings 1.2s var(--ease-in-out),
     font-weight 1.2s var(--ease-in-out);
@@ -29,4 +31,37 @@
 .letter {
   display: inline-block;
   will-change: transform;
+}
+
+.letter[data-poke] {
+  animation: letter-poke 620ms var(--ease-spring);
+}
+@keyframes letter-poke {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  40% {
+    translate: 0 -0.22em;
+  }
+}
+.title[data-wonk='true'] {
+  font-variation-settings:
+    'SOFT' 0,
+    'WONK' 1;
+  font-style: italic;
+}
+.title[data-wonk='true'] .letter {
+  animation: letter-wonk 1.6s var(--ease-in-out) infinite alternate;
+}
+.title[data-wonk='true'] .letter:nth-child(odd) {
+  animation-delay: -0.8s;
+}
+@keyframes letter-wonk {
+  from {
+    rotate: -4deg;
+  }
+  to {
+    rotate: 5deg;
+  }
 }

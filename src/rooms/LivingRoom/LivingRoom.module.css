@@ -60,7 +60,7 @@
 .dim {
   position: absolute;
   inset: 0;
-  z-index: 15;
+  z-index: 3;
   pointer-events: none;
   background: #14121c;
   opacity: 0;
@@ -214,4 +214,107 @@
     width: 22%;
     bottom: 16%;
   }
+}
+
+/* ---------- dust bunny ---------- */
+.bunny {
+  left: 31%;
+  bottom: 11%;
+  width: clamp(38px, 3.6vw, 58px);
+  z-index: 7;
+}
+
+/* ---------- marks: poofs and stickers ---------- */
+.poof,
+.sticker {
+  position: absolute;
+  z-index: 6;
+  pointer-events: none;
+  translate: -50% -50%;
+}
+.poof {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 2px dashed var(--ink);
+  animation: poof 650ms var(--ease-out) forwards;
+}
+@keyframes poof {
+  from {
+    transform: scale(0.2);
+    opacity: 1;
+  }
+  to {
+    transform: scale(1.6);
+    opacity: 0;
+  }
+}
+.sticker {
+  width: 38px;
+  height: 38px;
+  border: var(--stroke) solid var(--char-ink);
+  box-shadow: var(--shadow-sm);
+  animation:
+    oa-pop-in var(--dur-char) var(--ease-spring) both,
+    sticker-fade 1.2s ease-in 28.8s forwards;
+}
+.sticker[data-variant='0'] {
+  background: var(--yellow);
+  clip-path: polygon(50% 0, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+  border: 0;
+  box-shadow: none;
+}
+.sticker[data-variant='1'] {
+  background: var(--coral);
+  border-radius: 50%;
+}
+.sticker[data-variant='2'] {
+  background: var(--mint);
+  border-radius: 6px;
+  rotate: 12deg;
+}
+.sticker[data-variant='3'] {
+  background: var(--lavender);
+  border-radius: 50% 50% 50% 0;
+  rotate: -20deg;
+}
+@keyframes sticker-fade {
+  to {
+    opacity: 0;
+  }
+}
+
+/* ---------- mini-incident: the room gets rearranged (INT-029) ---------- */
+.prop {
+  transition: transform 900ms var(--ease-spring);
+}
+.room[data-rearranged='true'] .picture {
+  transform: rotate(24deg) translateY(10%);
+}
+.room[data-rearranged='true'] .clock {
+  transform: translateX(-40%) rotate(-30deg);
+}
+.room[data-rearranged='true'] .lamp {
+  transform: rotate(-9deg) translateX(10%);
+}
+.room[data-rearranged='true'] .plant {
+  transform: translateX(-30%) rotate(8deg);
+}
+.room[data-rearranged='true'] .rug {
+  transform: rotate(-5deg) translateX(-6%);
+}
+.room[data-rearranged='true'] .button {
+  transform: translateY(-12%) rotate(14deg);
+}
+.tidy {
+  position: absolute;
+  left: 50%;
+  top: calc(var(--nav-h) + 12px);
+  translate: -50% 0;
+  z-index: var(--z-bubbles);
+  animation: oa-pop-in var(--dur-char) var(--ease-spring) both;
+}
+.wall,
+.floor {
+  cursor: crosshair;
 }

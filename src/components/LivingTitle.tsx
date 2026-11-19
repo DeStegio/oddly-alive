@@ -1,4 +1,6 @@
 import { useEffect, useRef } from 'react';
+import { actors } from '../engine/actors';
+import type { ActorId } from '../engine/types';
 import { onFrame } from '../engine/frameLoop';
 import { layoutEpoch, pointer } from '../engine/pointer';
 import { isReducedMotion } from '../state/settings';
@@ -15,6 +17,8 @@ interface Props {
   className?: string;
   /** Called once when a letter is "pushed" hard by a fast pointer. */
   onShove?: () => void;
+  /** Listen to actor commands (poke a letter, go wonky). */
+  actorId?: ActorId;
 }
 
 interface LetterState {
@@ -39,6 +43,7 @@ export function LivingTitle({
   radius = 170,
   className,
   onShove,
+  actorId,
 }: Props) {
   const rootRef = useRef<HTMLHeadingElement>(null);
   const shove = useRef(onShove);
@@ -125,6 +130,38 @@ export function LivingTitle({
       for (const l of letters) l.el.style.transform = '';
     };
   }, [radius, size]);
+
+  useEffect(() => {
+    if (!actorId) return;
+    const timers = new Set<ReturnType<typeof setTimeout>>();
+    const unsub = actors.subscribe(actorId, (cmd) => {
+      const root = rootRef.current;
+      if (!root) return;
+      if (cmd.type === 'poke') {
+        if (cmd.key === 'WONK') root.dataset.wonk = 'true';
+        else if (cmd.key === 'UNWONK') delete root.dataset.wonk;
+        else {
+          root.querySelectorAll<HTMLSpanElement>('[data-letter]').forEach((el) => {
+            if (el.textContent?.toLowerCase() !== cmd.key) return;
+            el.removeAttribute('data-poke');
+            void el.offsetWidth;
+            el.setAttribute('data-poke', '');
+            const t = setTimeout(() => {
+              el.removeAttribute('data-poke');
+              timers.delete(t);
+            }, 650);
+            timers.add(t);
+          });
+        }
+      } else if (cmd.type === 'reset') {
+        delete root.dataset.wonk;
+      }
+    });
+    return () => {
+      unsub();
+      for (const t of timers) clearTimeout(t);
+    };
+  }, [actorId]);
 
   return (
     <h1

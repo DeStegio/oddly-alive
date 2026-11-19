@@ -143,13 +143,16 @@ interface PictureProps {
   onActivate: () => void;
   rootRef?: React.RefObject<HTMLDivElement>;
   thought?: string | null;
+  /** Great-Aunt Pim's expression changes with each nudge (INT-018): 0 stern, 1 smile, 2 wink. */
+  face?: number;
 }
 
 /**
  * "Great-Aunt Pim", an oil portrait. Nudging it enough times reveals what was
  * behind it the whole time.
  */
-export function Picture({ tilt, revealed, onActivate, rootRef, thought = null }: PictureProps) {
+export function Picture({ tilt, revealed, onActivate, rootRef, thought = null, face = 0 }: PictureProps) {
+  const f = ((face % 3) + 3) % 3;
   return (
     <div ref={rootRef} className={styles.picture}>
       <ThoughtBubble text={thought} />
@@ -206,9 +209,13 @@ export function Picture({ tilt, revealed, onActivate, rootRef, thought = null }:
             strokeLinecap="round"
           />
           <circle cx="68" cy="84" r="4" fill="var(--char-ink)" />
-          <circle cx="90" cy="84" r="4" fill="var(--char-ink)" />
+          {f === 2 ? (
+            <path d="M85 85 q 5 -4 10 0" fill="none" stroke="var(--char-ink)" strokeWidth="2.5" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
+          ) : (
+            <circle cx="90" cy="84" r="4" fill="var(--char-ink)" />
+          )}
           <path
-            d="M72 98 Q 79 95 86 98"
+            d={f === 0 ? 'M72 98 Q 79 95 86 98' : 'M70 95 Q 79 104 88 95'}
             fill="none"
             stroke="var(--char-ink)"
             strokeWidth="2.5"
@@ -216,7 +223,7 @@ export function Picture({ tilt, revealed, onActivate, rootRef, thought = null }:
             vectorEffect="non-scaling-stroke"
           />
           <path
-            d="M60 76 L 74 78 M84 78 L 98 76"
+            d={f === 0 ? 'M60 76 L 74 78 M84 78 L 98 76' : 'M60 74 L 74 72 M84 72 L 98 74'}
             stroke="var(--char-ink)"
             strokeWidth="2.5"
             strokeLinecap="round"
