@@ -23,6 +23,9 @@ export interface LivingObjects {
 export interface MoodObjects {
   lastUsed: string;
   teaPoured: number;
+  /** Nimbus is napping under the blanket (tea + blanket combination). */
+  napping: boolean;
+  mirrorLooks: number;
 }
 
 export interface SecretObjects {
@@ -60,7 +63,7 @@ export const OBJECT_DEFAULTS: ObjectsState = {
     rearranged: false,
     pimForm: 0,
   },
-  mood: { lastUsed: '', teaPoured: 0 },
+  mood: { lastUsed: '', teaPoured: 0, napping: false, mirrorLooks: 0 },
   secret: { slots: '', chestOpen: false, candleLit: false, keyFound: false },
   after: { radioOn: false, lightOn: false, constellations: 0 },
 };

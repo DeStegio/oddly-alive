@@ -21,6 +21,8 @@ export interface WorldView {
   discovered(secret: string): boolean;
   discoveredCount(): number;
   roomVisits(room: RoomId): number;
+  /** Distinct moods witnessed this session. */
+  moodsSeen(): number;
   /** Generic object-state lookup (e.g. 'living.lampOn'). */
   flag(key: string): boolean | number | string | undefined;
 }

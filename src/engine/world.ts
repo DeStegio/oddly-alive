@@ -167,6 +167,7 @@ export class World {
     this.personality = decay(this.personality, dt, now);
     this.personality = deriveMood(this.personality, { now, afterHours: useSettings.getState().afterHours });
     if (this.personality.mood !== before) {
+      this.syncStore();
       this.emit('MOOD_CHANGED', { from: before, to: this.personality.mood });
     }
     const idleMs = now - this.personality.lastInputAt;
@@ -254,6 +255,7 @@ export class World {
       discovered: (secret) => secret in s.discoveries,
       discoveredCount: () => Object.keys(s.discoveries).length,
       roomVisits: (room) => s.roomVisits[room] ?? 0,
+      moodsSeen: () => s.moodsSeen.length,
       flag: (key) => getFlag(key),
     };
   }
