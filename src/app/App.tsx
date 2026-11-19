@@ -1,5 +1,6 @@
 import { lazy } from 'react';
 import { HashRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { Controls } from '../components/Controls';
 import { Shell } from './Shell';
 import { WorldProvider } from './WorldProvider';
 
@@ -13,7 +14,7 @@ const AfterHours = lazy(() => import('../rooms/AfterHours/AfterHours'));
 export function AppRoutes() {
   return (
     <WorldProvider>
-      <Shell>
+      <Shell controls={<Controls />}>
       <Routes>
         <Route path="/" element={<LivingRoom />} />
         <Route path="/playground" element={<Playground />} />
