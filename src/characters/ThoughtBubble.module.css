@@ -1,0 +1,75 @@
+.anchor {
+  position: absolute;
+  left: 50%;
+  bottom: 100%;
+  width: 0;
+  height: 0;
+  z-index: var(--z-bubbles);
+  pointer-events: none;
+}
+
+.bubble {
+  position: absolute;
+  bottom: 10px;
+  left: 0;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: min(240px, 60vw);
+  padding: 8px 14px 9px;
+  background: var(--paper);
+  color: var(--ink);
+  border: var(--stroke) solid var(--ink);
+  border-radius: 18px;
+  box-shadow: var(--shadow-sm);
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.25;
+  text-align: center;
+  animation: bubble-in var(--dur-char) var(--ease-spring) both;
+}
+.bubble::after {
+  content: '';
+  position: absolute;
+  bottom: -9px;
+  left: 50%;
+  width: 14px;
+  height: 14px;
+  background: var(--paper);
+  border-right: var(--stroke) solid var(--ink);
+  border-bottom: var(--stroke) solid var(--ink);
+  transform: translateX(-50%) rotate(45deg);
+}
+.left {
+  transform: translateX(-85%);
+}
+.left::after {
+  left: 85%;
+}
+.right {
+  transform: translateX(-15%);
+}
+.right::after {
+  left: 15%;
+}
+
+@keyframes bubble-in {
+  from {
+    opacity: 0;
+    translate: 0 8px;
+    scale: 0.85;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+    scale: 1;
+  }
+}
+
+@media (max-width: 720px) {
+  .bubble {
+    font-size: 0.9rem;
+    max-width: min(200px, 56vw);
+  }
+}
