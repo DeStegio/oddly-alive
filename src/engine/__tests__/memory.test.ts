@@ -235,3 +235,24 @@ describe('memory sync (startMemory)', () => {
     expect(localStorage.getItem(MEMORY_KEY)).not.toBeNull();
   });
 });
+
+describe('forget me while memory sync is running', () => {
+  it('storage stays empty after Forget me, until something new is discovered', () => {
+    vi.useFakeTimers();
+    localStorage.clear();
+    sessionStorage.clear();
+    setWorldState(initialWorldState());
+    useSettings.getState().hydrate({ memoryEnabled: true });
+    const world = new World({ clock: new ManualClock(), actors: new ActorChannel(), seed: 2, behaviors: allBehaviors() });
+    const stop = startMemory(world);
+    world.discover('hello');
+    expect(localStorage.getItem(MEMORY_KEY)).not.toBeNull();
+    clearMemory(world);
+    vi.advanceTimersByTime(20_000);
+    expect(localStorage.getItem(MEMORY_KEY)).toBeNull();
+    world.discover('wonk');
+    expect(localStorage.getItem(MEMORY_KEY)).not.toBeNull();
+    stop();
+    vi.useRealTimers();
+  });
+});
