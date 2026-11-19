@@ -100,3 +100,21 @@ describe('advanced combinations', () => {
     expect(getWorldState().discoveries.aunt).toBeDefined();
   });
 });
+
+describe('first minute', () => {
+  it('a first-time visitor gets a shy hello, and one hint only if nothing was touched', () => {
+    const { world, said, advance } = setup();
+    world.emit('MEMORY_RESTORED', { visits: 1, returning: false, awayMs: 0 });
+    expect(said('pim').length).toBe(1);
+    advance(13_000);
+    expect(said('pim').some((t) => t.includes('poked'))).toBe(true);
+  });
+
+  it('no hint once the visitor has started playing', () => {
+    const { world, said, advance } = setup();
+    world.emit('OBJECT_CLICKED', { target: 'lumen', repeat: 1, via: 'pointer' });
+    advance(13_000);
+    expect(said('pim').some((t) => t.includes('poked'))).toBe(false);
+    expect(world).toBeDefined();
+  });
+});

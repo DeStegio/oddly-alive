@@ -7,6 +7,34 @@ const DAY = 24 * 60 * 60 * 1000;
 
 /** Returning visitors are recognized (locally) and greeted a little differently. */
 export const memoryBehaviors = [
+  // first visit: a shy hello, then — only if nothing has been touched — one gentle nudge
+  defineBehavior({
+    id: 'first.greet',
+    implements: ['INT-096'],
+    on: ['MEMORY_RESTORED'],
+    rooms: ['living'],
+    group: 'return',
+    priority: Priority.CHARACTER,
+    when: (c) => !c.event.payload.returning,
+    react: (c) =>
+      act('pim', 2600, () => {
+        face(c, 'pim', 'shy', 2400);
+        say(c, 'pim', ['oh. hello. you can look around.', '…hi. don’t mind me.'], 2400);
+      }),
+  }),
+  defineBehavior({
+    id: 'first.hint',
+    on: ['USER_IDLE'],
+    rooms: ['living'],
+    priority: Priority.CHARACTER,
+    cooldownMs: 24 * 60 * 60 * 1000,
+    when: (c) => c.event.payload.level === 'short' && c.view.visits <= 1 && c.view.count('pim') + c.view.count('lumen') + c.view.count('button') + c.view.count('dot') === 0,
+    react: (c) =>
+      act('pim', 3200, () => {
+        face(c, 'pim', 'curious', 3000);
+        say(c, 'pim', ['psst. everything in here can be poked. even me. gently.'], 3200);
+      }),
+  }),
   defineBehavior({
     id: 'return.greet',
     implements: ['INT-096', 'INT-035'],
