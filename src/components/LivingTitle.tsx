@@ -65,6 +65,7 @@ export function LivingTitle({
     let measuredEpoch = -1;
     let rootRect: DOMRect | null = null;
     let lastShove = 0;
+    let resting = false;
     const measure = () => {
       for (const l of letters) l.el.style.transform = '';
       rootRect = root.getBoundingClientRect();
@@ -94,6 +95,9 @@ export function LivingTitle({
       const px = pointer.x - rootRect.left;
       const py = pointer.y - rootRect.top;
       const live = pointer.active && pointer.inside && now - pointer.lastMove < 2500;
+      // every letter at rest and no pointer nearby: nothing to do this frame
+      if (!live && resting) return;
+      let allRest = true;
       for (const l of letters) {
         let tx = 0;
         let ty = 0;
@@ -121,8 +125,10 @@ export function LivingTitle({
           if (l.el.style.transform) l.el.style.transform = '';
           continue;
         }
+        allRest = false;
         l.el.style.transform = `translate(${l.x.toFixed(2)}px, ${l.y.toFixed(2)}px) rotate(${l.r.toFixed(2)}deg)`;
       }
+      resting = allRest && !live;
     });
     return () => {
       unsub();

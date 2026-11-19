@@ -52,10 +52,22 @@ export function Eye({
     let rect: DOMRect | null = null;
     let seenEpoch = -1;
     let frames = 0;
+    let lastMove = -1;
+    let lastEpoch = -1;
+    let idle = false;
+    let wasSpecial = false;
     return onFrame(() => {
       const el = eyeRef.current;
       const p = pupilRef.current;
       if (!el || !p) return;
+      // nothing moved and no override: skip the work entirely
+      const g0 = gaze?.current;
+      const special = Boolean(g0?.override) || Boolean(g0?.avert);
+      const skip = !special && !wasSpecial && pointer.lastMove === lastMove && layoutEpoch() === lastEpoch && idle;
+      wasSpecial = special;
+      if (skip) return;
+      lastMove = pointer.lastMove;
+      lastEpoch = layoutEpoch();
       let tx = 0;
       let ty = 0;
       const g = gaze?.current;
@@ -80,6 +92,9 @@ export function Eye({
         tx = g?.avert ? -dx : dx;
         ty = g?.avert ? -dy * 0.6 : dy;
       }
+      // settled: nothing to write this frame (until the pointer moves again)
+      idle = Math.abs(tx - curX) + Math.abs(ty - curY) < 0.04 && !g?.avert;
+      if (idle) return;
       const k = isReducedMotion() ? 1 : 0.22;
       curX += (tx - curX) * k;
       curY += (ty - curY) * k;
