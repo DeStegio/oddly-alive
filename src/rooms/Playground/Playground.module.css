@@ -1,0 +1,229 @@
+.room {
+  position: relative;
+  min-height: 100vh;
+  min-height: 100svh;
+  padding: calc(var(--nav-h) + 2vh) var(--gutter) var(--sp-7);
+  overflow: hidden;
+  isolation: isolate;
+}
+.head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--sp-3) var(--sp-6);
+}
+.blurb {
+  max-width: 34ch;
+  color: var(--ink-soft);
+  font-size: var(--fs-md);
+  padding-bottom: 0.6em;
+}
+
+.toolbar {
+  margin-top: var(--sp-5);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+  align-items: center;
+  position: relative;
+  z-index: 2;
+}
+.tool {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.swatch {
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  border: 2px solid var(--char-ink);
+}
+.sep {
+  width: 2px;
+  height: 26px;
+  background: var(--ink);
+  opacity: 0.25;
+  margin: 0 var(--sp-2);
+}
+
+/* the paper tray */
+.tray {
+  position: relative;
+  margin-top: var(--sp-4);
+  width: 100%;
+  max-width: 1200px;
+  border: var(--stroke) solid var(--ink);
+  border-radius: var(--radius-lg);
+  background:
+    radial-gradient(circle at 1px 1px, color-mix(in srgb, var(--ink) 18%, transparent) 1.2px, transparent 1.4px) 0 0 / 28px 28px,
+    var(--paper);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  touch-action: none;
+  user-select: none;
+  cursor: crosshair;
+}
+.world {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-origin: 0 0;
+}
+.world::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 20px;
+  background: var(--floor);
+  border-top: var(--stroke) solid var(--char-ink);
+  pointer-events: none;
+}
+.ramp {
+  position: absolute;
+  height: 18px;
+  background: var(--coral);
+  border: var(--stroke) solid var(--char-ink);
+  border-radius: 9px;
+  box-shadow: var(--shadow-sm);
+  pointer-events: none;
+}
+.bin {
+  position: absolute;
+  border: var(--stroke) dashed var(--char-ink);
+  border-radius: 10px;
+  display: grid;
+  place-items: end center;
+  padding-bottom: 6px;
+  pointer-events: none;
+  background: color-mix(in srgb, var(--yellow) 22%, transparent);
+}
+.bin span {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #24232b;
+  opacity: 0.75;
+}
+
+.shape {
+  position: absolute;
+  left: 0;
+  top: 0;
+  appearance: none;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  background: none;
+  cursor: grab;
+  touch-action: none;
+  will-change: transform;
+  -webkit-tap-highlight-color: transparent;
+}
+.shape:active {
+  cursor: grabbing;
+}
+.shape:focus-visible {
+  outline: 3px solid var(--blue);
+  outline-offset: 4px;
+  border-radius: 12px;
+}
+.shapeSvg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  transition: transform 160ms var(--ease-spring);
+}
+.shape[data-face='hit'] .shapeSvg {
+  transform: scale(1.1, 0.88);
+}
+
+/* face states */
+.eyesShut,
+.eyesDizzy,
+.mouthHit,
+.mouthProud {
+  display: none;
+}
+.shape[data-face='sleep'] .eyesOpen,
+.shape[data-face='dizzy'] .eyesOpen {
+  display: none;
+}
+.shape[data-face='sleep'] .eyesShut {
+  display: inline;
+}
+.shape[data-face='dizzy'] .eyesDizzy {
+  display: inline;
+}
+.shape[data-face='hit'] .mouthCalm,
+.shape[data-face='proud'] .mouthCalm {
+  display: none;
+}
+.shape[data-face='hit'] .mouthHit,
+.shape[data-face='proud'] .mouthProud {
+  display: inline;
+}
+
+/* collision sparks (pooled) */
+.spark {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  margin: -15px 0 0 -15px;
+  pointer-events: none;
+  opacity: 0;
+  background:
+    linear-gradient(var(--char-ink), var(--char-ink)) 50% 0 / 3px 9px no-repeat,
+    linear-gradient(var(--char-ink), var(--char-ink)) 0 50% / 9px 3px no-repeat,
+    linear-gradient(var(--char-ink), var(--char-ink)) 100% 50% / 9px 3px no-repeat;
+}
+.sparkOn {
+  animation: spark 380ms var(--ease-out);
+}
+@keyframes spark {
+  0% {
+    opacity: 1;
+    transform: scale(0.4);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.5);
+  }
+}
+
+.status {
+  margin-top: var(--sp-3);
+  font-size: var(--fs-sm);
+  color: var(--ink-soft);
+  min-height: 1.5em;
+}
+
+@media (max-width: 720px) {
+  .tool {
+    padding: 7px 11px;
+    font-size: 0.82rem;
+  }
+  .tray {
+    border-radius: var(--radius-md);
+  }
+}
+@media (max-width: 720px) {
+  .toolbar {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    margin-left: calc(var(--gutter) * -1);
+    margin-right: calc(var(--gutter) * -1);
+    padding: 4px var(--gutter) 8px;
+    scrollbar-width: none;
+  }
+  .tool {
+    flex-shrink: 0;
+  }
+  .blurb {
+    font-size: var(--fs-sm);
+  }
+}

@@ -30,6 +30,8 @@ export interface SecretObjects {
   slots: string;
   chestOpen: boolean;
   candleLit: boolean;
+  /** The golden key was delivered to the lost-and-found in the Playground. */
+  keyFound: boolean;
 }
 
 export interface AfterHoursObjects {
@@ -59,7 +61,7 @@ export const OBJECT_DEFAULTS: ObjectsState = {
     pimForm: 0,
   },
   mood: { lastUsed: '', teaPoured: 0 },
-  secret: { slots: '', chestOpen: false, candleLit: false },
+  secret: { slots: '', chestOpen: false, candleLit: false, keyFound: false },
   after: { radioOn: false, lightOn: false, constellations: 0 },
 };
 
