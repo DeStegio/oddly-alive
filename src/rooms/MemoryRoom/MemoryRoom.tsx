@@ -182,7 +182,7 @@ export default function MemoryRoom() {
             <li>how often you poked each object (top 40)</li>
             <li>totals of a few interaction kinds, rooms visited, the last room</li>
             <li>how much the house trusts you (a number between 0 and 1)</li>
-            <li>your sound, motion and After Hours settings</li>
+            <li>your motion and After Hours settings (sound always starts off)</li>
           </ul>
           <p className={styles.small}>Never stored: where your pointer went, what you typed, timestamps of actions, anything about you.</p>
 

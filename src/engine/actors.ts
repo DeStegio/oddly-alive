@@ -18,6 +18,15 @@ type Handler = (cmd: ActorCommand) => void;
 
 export class ActorChannel {
   private handlers = new Map<ActorId, Set<Handler>>();
+  private observers = new Set<(id: ActorId, cmd: ActorCommand) => void>();
+
+  /** Observe every command (used by the audio layer for character voices). */
+  observe(cb: (id: ActorId, cmd: ActorCommand) => void): () => void {
+    this.observers.add(cb);
+    return () => {
+      this.observers.delete(cb);
+    };
+  }
   /** Commands sent in this session, for tests and debugging. Bounded. */
   readonly history: Array<{ id: ActorId; cmd: ActorCommand }> = [];
 
@@ -38,6 +47,7 @@ export class ActorChannel {
     if (this.history.length > 50) this.history.shift();
     const set = this.handlers.get(id);
     if (!set || set.size === 0) return false;
+    for (const o of this.observers) o(id, cmd);
     for (const h of set) h(cmd);
     return true;
   }

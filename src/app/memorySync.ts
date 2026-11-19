@@ -55,8 +55,8 @@ export function startMemory(world: World): () => void {
 
   if (status === 'disabled') useSettings.getState().hydrate({ memoryEnabled: false });
   const st = data.settings;
+  // sound is never restored: every visit starts silent until the visitor opts in
   useSettings.getState().hydrate({
-    sound: st.sound,
     afterHours: st.afterHours,
     ...(st.motionExplicit ? { motion: st.motion, motionExplicit: true } : {}),
   });

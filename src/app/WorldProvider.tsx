@@ -5,6 +5,7 @@ import { installSensors } from '../engine/sensors';
 import { useSettings } from '../state/settings';
 import { useWorldStore } from '../state/worldStore';
 import { roomFromPath } from './rooms';
+import { startAudio } from './audioSync';
 import { startMemory } from './memorySync';
 import { getWorld } from './worldInstance';
 
@@ -39,10 +40,12 @@ export function WorldProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const stopMemory = startMemory(world);
+    const stopAudio = startAudio(world);
     world.start();
     const removeSensors = installSensors(world);
     return () => {
       removeSensors();
+      stopAudio();
       stopMemory();
       world.stop();
     };
