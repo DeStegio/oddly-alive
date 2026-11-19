@@ -17,6 +17,8 @@ interface PimProps {
   className?: string;
   /** Pajamas for After Hours. */
   nightcap?: boolean;
+  /** Outfit stage (INT-030): 0 none, 1 party hat, 2 glasses, 3 bow. */
+  accessory?: number;
 }
 
 /**
@@ -32,6 +34,7 @@ export function Pim({
   label = 'Pim, a shy blob on the sofa',
   className,
   nightcap,
+  accessory = 0,
 }: PimProps) {
   const face = FACES[expression];
   const svgRef = useRef<SVGSVGElement>(null);
@@ -84,6 +87,19 @@ export function Pim({
               strokeWidth="6"
               strokeLinecap="round"
             />
+            {accessory === 1 ? (
+              <g className={styles.accessory}>
+                <path d="M84 30 L 112 -18 L 136 30 Z" fill="var(--coral)" stroke="var(--char-ink)" strokeWidth="2.5" vectorEffect="non-scaling-stroke" strokeLinejoin="round" />
+                <path d="M94 12 L 128 14 M102 -2 L 122 0" stroke="var(--yellow)" strokeWidth="5" strokeLinecap="round" />
+                <circle cx="112" cy="-20" r="7" fill="var(--yellow)" stroke="var(--char-ink)" strokeWidth="2.5" vectorEffect="non-scaling-stroke" />
+              </g>
+            ) : null}
+            {accessory === 3 ? (
+              <g className={styles.accessory}>
+                <path d="M150 34 L 128 22 L 130 50 Z M150 34 L 172 20 L 172 50 Z" fill="var(--blue)" stroke="var(--char-ink)" strokeWidth="2.5" vectorEffect="non-scaling-stroke" strokeLinejoin="round" />
+                <circle cx="150" cy="35" r="6" fill="var(--yellow)" stroke="var(--char-ink)" strokeWidth="2.5" vectorEffect="non-scaling-stroke" />
+              </g>
+            ) : null}
             {nightcap ? (
               <g>
                 <path
@@ -151,6 +167,13 @@ export function Pim({
                 className={styles.mouth}
                 fill={face.mouthFilled ? 'var(--char-ink)' : 'none'}
               />
+              {accessory === 2 ? (
+                <g className={styles.accessory} fill="none" stroke="var(--char-ink)" strokeWidth="4" strokeLinejoin="round">
+                  <rect x="56" y="72" width="44" height="32" rx="6" />
+                  <rect x="104" y="70" width="44" height="32" rx="6" />
+                  <path d="M100 86 h 4 M56 84 L 34 78 M148 82 L 172 76" />
+                </g>
+              ) : null}
             </g>
           </g>
         </svg>

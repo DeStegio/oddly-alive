@@ -18,6 +18,8 @@ export interface LivingObjects {
   rearranged: boolean;
   /** Pim's transformation stage (INT-030). */
   pimForm: number;
+  /** A secret found elsewhere that Pim hasn't gossiped about yet. */
+  gossip: string;
 }
 
 export interface MoodObjects {
@@ -62,6 +64,7 @@ export const OBJECT_DEFAULTS: ObjectsState = {
     stickers: 0,
     rearranged: false,
     pimForm: 0,
+    gossip: '',
   },
   mood: { lastUsed: '', teaPoured: 0, napping: false, mirrorLooks: 0 },
   secret: { slots: '', chestOpen: false, candleLit: false, keyFound: false },

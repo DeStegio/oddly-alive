@@ -69,6 +69,7 @@ export default function LivingRoom() {
     home: { x: 0.56, y: 0.56 },
     onCatch: () => world.emit('OBJECT_STATE_CHANGED', { target: 'dot', key: 'caught', value: true }),
     onFrenzy: () => world.emit('POINTER_FRENZY', { target: 'dot' }),
+    onMimic: () => world.emit('OBJECT_STATE_CHANGED', { target: 'dot', key: 'mimic', value: true }),
   });
   useEffect(() => {
     dotMotion.current.follow = motion === 'full';
@@ -224,6 +225,7 @@ export default function LivingRoom() {
               thought={pim.thought}
               rootRef={pim.rootRef}
               gaze={pim.gaze}
+              accessory={living.pimForm}
               onActivate={click('pim')}
             />
           </div>

@@ -93,3 +93,8 @@
 .root[data-anim='wave'] .svg {
   animation: oa-wiggle 450ms var(--ease-in-out) 2;
 }
+.accessory {
+  animation: oa-pop-in 500ms var(--ease-spring) both;
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+}
