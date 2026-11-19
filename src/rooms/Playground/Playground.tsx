@@ -78,7 +78,12 @@ export default function Playground() {
       }
     };
     syncShapes();
+    // rare event: gravity hiccups and everything hops
+    const offRare = world.bus.on('RARE_EVENT', (ev) => {
+      if (ev.payload.event === 'gravity-hiccup') sim.shake();
+    });
     return () => {
+      offRare();
       sim.destroy();
       simRef.current = null;
     };
