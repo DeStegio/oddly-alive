@@ -1,0 +1,33 @@
+.root {
+  position: relative;
+  width: 100%;
+}
+.hit {
+  width: 100%;
+}
+.svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+.body {
+  transform-box: fill-box;
+  transform-origin: 0 100%;
+  animation: inch-scrunch 2.4s var(--ease-in-out) infinite;
+}
+@keyframes inch-scrunch {
+  0%,
+  100% {
+    transform: scaleX(1);
+  }
+  50% {
+    transform: scaleX(0.9) scaleY(1.06);
+  }
+}
+.root[data-anim='wave'] .svg {
+  animation: oa-wiggle 700ms var(--ease-in-out) 2;
+}
+.root[data-anim='jump'] .svg {
+  animation: oa-jump 650ms var(--ease-out);
+}

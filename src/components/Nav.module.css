@@ -12,6 +12,16 @@
 .bar > * {
   pointer-events: auto;
 }
+.bar {
+  transition:
+    background-color var(--dur-ui),
+    box-shadow var(--dur-ui);
+}
+.bar[data-scrolled='true'] {
+  background: var(--canvas);
+  box-shadow: 0 var(--stroke) 0 var(--ink);
+  pointer-events: auto;
+}
 
 .mark {
   display: inline-flex;

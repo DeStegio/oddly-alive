@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import type { ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { ROOM_LIST, type RoomId } from '../app/rooms';
 import styles from './Nav.module.css';
 
@@ -15,8 +15,15 @@ interface NavProps {
  * secrets must never prevent leaving a scene.
  */
 export function Nav({ hiddenLabels, onNavigate, controls }: NavProps) {
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 24);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
   return (
-    <header className={styles.bar}>
+    <header className={styles.bar} data-scrolled={scrolled}>
       <NavLink to="/" className={styles.mark} aria-label="Oddly Alive — Living Room">
         <svg viewBox="0 0 40 40" width="34" height="34" aria-hidden="true">
           <path
