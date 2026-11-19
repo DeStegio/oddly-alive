@@ -22,7 +22,7 @@ export const MOOD_OBJECTS: MoodObject[] = [
         <path d="M16 30 H 56 V 46 C 56 58 46 64 36 64 C 26 64 16 58 16 46 Z" fill="var(--mint)" {...INK} />
         <path d="M56 36 C 70 34 70 52 56 50" fill="none" {...INK} />
         <path d="M16 34 L 6 28" {...INK} />
-        <rect x="30" y="22" width="12" height="8" rx="3" fill="var(--paper)" {...INK} />
+        <rect x="30" y="22" width="12" height="8" rx="3" fill="var(--cut-paper)" {...INK} />
         <path className="steam" d="M28 16 q -4 -6 0 -12 M38 16 q -4 -6 0 -12" fill="none" {...INK} strokeWidth={2} />
       </svg>
     ),
@@ -71,7 +71,7 @@ export const MOOD_OBJECTS: MoodObject[] = [
     hint: 'mischievous',
     icon: (
       <svg viewBox="0 0 80 70" aria-hidden="true">
-        <path d="M14 62 C 30 40 46 14 66 8 C 66 30 50 52 22 58 Z" fill="var(--paper)" {...INK} />
+        <path d="M14 62 C 30 40 46 14 66 8 C 66 30 50 52 22 58 Z" fill="var(--cut-paper)" {...INK} />
         <path d="M14 62 L 60 14" {...INK} strokeWidth={2} />
         <path d="M30 46 l -6 -4 M38 38 l -6 -5 M46 30 l -5 -5" {...INK} strokeWidth={1.5} />
       </svg>
@@ -83,7 +83,7 @@ export const MOOD_OBJECTS: MoodObject[] = [
     hint: 'affectionate',
     icon: (
       <svg viewBox="0 0 80 70" aria-hidden="true">
-        <rect x="10" y="18" width="60" height="40" rx="4" fill="var(--paper)" {...INK} />
+        <rect x="10" y="18" width="60" height="40" rx="4" fill="var(--cut-paper)" {...INK} />
         <path d="M10 20 L 40 42 L 70 20" fill="none" {...INK} />
         <circle cx="40" cy="42" r="7" fill="var(--coral)" {...INK} />
       </svg>

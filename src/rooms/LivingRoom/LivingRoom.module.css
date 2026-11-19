@@ -326,3 +326,65 @@
   font-weight: 700;
   text-underline-offset: 3px;
 }
+
+/* ---------- tall tablets (portrait): a taller stage, larger props ---------- */
+@media (min-width: 721px) and (max-aspect-ratio: 4/5) {
+  .stage {
+    height: min(66vh, 900px);
+  }
+  .floor {
+    height: 28%;
+  }
+  .wall {
+    bottom: 28%;
+  }
+  .picture {
+    left: auto;
+    right: 10%;
+    top: 8%;
+    width: 22%;
+  }
+  .clock {
+    left: 14%;
+    top: 12%;
+    width: 13%;
+  }
+  .door {
+    right: 2%;
+    bottom: 28%;
+    width: 13%;
+  }
+  .lamp {
+    left: 3%;
+    bottom: 14%;
+    width: 16%;
+  }
+  .sofa {
+    left: 20%;
+    bottom: 13%;
+    width: 50%;
+  }
+  .pim {
+    left: 33%;
+    bottom: 30%;
+    width: 20%;
+  }
+  .bunny {
+    left: 24%;
+    width: 6%;
+  }
+  .button {
+    left: 66%;
+    bottom: 10%;
+    width: 13%;
+  }
+  .plant {
+    left: 80%;
+    bottom: 11%;
+    width: 15%;
+  }
+  .rug {
+    left: 10%;
+    width: 72%;
+  }
+}
