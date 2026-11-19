@@ -82,8 +82,10 @@ describe('world integration', () => {
     const { world, advance } = setup();
     advance(IDLE_LONG_MS + 1000);
     expect(world.scheduler.activeCount()).toBeGreaterThan(0);
+    expect(world.scheduler.activeOn('room')).toBe('idle.long');
     world.enterRoom('mood');
-    expect(world.scheduler.activeCount()).toBe(0);
+    // the old room's reactions are gone (the new room may greet you)
+    expect(world.scheduler.activeOn('room')).toBeNull();
     expect(getWorldState().room).toBe('mood');
     expect(getWorldState().roomVisits.mood).toBe(1);
     world.enterRoom('living');
