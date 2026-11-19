@@ -33,3 +33,60 @@
     padding-bottom: 62px;
   }
 }
+
+/* room entrance, tuned by mood (INT-040); navigation itself never waits for it */
+.enter {
+  animation: enter-default 520ms var(--ease-out) backwards;
+}
+.enter[data-mood='excited'],
+.enter[data-mood='playful'] {
+  animation: enter-bounce 600ms var(--ease-spring) backwards;
+}
+.enter[data-mood='sleepy'] {
+  animation: enter-fade 1100ms var(--ease-in-out) backwards;
+}
+.enter[data-mood='annoyed'] {
+  animation: enter-huff 380ms var(--ease-out) backwards;
+}
+.enter[data-mood='shy'] {
+  animation: enter-peek 800ms var(--ease-out) backwards;
+}
+.enter[data-mood='confused'] {
+  animation: enter-tilt 700ms var(--ease-spring) backwards;
+}
+@keyframes enter-default {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+@keyframes enter-bounce {
+  from {
+    opacity: 0;
+    transform: translateY(40px) scale(0.98);
+  }
+}
+@keyframes enter-fade {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes enter-huff {
+  from {
+    opacity: 0;
+    transform: translateX(-16px);
+  }
+}
+@keyframes enter-peek {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.995);
+    filter: blur(2px);
+  }
+}
+@keyframes enter-tilt {
+  from {
+    opacity: 0;
+    transform: rotate(-1.2deg);
+  }
+}
