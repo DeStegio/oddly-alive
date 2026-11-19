@@ -1,0 +1,49 @@
+.root {
+  position: relative;
+  width: 100%;
+}
+.hit {
+  width: 100%;
+}
+.svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+.body {
+  transform-box: fill-box;
+  transform-origin: 50% 60%;
+  animation: oa-float 5s var(--ease-in-out) infinite;
+}
+.line {
+  fill: none;
+  stroke: var(--char-ink);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+.blanket {
+  animation: oa-pop-in 600ms var(--ease-spring) both;
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+}
+.root[data-anim='wiggle'] .svg {
+  animation: oa-wiggle 600ms var(--ease-in-out);
+}
+.root[data-anim='shake'] .svg {
+  animation: oa-shake 450ms var(--ease-in-out) 2;
+}
+.root[data-anim='jump'] .svg {
+  animation: oa-jump 650ms var(--ease-out);
+}
+.root[data-anim='spin'] .svg {
+  animation: oa-spin 900ms var(--ease-in-out);
+}
+.root[data-anim='squish'] .svg {
+  animation: oa-squish 420ms var(--ease-spring);
+}
+.root[data-anim='bounce'] .svg {
+  animation: oa-jump 400ms var(--ease-out) 2;
+}
