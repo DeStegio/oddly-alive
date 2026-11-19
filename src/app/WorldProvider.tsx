@@ -6,6 +6,7 @@ import { useSettings } from '../state/settings';
 import { useWorldStore } from '../state/worldStore';
 import { roomFromPath } from './rooms';
 import { startAudio } from './audioSync';
+import { parseShareHash } from './share';
 import { startMemory } from './memorySync';
 import { getWorld } from './worldInstance';
 
@@ -41,6 +42,8 @@ export function WorldProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const stopMemory = startMemory(world);
     const stopAudio = startAudio(world);
+    // a shared link can ask for the night version of the scene
+    if (parseShareHash(window.location.hash).night) useSettings.getState().setAfterHours(true);
     world.start();
     const removeSensors = installSensors(world);
     return () => {

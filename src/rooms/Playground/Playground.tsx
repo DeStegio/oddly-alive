@@ -8,7 +8,8 @@ import { useSettings } from '../../state/settings';
 import { getFlag, setFlag } from '../../state/world';
 import { PlaygroundSim, SHAPES, defaultLayout, type ShapeKind } from './physics';
 import { ShapeView } from './ShapeView';
-import { readSharedArrangement } from './share';
+import { encodeArrangement, readSharedArrangement } from './share';
+import { setArrangementProvider } from '../../app/share';
 import styles from './Playground.module.css';
 
 interface ShapeRef {
@@ -78,12 +79,14 @@ export default function Playground() {
       }
     };
     syncShapes();
+    setArrangementProvider(() => encodeArrangement(sim.serialize(), sim.layout.portrait));
     // rare event: gravity hiccups and everything hops
     const offRare = world.bus.on('RARE_EVENT', (ev) => {
       if (ev.payload.event === 'gravity-hiccup') sim.shake();
     });
     return () => {
       offRare();
+      setArrangementProvider(null);
       sim.destroy();
       simRef.current = null;
     };

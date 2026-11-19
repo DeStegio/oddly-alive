@@ -58,7 +58,7 @@ export function Sofa() {
   );
 }
 
-export function Rug() {
+export function Rug({ ring = 'var(--coral)' }: { ring?: string }) {
   return (
     <svg viewBox="0 0 600 90" className={styles.fill} aria-hidden="true">
       <ellipse cx="300" cy="45" rx="292" ry="40" fill="var(--paper)" {...INK} />
@@ -78,7 +78,7 @@ export function Rug() {
         rx="180"
         ry="18"
         fill="none"
-        stroke="var(--coral)"
+        stroke={ring}
         strokeWidth="3"
       />
     </svg>
@@ -145,13 +145,15 @@ interface PictureProps {
   thought?: string | null;
   /** Great-Aunt Pim's expression changes with each nudge (INT-018): 0 stern, 1 smile, 2 wink. */
   face?: number;
+  /** Backdrop colour (varies with the scene seed). */
+  sky?: string;
 }
 
 /**
  * "Great-Aunt Pim", an oil portrait. Nudging it enough times reveals what was
  * behind it the whole time.
  */
-export function Picture({ tilt, revealed, onActivate, rootRef, thought = null, face = 0 }: PictureProps) {
+export function Picture({ tilt, revealed, onActivate, rootRef, thought = null, face = 0, sky = "var(--blue)" }: PictureProps) {
   const f = ((face % 3) + 3) % 3;
   return (
     <div ref={rootRef} className={styles.picture}>
@@ -194,7 +196,7 @@ export function Picture({ tilt, revealed, onActivate, rootRef, thought = null, f
           <circle cx="80" cy="3" r="3" fill="var(--char-ink)" />
           <rect x="14" y="24" width="138" height="112" fill="var(--shadow-ink)" />
           <rect x="8" y="18" width="138" height="112" fill="var(--yellow)" {...INK} />
-          <rect x="20" y="30" width="114" height="88" fill="var(--blue)" {...INK} />
+          <rect x="20" y="30" width="114" height="88" fill={sky} {...INK} />
           <path d="M20 96 Q 60 80 134 92 L 134 118 L 20 118 Z" fill="var(--mint)" opacity="0.9" />
           <path
             d="M42 112 C 38 82 56 58 78 58 C 100 58 114 78 112 104 C 111 116 100 118 78 118 C 56 118 43 120 42 112 Z"

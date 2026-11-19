@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { sceneVariant } from '../../app/share';
 import { useWorld } from '../../app/worldInstance';
 import { Clock } from '../../characters/Clock';
 import { Dot, type DotMotion } from '../../characters/Dot';
@@ -40,6 +41,8 @@ export default function LivingRoom() {
   const discoveries = useWorldStore((s) => Object.keys(s.discoveries).length);
   const returning = useWorldStore((s) => s.returning);
   const lastRoom = useWorldStore((s) => s.lastVisitRoom);
+  const seed = useWorldStore((s) => s.seed);
+  const variant = useMemo(() => sceneVariant(seed), [seed]);
 
   const roomRef = useRef<HTMLElement>(null);
   const pim = useActor('pim');
@@ -173,6 +176,7 @@ export default function LivingRoom() {
               tilt={living.pictureTilt}
               revealed={living.keyholeRevealed}
               face={living.pictureNudges}
+              sky={variant.pictureSky}
               rootRef={picture.rootRef}
               thought={picture.thought}
               onActivate={() => {
@@ -196,7 +200,7 @@ export default function LivingRoom() {
           </div>
 
           <div className={`${styles.prop} ${styles.rug}`}>
-            <Rug />
+            <Rug ring={variant.rugRing} />
           </div>
           <div className={`${styles.prop} ${styles.lamp}`}>
             <Lamp
@@ -246,6 +250,7 @@ export default function LivingRoom() {
           <div className={`${styles.prop} ${styles.plant}`}>
             <Plant
               leaves={7 + discoveries}
+              seed={variant.plantSeed}
               drooping={false}
               bloom={living.plantBloom || discoveries >= 6}
               thought={plant.thought}
