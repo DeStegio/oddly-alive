@@ -103,3 +103,24 @@ No backend, accounts, analytics or 3D.
 | Clear Local Memory | everything stored in `localStorage` (visits, discoveries, counts, nickname, settings) and the live session |
 
 Shared links carry only a seed, room id and an arrangement — never memory.
+
+## As built (release notes)
+
+The design above held up. A few things were added or changed during
+implementation:
+
+| Area | Module | Notes |
+| --- | --- | --- |
+| Plugins | `World.use({ onEvent, onTick })` | Memory, audio and the surprise director plug in without the world knowing about them. |
+| Event queue | `World.emit` | Follow-up events are queued breadth-first and depth-limited (`MAX_EVENT_DEPTH = 4`). |
+| Objects | `state/world.ts` | Per-room object slices addressed by string flags (`'living.lampOn'`) and type-checked against defaults. "Reset World" restores them. |
+| Memory | `engine/memory.ts`, `app/memorySync.ts` | Schema v2 with v1 migration, validation, an off switch, and a "forgotten" latch so Forget me stays forgotten. Sound is never restored. |
+| Surprises | `engine/surpriseDirector.ts` | Rare events gated by activity, minimum interval, room, per-session limits and novelty; behaviors decide how they look. |
+| Audio | `engine/audio.ts`, `app/audioSync.ts` | Web Audio synthesis, created only after opt-in; actor-channel observers give characters voices. |
+| Sharing | `app/share.ts`, `app/postcard.ts`, `rooms/Playground/share.ts` | Seeded scene variants; links with allow-listed keys; SVG plus canvas postcard. |
+| Line variety | `behaviors/helpers.ts` `pickLine` | Characters don't repeat a line while fresher ones exist. |
+| Loading | `app/App.tsx` | Rooms are code-split, then prefetched when idle (physics last). |
+
+Behavior files: `character.ts` (moods, idle, tab return), `living.ts`,
+`playground.ts`, `mood.ts`, `secret.ts`, `rare.ts`, `memory.ts`,
+`night.ts`, `combos.ts` (cross-room chains and multi-character gags).

@@ -5,21 +5,21 @@ Phase numbers follow the master plan (`oddly-alive-master-plan.txt`).
 | Phase | Scope | Status |
 | --- | --- | --- |
 | 0 | Research & creative foundation (docs) | done |
-| 1 | Vite/React/TS strict, lint, router, tokens, shell, tests, error boundary | planned |
-| 2 | Living Room visual prototype, characters, first pointer reactions | planned |
-| 3 | Core interaction engine (bus, registry, scheduler, RNG, cooldowns) | planned |
-| 4 | Personality engine (variables, moods, expressions) | planned |
-| 5 | Living Room expansion (25 verified behaviors, first secrets) | planned |
-| 6 | Playground (Matter.js, stacking, chains, reset) | planned |
-| 7 | Mood Room (weather = mood, contextual objects) | planned |
-| 8 | Secrets, Secret Space, surprise director | planned |
-| 9 | Memory, return visits, Memory Room, reset controls | planned |
-| 10 | After Hours | planned |
-| 11 | Advanced combinations, cross-room chains | planned |
-| 12 | Sound, motion, polish | planned |
-| 13 | Shareability (seeds, links, postcards) | planned |
-| 14 | QA, E2E, accessibility, performance | planned |
-| 15 | README, deployment | planned |
+| 1 | Vite/React/TS strict, lint, router, tokens, shell, tests, error boundary | done |
+| 2 | Living Room visual prototype, characters, first pointer reactions | done |
+| 3 | Core interaction engine (bus, registry, scheduler, RNG, cooldowns) | done |
+| 4 | Personality engine (variables, moods, expressions) | done |
+| 5 | Living Room expansion (25 verified behaviors, first secrets) | done |
+| 6 | Playground (Matter.js, stacking, chains, reset) | done |
+| 7 | Mood Room (weather = mood, contextual objects) | done |
+| 8 | Secrets, Secret Space, surprise director | done |
+| 9 | Memory, return visits, Memory Room, reset controls | done |
+| 10 | After Hours | done |
+| 11 | Advanced combinations, cross-room chains | done |
+| 12 | Sound, motion, polish | done |
+| 13 | Shareability (seeds, links, postcards) | done |
+| 14 | QA, E2E, accessibility, performance | done |
+| 15 | README, deployment | done |
 
 ## Phase 1 implementation plan
 
