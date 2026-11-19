@@ -1,5 +1,7 @@
 .main {
   position: relative;
+  /* entrance animations may tilt a room briefly; never let that scroll sideways */
+  overflow-x: clip;
   min-height: 100vh;
   min-height: 100dvh;
   outline: none;

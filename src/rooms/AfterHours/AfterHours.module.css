@@ -328,13 +328,22 @@
 }
 
 @media (max-width: 720px) {
+  /* mobile: the sky becomes its own row below the copy, so nothing covers a star */
   .sky {
-    inset: calc(var(--nav-h) + 250px) 0 32% 0;
+    position: relative;
+    inset: auto;
+    grid-row: 2;
+    min-height: 300px;
+    margin: var(--sp-4) var(--gutter) 0;
+  }
+  .head {
+    grid-row: 1;
   }
   .moon {
-    width: 110px;
-    top: -200px;
-    right: 4%;
+    width: 92px;
+    top: auto;
+    bottom: 4%;
+    right: 2%;
   }
   .roof {
     min-height: 30vh;

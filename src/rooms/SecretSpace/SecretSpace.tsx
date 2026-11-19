@@ -126,7 +126,7 @@ export default function SecretSpace() {
           {/* token puzzle */}
           <div className={styles.puzzle}>
             <p className={styles.note}>“First the night, then the green, then the thing you shouldn’t press.”</p>
-            <div className={styles.slots} aria-label="Three slots">
+            <div className={styles.slots} role="group" aria-label="Three slots">
               {[0, 1, 2].map((i) => (
                 <span key={i} className={styles.tokenSlot} data-filled={Boolean(slots[i])} data-solved={solved}>
                   {slots[i] ? <TokenIcon id={slots[i] as string} /> : null}

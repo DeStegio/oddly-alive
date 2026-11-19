@@ -61,6 +61,7 @@ export function Dot({
     let seen = -1;
     let frames = 0;
     let fastFrames = 0;
+    let wasFollowing = false;
     let lungeUntil = 0;
     let nextLunge = 0;
     const path: Array<{ x: number; y: number }> = [];
@@ -88,8 +89,14 @@ export function Dot({
       const py = pointer.y - rect.top;
       const pointerInBounds = px >= 0 && py >= 0 && px <= rect.width && py <= rect.height;
       const recentlyMoved = now - pointer.lastMove < 3500;
+      // touch pointers are not followed: on phones Dot stays put and tappable
       const following =
-        m.follow && pointer.active && pointer.inside && pointerInBounds && recentlyMoved;
+        m.follow && pointer.active && pointer.inside && pointer.kind !== 'touch' && pointerInBounds && recentlyMoved;
+      // while following, Dot must never intercept the clicks meant for what's under the pointer
+      if (following !== wasFollowing) {
+        wasFollowing = following;
+        mover.dataset.following = String(following);
+      }
       // record the pointer's path; when it stops after a long stroke, sometimes retrace it
       if (following && pointer.lastMove !== lastSampleAt) {
         lastSampleAt = pointer.lastMove;

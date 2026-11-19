@@ -54,11 +54,17 @@ export default function AfterHours() {
   const selRef = useRef<number | null>(null);
   const linksRef = useRef<Link[]>([]);
   const namedRef = useRef<string | null>(null);
+  const lastTap = useRef({ i: -1, t: 0 });
   const tapStar = (i: number) => {
+    // one physical tap can arrive as more than one event; ignore the echo
+    const now = performance.now();
+    if (lastTap.current.i === i && now - lastTap.current.t < 350) return;
+    lastTap.current = { i, t: now };
     const sel = selRef.current;
-    if (sel === null || sel === i) {
-      selRef.current = sel === i ? null : i;
-      setSelected(selRef.current);
+    if (sel === i) return; // re-tapping the selected star keeps it selected
+    if (sel === null) {
+      selRef.current = i;
+      setSelected(i);
       return;
     }
     selRef.current = i;
@@ -91,12 +97,7 @@ export default function AfterHours() {
   return (
     <section className={styles.room} data-light={after.lightOn} data-radio={after.radioOn} aria-labelledby="ah-title">
       <StarTrail />
-      <div ref={skyRef} className={styles.sky} onPointerUp={(e) => {
-          if (e.target === e.currentTarget) {
-            selRef.current = null;
-            setSelected(null);
-          }
-        }}>
+      <div ref={skyRef} className={styles.sky}>
         <svg className={styles.lines} viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
           {links.map(([a, b]) => (
             <line key={linkKey(a, b)} x1={STARS[a]!.x} y1={STARS[a]!.y} x2={STARS[b]!.x} y2={STARS[b]!.y} className={styles.link} />

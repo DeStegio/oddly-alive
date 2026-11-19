@@ -65,3 +65,6 @@
     transform: scale(1);
   }
 }
+.mover[data-following='true'] {
+  pointer-events: none;
+}

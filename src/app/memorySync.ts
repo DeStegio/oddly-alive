@@ -6,6 +6,8 @@ import { getWorldState, initialWorldState, setWorldState, useWorldStore } from '
 
 let manager: MemoryManager | null = null;
 let base: MemoryV2 | null = null;
+/** After "Forget me", nothing is written until something new is discovered. */
+let forgotten = false;
 
 export function getMemoryManager(): MemoryManager {
   if (!manager) manager = MemoryManager.fromWindow();
@@ -36,7 +38,7 @@ export function composeMemory(now: number): MemoryV2 {
 }
 
 export function saveNow(): boolean {
-  if (!useSettings.getState().memoryEnabled) return false;
+  if (!useSettings.getState().memoryEnabled || forgotten) return false;
   return getMemoryManager().save(composeMemory(Date.now()));
 }
 
@@ -80,8 +82,12 @@ export function startMemory(world: World): () => void {
   }, 1400);
 
   // save when discoveries change, every 15 s, and when the page hides
+  forgotten = false;
   const unsub = useWorldStore.subscribe((s, prev) => {
-    if (s.discoveries !== prev.discoveries) saveNow();
+    if (s.discoveries === prev.discoveries) return;
+    // a new discovery after Forget me is the visitor choosing to be remembered again
+    if (forgotten && Object.keys(s.discoveries).length > 0) forgotten = false;
+    saveNow();
   });
   const interval = window.setInterval(() => document.visibilityState === 'visible' && saveNow(), 15_000);
   const onHide = () => document.visibilityState === 'hidden' && saveNow();
@@ -116,6 +122,7 @@ export function resetWorld(world: World) {
 
 /** Clear Local Memory: forget everything stored, and start over as a stranger. */
 export function clearMemory(world: World) {
+  forgotten = true;
   getMemoryManager().clear();
   base = emptyMemory(Date.now());
   const keepRoom = getWorldState().room;
@@ -130,5 +137,8 @@ export function clearMemory(world: World) {
 export function setMemoryEnabled(on: boolean) {
   useSettings.getState().setMemoryEnabled(on);
   getMemoryManager().setDisabled(!on);
-  if (on) saveNow();
+  if (on) {
+    forgotten = false;
+    saveNow();
+  }
 }

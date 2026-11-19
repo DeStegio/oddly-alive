@@ -2,14 +2,15 @@
   position: fixed;
   left: 0;
   right: 0;
-  bottom: 12px;
-  height: 0;
+  bottom: 0;
+  height: 160px;
+  overflow: hidden;
   z-index: calc(var(--z-nav) - 2);
   pointer-events: none;
 }
 .visitor {
   position: absolute;
-  bottom: 0;
+  bottom: 12px;
   left: 0;
   width: 92px;
   transform: translateX(-140px);
