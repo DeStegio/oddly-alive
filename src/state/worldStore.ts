@@ -32,6 +32,12 @@ export interface WorldStoreState {
   lastRoom: RoomId | null;
   caption: Caption | null;
   seed: number;
+  /** Interaction counts from previous visits (local memory). */
+  pastCounts: Record<string, number>;
+  pastRoomVisits: Partial<Record<RoomId, number>>;
+  pastEventTotals: Record<string, number>;
+  memoryStatus: 'fresh' | 'restored' | 'migrated' | 'corrupt' | 'unavailable' | 'disabled';
+  lastVisitRoom: RoomId | null;
 }
 
 export const initialWorldState = (): WorldStoreState => ({
@@ -50,6 +56,11 @@ export const initialWorldState = (): WorldStoreState => ({
   lastRoom: null,
   caption: null,
   seed: 1,
+  pastCounts: {},
+  pastRoomVisits: {},
+  pastEventTotals: {},
+  memoryStatus: 'fresh',
+  lastVisitRoom: null,
 });
 
 export const useWorldStore = create<WorldStoreState>()(() => initialWorldState());
