@@ -1,0 +1,576 @@
+THE WEBSITE IS ALIVE / ODDLY ALIVE
+COMPLETE CREATIVE DIRECTION, PRODUCT SPECIFICATION & ENGINEERING EXECUTION PLAN
+
+Repository name: oddly-alive
+Product name: Oddly Alive
+Concept: A website with a mind of its own.
+Tagline: It's not broken. It's just being itself.
+
+============================================================
+0. YOUR ROLE AND WORKING AGREEMENT
+============================================================
+
+Act as the lead creative developer, senior frontend engineer, interaction designer, motion designer, and technical architect. Build a large, exceptionally polished, imaginative, surprising interactive web experience intended as a standout frontend portfolio project.
+
+This document is the product and implementation source of truth. Make reasoned design decisions, record them, and implement work incrementally. Do not generate the whole application in one uncontrolled step. Inspect the existing repository first.
+
+At each phase: explain the objective, implement only scoped work, run available lint/typecheck/tests, visually verify when possible, document important decisions, and make the suggested commits only after validation. Do not claim tests, visual QA, or deployment completed unless they actually occurred. Do not create empty commits. Keep the application runnable. Do not overwrite unrelated user changes.
+
+============================================================
+1. PRODUCT VISION
+============================================================
+
+The entire website should feel alive, not because it has a chatbot, a pair of eyes following the cursor, or randomly moving buttons, but because it behaves as a coherent interactive world with:
+
+- A consistent fictional personality and emotional states.
+- Awareness of user interactions (only events within the website).
+- Expressive environmental responses and interconnected behaviors.
+- Persistent optional, transparent local memory.
+- Surprises, secrets, hidden discoveries, and small evolving storylines.
+- Reactive visual elements and optional, user-enabled audio.
+- Multiple explorable environments and meaningful continuity.
+- Playful, sometimes absurd humor.
+
+The website should feel like a character, not a collection of disconnected JavaScript tricks. Do not create a static marketing homepage with a few animated buttons. Do not create mandatory tutorials, levels, scores, quests, or learning activities. The activity is interacting with the website itself.
+
+CORE PILLARS
+- Awareness: responds to pointer, click, scroll, speed, inactivity, and return visits.
+- Personality: fictional moods, habits, preferences, context-aware reactions.
+- Surprise: interdependent events, secrets, small stories, unexpected consequences.
+- Persistence: minimal locally stored discoveries/settings with explicit controls.
+
+EXPERIENCE DESIGN TARGETS (to validate through usability testing)
+First 5 seconds: one clear, unusual, charming nonintrusive response.
+First 30 seconds: at least three distinct discoverable ways to interact.
+First 2 minutes: multiple objects, at least one chain reaction, one mood shift, one surprise, another explorable area.
+First 5 minutes: new combinations, unusual behaviors, rare events, optional secrets.
+
+No experience target is a guarantee of actual user behavior. Test with users.
+
+============================================================
+2. ART DIRECTION AND DESIGN REQUIREMENTS
+============================================================
+
+Overall look: original, premium, playful, editorial, experimental, comparable in quality to an independent creative studio. Rich and memorable, not visually exhausting. Professional creative craftsmanship, not a childish game or generic SaaS dashboard.
+
+- Warm inviting backgrounds, controlled accent colors, editorial typography.
+- Asymmetric, intentional composition with ample whitespace.
+- Original SVG illustration, expressive shapes, small secondary characters.
+- Expressive, purposeful kinetic typography, transitions, tactile feedback.
+- Individual art-directed room compositions that share an underlying system.
+- Interface itself is the character: behavior across objects, text, shapes, space.
+- Never depend entirely on one central mascot.
+
+STARTING PALETTE (refine for accessibility and visual coherence)
+Canvas #F6F1E8; Ink #24232B; Coral #F57963; Electric Blue #657BE8; Soft Yellow #F5D873; Mint #A6D7B3; Lavender #B9A5DB.
+Use restraint: not all accents everywhere. Prefer licensed expressive grotesk/editorial display font plus legible UI sans. Monospace only when purposeful. Establish tokens for color, type, spacing, radii, shadows, z-index, motion duration/easing, and responsive dimensions.
+
+CRITICAL CLAUDE / CODEX DESIGN INSTRUCTION
+Do NOT use a default Claude theme, Anthropic/Claude branding, an OpenAI style, or a stereotypical AI-generated website. Absolutely avoid generic purple-to-blue gradients, excessive glassmorphism, generic hero+three-feature-card SaaS layouts, AI chat styling, fake analytics, random glowing floating blobs, generic gradients, oversized rounded dashboard panels, or generic Lucide iconography as the visual identity. Don't use emojis instead of original art direction.
+
+Study interaction quality and art direction from these websites if browsing is actually available:
+https://neal.fun/
+https://bruno-simon.com/
+https://patatap.com/
+https://memorabl.es/inspiration/interactive-websites
+https://www.awwwards.com/
+
+Research the immediate hook, discoverability, thoughtful motion, surprise pacing, and composition. These are inspiration references only. DO NOT copy their source code, layouts, distinctive mechanics, visual assets, characters, or unlicensed audio. If you cannot browse, state the limitation and use original design decisions.
+
+DESIGN-FIRST PROCESS
+1. Write PRODUCT_VISION.md.
+2. Write DESIGN_DIRECTION.md including original visual concept, palette and typography.
+3. Define characters and expressive visual vocabulary.
+4. Define design system tokens.
+5. Produce an intentional visual composition for the primary Living Room.
+6. Build a working visual prototype, review it, and refine.
+7. Expand only after the visual foundation and interaction quality are coherent.
+
+The result must not resemble a rectangular wireframe or generic component gallery.
+
+============================================================
+3. WORLD STRUCTURE
+============================================================
+
+Build six interconnected areas. Routes or scenes are both valid; choose based on smooth navigation and maintainability. Shared personality/world state spans them. Each needs several visible interactive affordances and an original composition, not identical template cards.
+
+A. THE LIVING ROOM
+Default landing scene. Reactive title, distributed personality, original characters, interactive props, environment reactions, discoverable navigation, hidden reactions. Highest initial polish and many instantly discoverable interactions.
+
+B. THE PLAYGROUND
+Expressive interactions: draggable physics-inspired objects, stacking, collisions, reactions to gestures, transformations, visual chain reactions, optional sounds, safe resets.
+
+C. THE MOOD ROOM
+Mood-dependent atmosphere, expressions, contextual objects influencing character behavior, unique surprises, inter-room continuity. Do not make it a mood selection dashboard.
+
+D. THE SECRET SPACE
+Hidden objects, surprising reveals, environmental puzzles and combinations, rare events, secrets linked across spaces. No mandatory puzzle gates.
+
+E. THE MEMORY ROOM
+Minimal local memory: visit count, discovered secrets, favorite interacted-with objects based on counts, playful locally generated nickname, visualizations of non-sensitive interactions. Transparent, optional, resettable.
+
+F. THE AFTER HOURS
+Alternate palette/ambience, unique gestures and reactions, special surprises, different character state. Provide manual switch; never make clock time the only access path.
+
+Navigation stays usable regardless of animations/mood. Motion and secrets never prevent leaving a scene.
+
+============================================================
+4. PERSONALITY ENGINE
+============================================================
+
+FICTIONAL MOODS:
+neutral, curious, playful, shy, annoyed, excited, sleepy, mischievous, confused, affectionate.
+
+BOUNDED INTERNAL VARIABLES:
+curiosity, energy, trust, mischief, stimulation, fatigue.
+
+Derive moods from explicit rules, recent interactions, object/room context, time spent idle, and cool-down periods. Do not pretend the site has real emotions or consciousness.
+
+Examples:
+- Repeated same-object clicks: annoyance and a changed response, followed by recovery.
+- Idle: subtle bored/curious behavior; no intrusive repeated pop-ups.
+- Gentle diverse interactions: curiosity and playfulness increase.
+- Rapid interactions: increased stimulation, temporary excited or overwhelmed response with limits.
+- Returning locally recognized visit: mild change in greeting and selected reactions.
+- Objects and secondary characters respond to each other, not only the user.
+
+The personality must show through actual behavior and timing, not numerical mood displays.
+
+============================================================
+5. INTERACTION CATALOG (110 IDEAS)
+============================================================
+
+This is a prioritized backlog to refine, not permission to add filler. Every built interaction must specify: trigger, preconditions, state changes, visual result, optional sound, cooldown, cleanup, keyboard/touch accessibility alternative, test. Count distinct user-visible behaviors, not trivial animation variants.
+
+A. POINTER AND CURSOR
+INT-001 Eyes follow cursor movement.
+INT-002 Character looks away when stared at too long.
+INT-003 Character blinks on cursor approach.
+INT-004 Text reacts to cursor proximity.
+INT-005 Decorative object hides from cursor.
+INT-006 Object follows cursor with spring motion.
+INT-007 Rapid pointer motion makes object dizzy.
+INT-008 Slow approach triggers shy reaction.
+INT-009 Repeated hover changes response.
+INT-010 Small object mimics cursor path.
+INT-011 Optional cursor trail in select scenes.
+INT-012 Object remembers last cursor location temporarily.
+INT-013 Dragging an object moves nearby objects.
+INT-014 Character occasionally tries catching cursor.
+INT-015 Repeated cursor circles trigger hidden response.
+
+B. CLICKS AND OBJECT INTERACTION
+INT-016 Button response evolves over repeated clicks.
+INT-017 Decorative object splits into smaller pieces.
+INT-018 Shape changes personality when clicked.
+INT-019 Clicking one object triggers another.
+INT-020 Harmless fake button protests being pressed.
+INT-021 Character suspicious of excessive clicks.
+INT-022 Object changes behavior after drag.
+INT-023 Element playfully refuses once then cooperates.
+INT-024 Clicking empty space can produce tiny surprise.
+INT-025 Secret revealed by action sequence.
+INT-026 Characters react to interactions with each other.
+INT-027 Multiple objects combine into chain reactions.
+INT-028 Temporary stickers on selected surfaces.
+INT-029 Reversible mini-incident rearranges environment.
+INT-030 Object can transform several times.
+
+C. SCROLL AND NAVIGATION
+INT-031 Headline reacts to scroll velocity.
+INT-032 Character accompanies user between sections.
+INT-033 Decorative response to scrolling without blocking native scroll.
+INT-034 Scrolling upward triggers reaction.
+INT-035 Revisiting an area changes greeting.
+INT-036 Environment shifts subtly with scroll depth.
+INT-037 Hidden mini-scene at a location.
+INT-038 Object reacts at end of page.
+INT-039 Playful expressive progress indicator.
+INT-040 Navigation transition responds to mood.
+
+D. KEYBOARD
+INT-041 Selected harmless keys trigger effects.
+INT-042 Secret key sequence reveals Easter egg.
+INT-043 Space makes a selected scene character jump.
+INT-044 Arrows animate selected object.
+INT-045 Discoverable simple rhythm interaction.
+INT-046 Key combination reveals hidden message.
+INT-047 Escape cancels nonessential effects and dismisses overlays.
+Never intercept normal keyboard input in forms or interfere with assistive technology.
+
+E. ENVIRONMENT
+INT-048 Background changes based on mood.
+INT-049 Objects react to nearby movement.
+INT-050 After Hours has alternate atmospheric ambience.
+INT-051 Character becomes sleepy after inactivity.
+INT-052 Website reacts to return from another tab.
+INT-053 Objects relax back to original positions.
+INT-054 World becomes subtly more playful with discoveries.
+INT-055 Reversible visual transformation of scene.
+INT-056 New small character enters scene.
+INT-057 Two characters independently interact.
+INT-058 Multiple objects react to rare event.
+INT-059 Short original humorous thought appears occasionally.
+INT-060 Character notices repeated visits to a room.
+
+F. PHYSICS-INSPIRED
+INT-061 Draggable objects have momentum.
+INT-062 Objects bounce at scene boundaries.
+INT-063 Pile of shapes responds to input.
+INT-064 Collisions have subtle visual feedback.
+INT-065 Stackable objects.
+INT-066 Unstable piles fall.
+INT-067 Gentle vs fast drag changes reactions.
+INT-068 Physics-based chain reactions.
+INT-069 Objects vary in weight/movement behavior.
+INT-070 Scene reset returns to stable state.
+
+G. PERSONALITY AND MOOD
+INT-071 Mood changes reaction timing.
+INT-072 Same action elicits mood-specific results.
+INT-073 Website reacts to being ignored.
+INT-074 Website reacts to excessive attention.
+INT-075 Characters occasionally disagree visually.
+INT-076 Shy character opens up with time.
+INT-077 Playful character sometimes initiates interaction.
+INT-078 Annoyed character eventually recovers.
+INT-079 Mood visible in environment, not just metrics.
+INT-080 Mood influences a different room.
+
+H. SECRETS
+INT-081 Hidden clickable object.
+INT-082 Secret character appearance.
+INT-083 Rare reaction for discoverable action combo.
+INT-084 Hidden typography variation.
+INT-085 Playful visual inside joke.
+INT-086 Secret-space interaction.
+INT-087 Clearly harmless fake error that self-resolves.
+INT-088 Character pretends to sleep.
+INT-089 Background prop briefly becomes main character.
+INT-090 Return visit triggers surprise.
+INT-091 Footer Easter egg.
+INT-092 Combine objects for scene transformation.
+INT-093 Short multicharacter visual gag.
+INT-094 Rare event changes environment temporarily.
+INT-095 Secret linked to earlier discovery.
+
+I. MEMORY
+INT-096 Locally recognize return visits.
+INT-097 Remember selected discoveries.
+INT-098 Locally generated playful nickname based on counts.
+INT-099 Favorite repeat action influences response.
+INT-100 Remember last explored room.
+INT-101 View local discoveries.
+INT-102 Forget Me / clear memory control.
+INT-103 Restore optional visual customizations.
+INT-104 Do not transmit behavioral history to analytics by default.
+INT-105 Persist only minimal continuity data.
+
+J. SHAREABILITY
+INT-106 Shareable scene snapshot.
+INT-107 Export original playful postcard image.
+INT-108 Reproducible scene seed.
+INT-109 Share original visual arrangement.
+INT-110 Copyable scene link without user accounts.
+
+============================================================
+6. INTERCONNECTED BEHAVIOR (NOT 110 RANDOM CLICK HANDLERS)
+============================================================
+
+Build an event-driven world. Example: repeated clicks on a character -> record event -> adjust stimulation/mischief -> derive mood -> update character response -> influence nearby props -> make a secret eligible -> optionally persist discovery. Same trigger can produce different results depending on context and cooldowns. Implement controlled variation, not incoherent randomness or an LLM call for every reaction.
+
+Priority order:
+1. Safety/accessibility and essential navigation.
+2. Direct response to user action.
+3. Current character actions.
+4. Contextual ambient reactions.
+5. Rare surprises.
+
+Use recent-reaction history and weighted selection to prevent repetition. Limit simultaneous visual effects, cancel ambient effects for high-priority input, and avoid distracting readers. No intrusive popups or repeated unrequested effects.
+
+============================================================
+7. TECHNICAL ARCHITECTURE
+============================================================
+
+Recommended stack:
+- React + Vite + TypeScript strict.
+- CSS Modules or disciplined Tailwind, aligned to art direction.
+- Motion for React OR GSAP as primary animation library, not a needless mix.
+- Original SVG for expressions and characters.
+- Canvas for dense particles only where justified.
+- Zustand if shared state complexity warrants it; otherwise light typed state.
+- Matter.js only in isolated scenes that genuinely need physics.
+- Vitest, React Testing Library, Playwright.
+- No mandatory backend, authentication, tracking, or complex 3D.
+
+Core modules:
+1. World State: room, character states, mood, object states, effects, discoveries.
+2. Typed Interaction/Event Bus.
+3. Interaction Registry: event -> eligible behaviors.
+4. Behavior Engine: context-sensitive rules.
+5. Personality Engine: bounded variables/mood transitions.
+6. Reaction Scheduler: timing, cancelation, priorities, cooldowns.
+7. Surprise Director: rare events and novelty.
+8. Memory Manager: versioned local persistence.
+9. Scene Manager: route/room transitions.
+10. Audio Manager: opt-in synthesized sound.
+11. Motion Controller: animation orchestration.
+12. Performance Controller: caps and background suspension.
+
+Representative event families:
+POINTER_MOVED, POINTER_ENTERED, POINTER_LEFT, OBJECT_CLICKED,
+OBJECT_DRAGGED, SCROLL_CHANGED, KEY_SEQUENCE_DETECTED, USER_IDLE,
+USER_ACTIVE, TAB_VISIBILITY_CHANGED, ROOM_ENTERED, ROOM_EXITED,
+MOOD_CHANGED, SECRET_DISCOVERED, CHARACTER_INTERACTED, MEMORY_RESTORED,
+WORLD_RESET.
+
+Use TypeScript discriminated unions with strongly typed payloads. Do not overuse `unknown` or stringly typed event handlers. A representative, intentionally incomplete starter type is:
+
+type WorldEvent = {
+  id: string;
+  type: string;
+  timestamp: number;
+  sourceId?: string;
+  payload?: unknown;
+};
+
+Replace this with discriminated unions in the real implementation.
+
+Behavior selection: explicit predicates, bounded mood scores, cool-downs, priorities, weighted seeded RNG, recent-reaction suppression, and room context. Reactions must declare cleanup and cancellation behavior.
+
+High-frequency pointer/physics state must NOT cause global React re-renders on every frame. Use refs, requestAnimationFrame, imperative animation as needed. Cancel timers/listeners on unmount, scene changes and reset.
+
+============================================================
+8. RESPONSIVE, ACCESSIBILITY, PRIVACY, PERFORMANCE
+============================================================
+
+Desktop is visually richest, but tablet/mobile must be deliberately adapted. Touch alternatives for hover, gestures appropriate for mobile, controlled particle density, readable typography and obvious navigation. Don't merely shrink desktop layouts. Essential discoveries and functionality require keyboard equivalents; decorative secrets can be optional.
+
+- Semantic controls, clear focus visibility, keyboard escape/close, no keyboard traps.
+- Respect prefers-reduced-motion and provide motion intensity controls.
+- Avoid flashing/strobing. No autoplay sound; user enables sound explicitly.
+- Stop or suspend loops while page hidden; reduce idle animations while reading.
+- Prefer lightweight SVG/DOM; heavy scenes lazy-loaded.
+- Bound physics bodies, particles, animations, intervals, and memory.
+- Measure actual performance on representative devices rather than claiming an arbitrary FPS.
+- No browser-history/camera/microphone surveillance; no claiming real awareness.
+- localStorage for tiny local stats/settings; IndexedDB only if needed.
+- Version and validate stored data; support storage errors/corruption.
+- Provide different Reset Session, Reset World, and Clear Local Memory semantics.
+- Shareable data must not leak local private history.
+
+============================================================
+9. TESTING AND ACCEPTANCE
+============================================================
+
+Behavior tests: event typing, deterministic state transitions, reaction priorities, cool-downs, weighted selection boundaries, recent-reaction suppression, cancellation, reset.
+Personality tests: mood rules, recovery, context, inter-room continuity.
+Memory tests: restore, schema migration, corruption, clear, storage failure.
+Interaction tests: click/drag/keyboard, discovery registry, room transitions, cleanup.
+Accessibility: semantic navigation, focus, reduced motion, optional audio, nonpointer alternatives.
+Performance: listener/timer cleanup, capped particle generation, bounded memory and scene transitions.
+UX: first 30-second/2-minute/5-minute observation with users, discoverability, no dead ends, no forced instructions.
+
+Do not snapshot-test each animation frame. Test deterministic core behavior and stable-state visual regression. Run and report actual lint, typecheck, unit and E2E tests before release. No fake UI behaviors or placeholders marked finished.
+
+============================================================
+10. PHASED DEVELOPMENT PLAN WITH COMMITS
+============================================================
+
+PHASE 0 — RESEARCH AND CREATIVE FOUNDATION
+Deliverables: PRODUCT_VISION.md, DESIGN_DIRECTION.md, INTERACTION_CATALOG.md, ARCHITECTURE.md, ROADMAP.md, visual reference notes.
+Commits:
+- docs: define product vision and creative direction
+- docs: establish interaction system and architecture
+Gate: original visual direction, coherent room map, architecture, prioritized backlog and initial prototype plan.
+
+PHASE 1 — PROJECT FOUNDATION
+Build: Vite/React/TS strict, lint/format, router, tokens, shell, test tools, error boundaries.
+Commits:
+- chore: initialize application and tooling
+- feat: establish design system and application shell
+- test: configure automated testing foundation
+Gate: running app, successful checks, responsive base shell.
+
+PHASE 2 — LIVING ROOM VISUAL PROTOTYPE
+Build: art-directed scene, original characters/SVGs, typography, first pointer reactions, scene props, responsive motion settings.
+Commits:
+- feat: build living room scene and visual identity
+- feat: add primary character expressions
+- feat: implement first interactive scene objects
+- style: refine scene motion and responsive layout
+Gate: polished original visual design, delightful first interactions, usable on mobile, not SaaS-looking.
+
+PHASE 3 — CORE INTERACTION ENGINE
+Build: typed event bus, registry, world state, behavior rules, scheduler, cancellation, priorities, cooldowns, seedable RNG.
+Commits:
+- feat: implement typed world event system
+- feat: add behavior registry and reaction scheduler
+- feat: support deterministic reactions and cooldowns
+- test: cover interaction engine and scheduling
+Gate: repeatable unit-tested reactions, no leaks.
+
+PHASE 4 — PERSONALITY ENGINE
+Build: variables, mood rules/transitions, expressions, contextual timing and character-specific reactions.
+Commits:
+- feat: implement personality and mood engine
+- feat: connect moods to character expressions
+- feat: enable contextual character reactions
+- test: verify mood transitions and behavior rules
+Gate: moods change actual behavior and do not contradict one another constantly.
+
+PHASE 5 — LIVING ROOM INTERACTION EXPANSION
+Build: pointer/hover/click variations, transformations, drag, contextual scroll, simple chains and first secrets. Target 25 verified distinct user-visible behaviors.
+Commits:
+- feat: expand pointer and proximity reactions
+- feat: add object interactions and transformations
+- feat: implement contextual scroll responses
+- feat: add first interconnected surprises
+- test: cover living room interaction scenarios
+Gate: exciting first minute, distinct discoverable interactions, no visual overload.
+
+PHASE 6 — PLAYGROUND
+Build: dragging, momentum, bouncing, stacking, simple collision/chain reactions, scene reset, bounded effects.
+Commits:
+- feat: create playground environment
+- feat: implement draggable physics-inspired objects
+- feat: support collisions and chain reactions
+- perf: optimize interactive object updates
+- test: validate playground state and reset
+Gate: reactive, stable, resettable, touch-friendly.
+
+PHASE 7 — MOOD ROOM
+Build: mood-based atmosphere and interactions, visual/character variations, cross-room continuity, surprises.
+Commits:
+- feat: create mood room and reactive environment
+- feat: connect mood-driven scene behavior
+- feat: add contextual mood interactions
+- test: verify cross-room mood continuity
+Gate: unique spatial design and meaningful mood variation.
+
+PHASE 8 — SECRETS AND DISCOVERY
+Build: secret registry, triggers, Secret Space, rare event director, cross-room secrets, discovery persistence.
+Commits:
+- feat: implement discovery and secret registry
+- feat: create secret space
+- feat: add cross-room secrets
+- feat: introduce rare events and surprise director
+- test: verify discovery and rare event rules
+Gate: discoverable secrets, no mandatory gates, safe cooldowns.
+
+PHASE 9 — MEMORY AND RETURN VISITS
+Build: versioned local persistence, visit recognition, returning reactions, Memory Room, settings/privacy/reset.
+Commits:
+- feat: implement local memory persistence
+- feat: add returning visitor behaviors
+- feat: create memory room
+- feat: add privacy and memory reset controls
+- test: validate persistence and data recovery
+Gate: visible continuity without sensitive tracking, reliable clear-memory.
+
+PHASE 10 — AFTER HOURS
+Build: alternative atmosphere, expressions, interactions, distinct ambience, manual switch, continuity.
+Commits:
+- feat: create after hours environment
+- feat: implement alternate environmental reactions
+- feat: add after hours surprises
+- test: validate environmental transitions
+Gate: independently engaging atmosphere; no clock-based lockout.
+
+PHASE 11 — ADVANCED COMBINATIONS
+Build: multi-object interaction chains, cross-room events, varied reaction libraries, new secrets/character behaviors. Reach 70+ meaningful verified distinct behaviors if quality allows; remaining catalog stays backlog.
+Commits:
+- feat: implement advanced interaction combinations
+- feat: expand character behavior library
+- feat: add cross-scene event chains
+- feat: improve surprise variety and repetition control
+- test: cover combined world interactions
+Gate: cohesive surprises, varied behavior, no filler or random incoherence.
+
+PHASE 12 — SOUND, MOTION AND POLISH
+Build: original optional audio, typography animation, scene transitions, expressions, particles, accessibility/reduced motion, responsive refinement.
+Commits:
+- feat: add optional reactive audio
+- style: refine expressive motion across scenes
+- style: improve typography and visual consistency
+- perf: optimize animation execution
+- fix: resolve responsive and accessibility issues
+Gate: premium, restrained motion; opt-in audio; accessible alternatives.
+
+PHASE 13 — SHAREABILITY
+Build: reproducible seeds, share links, exported image postcards/snapshots, robust serialization and privacy checks.
+Commits:
+- feat: support reproducible shared scenes
+- feat: add snapshot and postcard export
+- test: validate shareable scene serialization
+Gate: shared states reproduce as promised, no local memory leak.
+
+PHASE 14 — QA AND USER TESTING
+Build: unit/integration/E2E, visual stability checks, accessibility audit, perf profile, mobile/browser review, first-minute and five-minute UX testing, bug fixes.
+Commits:
+- test: expand behavior and interaction coverage
+- test: add end-to-end experience flows
+- perf: optimize scenes and lazy loading
+- fix: resolve accessibility and cross-browser defects
+- polish: improve discoverability and first-minute experience
+Gate: no critical bugs, measured performance, all rooms accessible, no leaks.
+
+PHASE 15 — PUBLIC PORTFOLIO RELEASE
+Build: README, architecture notes, screenshots/demo GIF/video, live demo, setup/testing instructions, accessibility/performance/limitations docs, deployment.
+Commits:
+- docs: document architecture and interaction systems
+- docs: prepare portfolio presentation and README
+- chore: configure production deployment
+- chore: finalize release candidate
+Gate: accurate README, good live experience, clean history, checks verified, no major fake/placeholder behavior.
+
+============================================================
+11. RELEASE STRATEGY
+============================================================
+
+ALPHA — Living Website (Phases 0–5)
+Living Room, coherent visual identity, engine, personality, 25 verified behaviors. Must already be fun without other rooms.
+
+BETA — Explorable World (Phases 6–10)
+Multiple rooms, secrets, local memory, richer characters and interactions, approximately 50 distinct verified behaviors. Exploration is rewarding beyond first minutes.
+
+V1 — World With Personality (Phases 11–15)
+Six polished environments, connected reaction systems, sound/motion polish, shareability, tests and accessibility. Target 70+ high-quality, verified behaviors, not filler. Full 110-item catalog is a backlog, not an obligation to add mediocre effects.
+
+============================================================
+12. REPOSITORY DOCUMENTATION AND QUALITY BAR
+============================================================
+
+Keep these documents current:
+README.md
+PRODUCT_VISION.md
+DESIGN_DIRECTION.md
+ARCHITECTURE.md
+INTERACTION_CATALOG.md
+ROADMAP.md
+DECISIONS.md
+TESTING.md
+
+Track interaction ID, description, status (planned/in_progress/implemented/verified/deferred), code locations, related events, dependencies and tests. Verify functionality before marking verified.
+
+Code quality:
+- strict TS, reusable components/hooks, no monolithic App.tsx.
+- clear behavior/presentation separation and typed events.
+- no uncontrolled timers, event loops, physics or memory growth.
+- appropriate error handling and loading boundaries.
+- no unnecessary dependencies or speculative architecture.
+- no dead controls, misleading functionality or unfinished placeholder scenes passed as complete.
+- avoid secretly collecting data or claiming sentience.
+
+When deciding whether to implement a behavior, ask: Is it understandable? satisfying? in-character? different from what exists? able to create a consequence? accessible and stable? worth its visual complexity?
+
+============================================================
+13. FIRST INSTRUCTION TO THE CODING AGENT
+============================================================
+
+START WITH PHASE 0 ONLY. Inspect repository contents. Produce the product vision, original art-direction proposal, initial design system, world/room map, character personality definitions, event/behavior architecture, prioritized interaction backlog, Phase 1 implementation plan and risks. Do not generate the entire website in one go.
+
+After Phase 0, proceed with small, scoped, validated commits as specified. Keep design quality and enjoyment higher priority than raw interaction count. Make independent reasonable decisions when the brief is sufficient; document assumptions instead of repeatedly asking unnecessary questions.
+
+FINAL GOAL
+An original, memorable, technically credible, beautifully art-directed interactive website that seems to have a mind of its own—and that a visitor genuinely wants to explore.
