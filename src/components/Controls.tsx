@@ -1,5 +1,6 @@
 import { useWorld } from '../app/worldInstance';
 import { useSettings } from '../state/settings';
+import { ShareSheet } from './ShareSheet';
 import styles from './Controls.module.css';
 
 const isLate = () => {
@@ -60,6 +61,7 @@ export function Controls() {
           <path d="M15 4 a 8 8 0 1 0 5 12 a 6 6 0 1 1 -5 -12 z" />
         </svg>
       </button>
+      <ShareSheet />
     </div>
   );
 }
