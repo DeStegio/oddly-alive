@@ -358,5 +358,5 @@ stay complete (visually-hidden controls), but pointer play is physical.
 | Step | Status | Notes |
 | --- | --- | --- |
 | R1 | done | Garden rewritten by hand: `gardenSim.ts` (pure: seeds, drops, crops; soil / lawn / house / fence landings), seed throwing from the tin (Inch eats misses; over the fence to Bip), watering can stream (only soil drops water; stale hand speed decays), pull-with-tension harvest then throw (house → vase/Playground, fence → Bip), plants lean, sunflowers watch the pointer, snapdragons snap. Keyboard tools hidden until focused. New discoveries: Long Shot, A Bouquet for Bip. |
-| R2 | todo | |
+| R2 | done | Attic rewritten by hand: `pile.ts` (Matter.js stage with Marguerite on the left; boxes burst on a hard landing of their own or a good shake; settle period; no chain bursts), contents spill as draggable bodies (hats, shoe, dust puff, the letter from the last box), hats go on Marguerite when dropped on her head or thrown there (“Nice Shot”), `Gramophone.tsx` + `spin.ts` (record plays only while turned by hand; speed = tempo, backwards = backwards (“Scratch”); winds down), diary pages drag. Keyboard path: open next box, put hat on, give the record a spin. |
 | R3 | todo | |

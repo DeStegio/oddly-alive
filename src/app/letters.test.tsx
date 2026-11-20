@@ -62,7 +62,7 @@ describe('Great-Aunt Pim’s letters', () => {
 
   it('the attic’s last box holds one', () => {
     wrap(<Attic />);
-    for (const box of screen.getAllByRole('button', { name: /box|suitcase|crate/i })) fireEvent.click(box);
+    for (let i = 0; i < 6; i++) fireEvent.click(screen.getByRole('button', { name: 'Open the next box' }));
     expect(useKeepsakes.getState().letters).toContain('attic');
     expect(screen.getByText(/under everything, an envelope/)).toBeInTheDocument();
   });

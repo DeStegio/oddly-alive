@@ -379,3 +379,216 @@
 [data-motion='reduced'] .letterPage {
   rotate: none;
 }
+
+/* ===================== Phase 2.1: the pile, by hand ===================== */
+.keys,
+.keyOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+.keys:focus-within,
+.keyOnly:focus {
+  position: static;
+  width: auto;
+  height: auto;
+  clip: auto;
+  margin-top: var(--sp-3);
+}
+.keys:focus-within {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.keys button,
+.keyOnly {
+  font: inherit;
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  padding: 4px 10px;
+  border: 2px solid var(--ink);
+  border-radius: var(--radius-pill);
+  background: var(--paper);
+  color: var(--ink);
+}
+
+/* the stage: a floor of planks under the roof */
+.stage {
+  position: relative;
+  margin-top: var(--sp-5);
+  width: 100%;
+  border-bottom: 4px solid #8a5a3c;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+  background: linear-gradient(to top, #5a4232 0 16px, transparent 16px);
+}
+.stageWorld {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-origin: 0 0;
+}
+.margueriteOnStage {
+  position: absolute;
+  left: 35px;
+  top: 125px;
+  width: 170px;
+}
+.margueriteOnStage .mHit {
+  width: 100%;
+}
+.margueriteOnStage[data-tempo='true'] svg {
+  transform-origin: 50% 100%;
+  animation: sway calc(1.4s / max(0.4, var(--sway, 1))) var(--ease-in-out) infinite alternate;
+}
+@keyframes sway {
+  from {
+    transform: rotate(-3deg);
+  }
+  to {
+    transform: rotate(3deg);
+  }
+}
+.thing {
+  position: absolute;
+  left: 0;
+  top: 0;
+  cursor: grab;
+  will-change: transform;
+}
+.thing:active {
+  cursor: grabbing;
+}
+.thingSvg,
+.hatSvg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.boxLabel {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 18px;
+  fill: #24232b;
+  opacity: 0.75;
+}
+.dustPuff {
+  position: absolute;
+  width: 160px;
+  height: 160px;
+  margin: -80px 0 0 -80px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(220, 205, 185, 0.85), rgba(220, 205, 185, 0) 65%);
+  animation: puff 1.4s var(--ease-out) forwards;
+  pointer-events: none;
+}
+@keyframes puff {
+  from {
+    transform: scale(0.3);
+    opacity: 1;
+  }
+  to {
+    transform: scale(1.6);
+    opacity: 0;
+  }
+}
+
+/* trunk, diary and gramophone along the bottom */
+.lower {
+  margin-top: var(--sp-6);
+  display: grid;
+  grid-template-columns: minmax(240px, 1fr) minmax(280px, 1.2fr) minmax(260px, 1fr);
+  gap: var(--sp-5);
+  align-items: start;
+}
+.gramStage {
+  position: relative;
+  height: 150px;
+}
+.gramBody {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 200px;
+  height: auto;
+}
+.record {
+  position: absolute;
+  left: 18px;
+  bottom: 50px;
+  width: 128px;
+  height: 128px;
+  border-radius: 50%;
+  border: 2.5px solid var(--char-ink);
+  background: repeating-radial-gradient(circle, #24232b 0 3px, #33313d 3px 5px);
+  transform-origin: 50% 50%;
+  cursor: grab;
+  touch-action: none;
+  /* seen a little from above */
+  scale: 1 0.42;
+}
+.record:active {
+  cursor: grabbing;
+}
+.recordLabel {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 40px;
+  height: 40px;
+  margin: -20px 0 0 -20px;
+  border-radius: 50%;
+  background: var(--coral);
+  border: 2px solid var(--char-ink);
+}
+.recordLabel::after {
+  content: '';
+  position: absolute;
+  left: 6px;
+  top: 16px;
+  width: 26px;
+  height: 4px;
+  background: #f3ede2;
+  border-radius: 2px;
+}
+.floatNote {
+  position: absolute;
+  left: 140px;
+  top: 30px;
+  font-size: 22px;
+  color: var(--yellow);
+  opacity: 0;
+  pointer-events: none;
+}
+.noteUp {
+  animation: note-up 1.4s var(--ease-out);
+}
+@keyframes note-up {
+  0% {
+    opacity: 1;
+    transform: translate(0, 10px);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(26px, -50px) rotate(18deg);
+  }
+}
+
+@media (max-width: 1080px) {
+  .lower {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+@media (max-width: 720px) {
+  .lower {
+    grid-template-columns: 1fr;
+  }
+}
+[data-motion='reduced'] .margueriteOnStage svg {
+  animation: none !important;
+}
