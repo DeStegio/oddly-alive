@@ -1,3 +1,4 @@
+import { LADDER_LINES } from '../content/attic';
 import { LINES } from '../content/lines';
 import { defineBehavior } from '../engine/behaviorEngine';
 import { Priority } from '../engine/scheduler';
@@ -745,6 +746,19 @@ export const livingBehaviors = [
             2400,
           ),
         );
+      }),
+  }),
+  // ---- Phase 2: the attic ladder comes down
+  defineBehavior({
+    id: 'living.cord',
+    on: ['OBJECT_STATE_CHANGED'],
+    rooms: ['living'],
+    priority: Priority.DIRECT,
+    when: (c) => c.event.payload.target === 'cord' && c.event.payload.key === 'pulled',
+    react: (c) =>
+      act('pim', 2600, () => {
+        face(c, 'pim', 'surprised', 1600);
+        say(c, 'pim', LADDER_LINES, 2600);
       }),
   }),
 ];

@@ -162,6 +162,15 @@ export class AudioManager {
         return [880, 988, 880, 1046].forEach((f, i) => this.tone(f, t + i * 0.06, 0.08, { wave: 'triangle', gain: 0.2 }));
       case 'obj-letter':
         return this.tone(523, t, 0.6, { gain: 0.2, slideTo: 659 });
+      case 'waltz': {
+        // the attic gramophone: a short, original tune in three-four
+        const beat = 0.42;
+        const melody = [523, 659, 784, 659, 784, 1046, 988, 784, 659, 587, 698, 880, 784, 659, 523, 587, 494, 523];
+        const bass = [131, 131, 147, 147, 131, 98];
+        melody.forEach((f, i) => this.tone(f, t + i * beat, beat * 0.95, { wave: 'triangle', gain: 0.16 }));
+        bass.forEach((f, i) => this.tone(f, t + i * beat * 3, beat * 0.9, { gain: 0.22 }));
+        return;
+      }
       default:
         return;
     }

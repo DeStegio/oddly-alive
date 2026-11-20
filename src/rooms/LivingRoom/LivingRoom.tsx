@@ -20,6 +20,7 @@ import { Link } from 'react-router-dom';
 import { ROOMS } from '../../app/rooms';
 import { Basement } from './Basement';
 import { HouseWindow } from './HouseWindow';
+import { PullCord } from './PullCord';
 import { DoNotPress, Door, Picture, Rug, Sofa } from './Scenery';
 import styles from './LivingRoom.module.css';
 
@@ -138,6 +139,7 @@ export default function LivingRoom() {
         data-rearranged={living.rearranged}
         aria-labelledby="living-title"
       >
+        <PullCord />
         <div className={styles.intro}>
           <LivingTitle
             id="living-title"
