@@ -1,5 +1,6 @@
 import { act, render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
+import { useKeepsakes } from '../state/keepsakes';
 import { setWorldState } from '../state/worldStore';
 import { ErrorBoundary } from './ErrorBoundary';
 import { Shell } from './Shell';
@@ -9,7 +10,7 @@ function Boom(): never {
 }
 
 describe('Shell', () => {
-  it('renders navigation for all six rooms and a skip link', () => {
+  it('renders navigation for the known rooms and a skip link', () => {
     render(
       <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <Shell>
@@ -18,7 +19,12 @@ describe('Shell', () => {
       </MemoryRouter>,
     );
     const nav = screen.getByRole('navigation', { name: 'Rooms' });
-    expect(nav.querySelectorAll('a')).toHaveLength(6);
+    // eight rooms; the attic stays unlisted until its ladder comes down
+    expect(nav.querySelectorAll('a')).toHaveLength(7);
+    expect(nav.querySelector('a[data-room="attic"]')).toBeNull();
+    act(() => useKeepsakes.getState().unlockAttic());
+    expect(nav.querySelectorAll('a')).toHaveLength(8);
+    act(() => useKeepsakes.getState().reset());
     expect(screen.getByText('Skip to the room')).toHaveAttribute('href', '#scene');
     expect(screen.getByText('scene')).toBeInTheDocument();
   });

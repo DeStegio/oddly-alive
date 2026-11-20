@@ -1,0 +1,12 @@
+.room {
+  position: relative;
+  min-height: 100vh;
+  min-height: 100svh;
+  padding: calc(var(--nav-h) + 2vh) var(--gutter) var(--sp-7);
+}
+.blurb {
+  margin-top: var(--sp-4);
+  max-width: 34ch;
+  color: var(--ink-soft);
+  font-size: var(--fs-lg);
+}

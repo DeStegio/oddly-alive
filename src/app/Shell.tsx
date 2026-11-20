@@ -5,6 +5,7 @@ import { DiscoveryToast } from '../components/DiscoveryToast';
 import { NimbusVisitor } from '../components/NimbusVisitor';
 import { Nav } from '../components/Nav';
 import { RareLayer } from '../components/RareLayer';
+import { useKeepsakes } from '../state/keepsakes';
 import { useWorldStore } from '../state/worldStore';
 import { ErrorBoundary } from './ErrorBoundary';
 import { ROOMS, roomFromPath, type RoomId } from './rooms';
@@ -39,14 +40,17 @@ export function Shell({ children, controls }: { children: ReactNode; controls?: 
   const room = roomFromPath(location.pathname);
   const mood = useWorldStore((s) => s.mood);
   // the Secret Space keeps a mysterious label until you've been there or found the keyhole
-  const secretKnown = useWorldStore((s) => Boolean(s.roomVisits.secret) || 'keyhole' in s.discoveries);
+  const secretKnown = useWorldStore((s) => Boolean(s.roomVisits.secret || s.pastRoomVisits.secret) || 'keyhole' in s.discoveries);
   const hidden = useMemo<ReadonlySet<RoomId>>(() => (secretKnown ? new Set() : new Set(['secret'])), [secretKnown]);
+  // the Attic isn't listed until its ladder comes down (its URL always works)
+  const atticKnown = useKeepsakes((k) => k.attic.unlocked) || room === 'attic';
+  const unlisted = useMemo<ReadonlySet<RoomId>>(() => (atticKnown ? new Set() : new Set(['attic'])), [atticKnown]);
   return (
     <>
       <a className="skip-link" href="#scene">
         Skip to the room
       </a>
-      <Nav hiddenLabels={hidden} controls={controls} dark={room === 'secret' || room === 'after-hours'} />
+      <Nav hiddenLabels={hidden} hiddenRooms={unlisted} controls={controls} dark={room === 'secret' || room === 'after-hours'} />
       <main id="scene" className={styles.main} data-room={room} tabIndex={-1}>
         <ErrorBoundary resetKey={room} label={ROOMS[room].label}>
           <Suspense fallback={<SceneFallback />}>

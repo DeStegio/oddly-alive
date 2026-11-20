@@ -55,7 +55,7 @@ test('living room: frame pacing vs. a blank page under the same input; no long t
 test('visiting every room repeatedly does not grow the DOM', async ({ page, isMobile }) => {
   test.skip(isMobile, 'desktop-only');
   await page.goto('./');
-  const rooms = ['playground', 'mood', 'secret', 'memory', 'after-hours', ''];
+  const rooms = ['playground', 'garden', 'mood', 'secret', 'memory', 'after-hours', 'attic', ''];
   const counts: number[] = [];
   for (let round = 0; round < 3; round++) {
     for (const r of rooms) {

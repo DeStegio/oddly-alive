@@ -1,7 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import { SECRETS } from '../src/content/secrets';
 
-const ROOMS = ['', 'playground', 'mood', 'secret', 'memory', 'after-hours'];
+const ROOMS = ['', 'playground', 'garden', 'mood', 'secret', 'memory', 'after-hours', 'attic'];
 
 function collectErrors(page: Page) {
   const errors: string[] = [];

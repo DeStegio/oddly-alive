@@ -93,7 +93,8 @@
   align-items: center;
 }
 
-@media (max-width: 1080px) {
+/* eight rooms: short labels sooner */
+@media (max-width: 1280px) {
   .long {
     display: none;
   }
@@ -118,6 +119,11 @@
     border-top: var(--stroke) solid var(--ink);
     overflow-x: auto;
     scrollbar-width: none;
+    scroll-snap-type: x proximity;
+    scroll-padding: 0 10px;
+  }
+  .rooms li {
+    scroll-snap-align: start;
   }
   .rooms ul {
     justify-content: space-between;

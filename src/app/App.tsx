@@ -11,6 +11,8 @@ const load = {
   secret: () => import('../rooms/SecretSpace/SecretSpace'),
   memory: () => import('../rooms/MemoryRoom/MemoryRoom'),
   after: () => import('../rooms/AfterHours/AfterHours'),
+  garden: () => import('../rooms/Garden/Garden'),
+  attic: () => import('../rooms/Attic/Attic'),
 };
 const LivingRoom = lazy(load.living);
 const Playground = lazy(load.playground);
@@ -18,6 +20,8 @@ const MoodRoom = lazy(load.mood);
 const SecretSpace = lazy(load.secret);
 const MemoryRoom = lazy(load.memory);
 const AfterHours = lazy(load.after);
+const Garden = lazy(load.garden);
+const Attic = lazy(load.attic);
 
 /** Once the first room is up and the page is idle, quietly fetch the others (physics last). */
 function usePrefetchRooms() {
@@ -32,6 +36,8 @@ function usePrefetchRooms() {
       void load.secret();
       void load.memory();
       void load.after();
+      void load.garden();
+      void load.attic();
     }, 2500);
     const b = idle(() => void load.playground(), 6000);
     return () => {
@@ -53,6 +59,8 @@ export function AppRoutes() {
         <Route path="/secret" element={<SecretSpace />} />
         <Route path="/memory" element={<MemoryRoom />} />
         <Route path="/after-hours" element={<AfterHours />} />
+        <Route path="/garden" element={<Garden />} />
+        <Route path="/attic" element={<Attic />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       </Shell>
