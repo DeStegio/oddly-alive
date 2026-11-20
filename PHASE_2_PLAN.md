@@ -303,7 +303,7 @@ cross-room, Marguerite's 4th hat, Tourist/Homebody discoveries.
 | Step | Status | Notes |
 | --- | --- | --- |
 | 0 | done | Refresh fix, cursor clarity, Field Notes, Bip volleyball, rally discoveries, this plan. |
-| 1 | todo | |
+| 1 | done | VOICE.md (rules, character sheet, before/after) + copy lint test (banned formulas/words, bubble length, em-dash budget, duplicates). Fixed the 3 existing violations. |
 | 2 | todo | |
 | 3 | todo | |
 | 4 | todo | |
