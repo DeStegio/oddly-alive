@@ -686,7 +686,7 @@ export default function Playground() {
       <header className={styles.head}>
         <LivingTitle id="pg-title" lines={['Play', 'ground']} label="Playground" size="room" />
         <p className={styles.blurb}>
-          Things fall over here on purpose. Drag, throw, stack. Tap empty floor to poke the pile. Throw really hard to the right and Bip next door will volley it back.
+          Put things down. They won’t stay there. Drag, throw, stack, poke the floor, and throw hard over the fence: Bip next door hits everything back.
         </p>
       </header>
 

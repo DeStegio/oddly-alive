@@ -33,7 +33,7 @@ export const ROOMS: Record<RoomId, RoomMeta> = {
     path: '/playground',
     label: 'Playground',
     short: 'Play',
-    blurb: 'Things fall over here on purpose.',
+    blurb: 'Put things down. They won’t stay there.',
   },
   mood: {
     id: 'mood',
