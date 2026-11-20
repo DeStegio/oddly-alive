@@ -182,7 +182,7 @@ test('navigation always works, even mid-reaction', async ({ page }) => {
   await expect(page.locator('main#scene')).toHaveAttribute('data-room', 'memory');
 });
 
-test('garden by hand: pull a ripe sunflower up and throw it to the house', async ({ page }) => {
+test('garden: draw to plant, swipe to pick, and you are the sun', async ({ page }) => {
   await page.addInitScript(() => {
     if (sessionStorage.getItem('seeded-garden')) return;
     sessionStorage.setItem('seeded-garden', '1');
@@ -198,20 +198,39 @@ test('garden by hand: pull a ripe sunflower up and throw it to the house', async
     );
   });
   await page.goto('./#/garden');
-  const plot = page.getByRole('button', { name: /^Plot 2: sunflower, in bloom/ });
-  await plot.evaluate((el) => el.scrollIntoView({ block: 'center' }));
+  const empty = page.getByRole('button', { name: 'Plot 1: empty' });
+  await empty.evaluate((el) => el.scrollIntoView({ block: 'center' }));
   await page.waitForTimeout(300);
-  const b = (await plot.boundingBox())!;
-  await page.mouse.move(b.x + b.width / 2, b.y + b.height * 0.4);
+
+  // a line drawn upwards in the soil is a sunflower
+  const e = (await empty.boundingBox())!;
+  await page.mouse.move(e.x + e.width / 2, e.y + e.height * 0.9);
   await page.mouse.down();
-  for (let i = 1; i <= 5; i++) await page.mouse.move(b.x + b.width / 2, b.y + b.height * 0.4 - i * 20);
-  await expect(page.getByRole('button', { name: 'Plot 2: empty' })).toBeVisible();
-  // a hard throw left, with margin for a busy machine
-  for (let i = 1; i <= 4; i++) await page.mouse.move(b.x - i * 260, b.y - 60 - i * 30);
+  for (let i = 1; i <= 10; i++) await page.mouse.move(e.x + e.width / 2 + (i % 2), e.y + e.height * 0.9 - i * 9);
   await page.mouse.up();
+  await expect(page.getByRole('button', { name: /^Plot 1: sunflower/ })).toBeVisible();
+
+  // a swipe across the ripe one picks it, and it goes to the vase
+  const ripe = (await page.getByRole('button', { name: /^Plot 2: sunflower, in bloom/ }).boundingBox())!;
+  const y = ripe.y + ripe.height * 0.5;
+  await page.mouse.move(ripe.x - 10, y);
+  await page.mouse.down();
+  for (let i = 1; i <= 8; i++) await page.mouse.move(ripe.x - 10 + i * ((ripe.width + 20) / 8), y + (i % 2));
+  await page.mouse.up();
+  await expect(page.getByRole('button', { name: 'Plot 2: empty' })).toBeVisible();
   await expect
     .poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('oddly-alive:memory') || '{}').world?.garden?.vase ?? []), { timeout: 6000 })
     .toContain('sunflower');
+
+  // the pointer is the sun: rest it behind the fence and night comes; lift it and it's day
+  const room = page.getByRole('region', { name: 'Garden' });
+  const fence = (await page.locator('[class*="fence"]').first().boundingBox())!;
+  await page.mouse.move(fence.x + fence.width * 0.5, fence.y + fence.height * 0.7, { steps: 4 });
+  await page.waitForTimeout(500);
+  await page.mouse.move(fence.x + fence.width * 0.52, fence.y + fence.height * 0.75);
+  await expect(room).toHaveAttribute('data-phase', 'night', { timeout: 4000 });
+  await page.mouse.move(fence.x + fence.width * 0.5, fence.y - 120, { steps: 4 });
+  await expect(room).toHaveAttribute('data-phase', 'day', { timeout: 4000 });
 });
 
 test('attic by hand: shake a box until it bursts open', async ({ page }) => {
