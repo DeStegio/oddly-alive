@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { findLetter } from '../../app/letters';
 import { Link } from 'react-router-dom';
 import { clearMemory, composeMemory, getMemoryManager, resetSession, resetWorld, setMemoryEnabled } from '../../app/memorySync';
 import { ROOMS } from '../../app/rooms';
@@ -64,6 +65,11 @@ export default function MemoryRoom() {
   const [confirm, setConfirm] = useState(false);
   const [showRaw, setShowRaw] = useState(false);
   const [notice, setNotice] = useState('');
+  // a letter comes by post on the third visit
+  const visits = s.visits;
+  useEffect(() => {
+    if (visits >= 3) findLetter(world, 'memory');
+  }, [visits, world]);
 
   const lifetime = useMemo(() => mergeCounts(s.pastCounts, Object.fromEntries(Object.entries(s.counts).filter(([k]) => !k.startsWith('hover:')))), [s.pastCounts, s.counts]);
   const favorites = Object.entries(lifetime)

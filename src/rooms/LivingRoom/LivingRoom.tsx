@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { allLettersFound, findLetter } from '../../app/letters';
+import { useKeepsakes } from '../../state/keepsakes';
 import { sceneVariant } from '../../app/share';
 import { useWorld } from '../../app/worldInstance';
 import { Clock } from '../../characters/Clock';
@@ -36,6 +38,8 @@ const MAX_STICKERS = 6;
 const MAX_POOFS = 4;
 
 export default function LivingRoom() {
+  // after all of her letters, Great-Aunt Pim smiles for good
+  const allLetters = useKeepsakes((k) => allLettersFound(k.letters));
   const world = useWorld();
   const living = useObjects((s) => s.living);
   const setLiving = useObjects((s) => s.setLiving);
@@ -178,13 +182,15 @@ export default function LivingRoom() {
             <Picture
               tilt={living.pictureTilt}
               revealed={living.keyholeRevealed}
-              face={living.pictureNudges}
+              face={allLetters ? 1 : living.pictureNudges}
               sky={variant.pictureSky}
               rootRef={picture.rootRef}
               thought={picture.thought}
               onActivate={() => {
                 setLiving((s) => ({ pictureNudges: s.pictureNudges + 1, pictureTilt: s.pictureTilt > 0 ? -7 : 8 }));
                 world.emit('OBJECT_CLICKED', { target: 'picture', repeat: living.pictureNudges + 1, via: 'pointer' });
+                // once the keyhole is known, there's something else behind the frame
+                if (living.keyholeRevealed) findLetter(world, 'living');
               }}
             />
           </div>

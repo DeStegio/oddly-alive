@@ -1,4 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
+import { allLettersFound } from '../../app/letters';
+import { useKeepsakes } from '../../state/keepsakes';
+import { RooftopParty } from './RooftopParty';
+import { findLetter } from '../../app/letters';
 import { useWorld } from '../../app/worldInstance';
 import { Pim } from '../../characters/Pim';
 import { ThoughtBubble } from '../../characters/ThoughtBubble';
@@ -20,6 +24,7 @@ const NIGHT_WEATHER = new Set<Weather>(['rain', 'snow', 'storm', 'fog', 'windy']
 
 export default function AfterHours() {
   const weather = useWeather();
+  const party = useKeepsakes((k) => allLettersFound(k.letters));
   const world = useWorld();
   const after = useObjects((s) => s.after);
   const setSlice = useObjects((s) => s.setSlice);
@@ -88,6 +93,7 @@ export default function AfterHours() {
       setNamed(name);
       setSlice('after', { constellations: after.constellations + 1 });
       world.emit('OBJECT_STATE_CHANGED', { target: 'sky', key: 'constellation', value: name });
+      if (after.radioOn) findLetter(world, 'after-hours');
     }
   };
 
@@ -162,6 +168,8 @@ export default function AfterHours() {
 
       {/* the rooftop */}
       <div className={styles.roof}>
+        {/* the finale: after all eight letters, everyone comes up */}
+        {party ? <RooftopParty /> : null}
         <div className={styles.neon} aria-hidden="true">
           open <em>late</em>
         </div>

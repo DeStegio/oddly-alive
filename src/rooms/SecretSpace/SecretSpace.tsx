@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { findLetter } from '../../app/letters';
 import { useWorld } from '../../app/worldInstance';
 import { ThoughtBubble } from '../../characters/ThoughtBubble';
 import { useCharacter } from '../../characters/useCharacter';
@@ -99,6 +100,7 @@ export default function SecretSpace() {
               aria-label={secret.chestOpen ? 'The open chest. There is a sock inside.' : 'A locked chest'}
               onClick={(e) => {
                 emitClick('chest', e);
+                if (secret.chestOpen) findLetter(world, 'secret');
                 if (secret.keyFound && !secret.chestOpen) {
                   setSlice('secret', { chestOpen: true });
                   world.emit('OBJECT_STATE_CHANGED', { target: 'chest', key: 'open', value: true });

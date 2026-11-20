@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { findLetter } from '../../app/letters';
 import { useWorld } from '../../app/worldInstance';
 import { Dot, type DotMotion } from '../../characters/Dot';
 import { useActor } from '../../characters/useActor';
@@ -371,6 +372,7 @@ export default function Playground() {
       bestRallyRef.current = n;
       setBestRally(n);
     }
+    if (n === 5 && findLetter(world, 'playground')) yardRef.current?.say('something’s caught in the net. a letter?', 2600);
     if (useKeepsakes.getState().record('bestRally', n) && n >= 3) {
       useKeepsakes.getState().note('record:rally', `Kept a rally of ${n} going with Bip next door. A new best.`);
     }
