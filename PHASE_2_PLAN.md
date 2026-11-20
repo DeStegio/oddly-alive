@@ -308,7 +308,7 @@ cross-room, Marguerite's 4th hat, Tourist/Homebody discoveries.
 | 3 | done | Schema v3 (`world` keepsakes: garden, letters, almanac, diary ≤40, records, attic) with v2→v3 and v1→v3 migration and hostile-input cleaning; `state/keepsakes.ts`; diary lines for first visit, discoveries, rally/tower records; best rally persists; Memory Room "what is stored" updated honestly. |
 | 4 | done | `engine/weather.ts` (9 weathers, mood map, 3-min pin; rain/snow pin-only), store + `WEATHER_CHANGED` + `view.weather`, `app/weatherSync.ts` (html[data-weather], almanac, re-entrancy safe), CSS-only `WeatherLayer` (pane/ambient, capped, static for reduced motion), `useWeather`. |
 | 5 | done | Mood Room: Barometer (pin 8 weathers, countdown, effect caption, Nimbus refuses once when annoyed), Nimbus’s almanac (9 cards, first-seen dates), send Nimbus to Living Room/Playground (NimbusVisitor with local shower). House-wide effects: Living Room window (sky + curtains), weather remarks; Playground wind/slippery/snow caps/rainbow gravity/storm thunder + Bip lines, wind in flights; After Hours sky weather. Discoveries: The Almanac, Indoor Weather. INT catalog rows deferred to step 12. |
-| 6 | todo | |
+| 6 | done | Garden + Attic registered (stub rooms, routes, prefetch), `reveal` metadata (mysterious / unlockable), Attic unlisted until unlocked or visited (URL always works), short labels ≤1280px, mobile dock snap + keeps current room in view (without scrollIntoView, which moved the Tab start — caught by the keyboard e2e). All room lists in tests updated; new smoke test for the unlisted attic. |
 | 7 | todo | |
 | 8 | todo | |
 | 9 | todo | |
