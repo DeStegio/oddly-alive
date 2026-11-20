@@ -2,7 +2,8 @@ import Matter from 'matter-js';
 
 const { Engine, Bodies, Body, Composite, Constraint, Events, Sleeping, Vector } = Matter;
 
-export const SHAPE_KINDS = ['ball', 'block', 'pebble', 'balloon', 'domino', 'pill', 'key'] as const;
+// order matters for share links: only ever append
+export const SHAPE_KINDS = ['ball', 'block', 'pebble', 'balloon', 'domino', 'pill', 'key', 'radish'] as const;
 export type ShapeKind = (typeof SHAPE_KINDS)[number];
 
 export interface ShapeSpec {
@@ -27,6 +28,7 @@ export const SHAPES: Record<ShapeKind, ShapeSpec> = {
   balloon: { w: 64, h: 76, color: 'var(--yellow)', circle: true, density: 0.0005, restitution: 0.5, friction: 0.05, buoyant: true, label: 'a floaty yellow balloon' },
   domino: { w: 24, h: 118, color: 'var(--mint)', chamfer: 4, density: 0.0022, restitution: 0.05, friction: 0.4, label: 'a tall mint domino' },
   pill: { w: 118, h: 48, color: 'var(--yellow)', chamfer: 24, density: 0.0016, restitution: 0.3, friction: 0.3, label: 'a yellow pill-shaped cushion' },
+  radish: { w: 46, h: 56, color: 'var(--coral)', circle: true, density: 0.0012, restitution: 0.45, friction: 0.2, label: 'a radish from the garden' },
   key: { w: 84, h: 36, color: '#e9b949', chamfer: 8, density: 0.0018, restitution: 0.2, friction: 0.5, label: 'a small golden key' },
 };
 

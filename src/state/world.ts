@@ -48,6 +48,8 @@ export interface AfterHoursObjects {
 export interface PlaygroundObjects {
   /** Comma-separated ids of the Field Notes goals reached this session. */
   goals: string;
+  /** Radishes harvested in the Garden, waiting to be dropped into the tray. */
+  radishes: number;
 }
 
 export interface ObjectsState {
@@ -75,7 +77,7 @@ export const OBJECT_DEFAULTS: ObjectsState = {
   mood: { lastUsed: '', teaPoured: 0, napping: false, mirrorLooks: 0 },
   secret: { slots: '', chestOpen: false, candleLit: false, keyFound: false },
   after: { radioOn: false, lightOn: false, constellations: 0 },
-  playground: { goals: '' },
+  playground: { goals: '', radishes: 0 },
 };
 
 type SliceKey = keyof ObjectsState;
