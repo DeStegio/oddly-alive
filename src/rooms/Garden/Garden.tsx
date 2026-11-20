@@ -6,7 +6,7 @@ import { ThoughtBubble } from '../../characters/ThoughtBubble';
 import { LivingTitle } from '../../components/LivingTitle';
 import { WeatherLayer } from '../../components/WeatherLayer';
 import { useWeather } from '../../components/useWeather';
-import { BIP_FENCE, CARD_TITLE, GARDEN_LINES, INCH_GARDEN, PACKETS, SHAPE_GLYPH, SHAPE_PLANT } from '../../content/garden';
+import { BIP_FENCE, CARD_SKY, CARD_TITLE, CLOUD_GLYPH, GARDEN_LINES, INCH_GARDEN, PACKETS, SHAPE_GLYPH, SHAPE_PLANT } from '../../content/garden';
 import { onFrame } from '../../engine/frameLoop';
 import type { StoredPlot } from '../../engine/memory';
 import { useKeepsakes } from '../../state/keepsakes';
@@ -14,7 +14,8 @@ import { useSettings } from '../../state/settings';
 import { useObjects } from '../../state/world';
 import { PLANTS, PLANT_KINDS, advance, isPlantKind, plant, stage, sunGrow, type GrowContext, type PlantKind, type Stage } from './growth';
 import { elevation, leanTowards, lightAt, phaseOf, shadow, skyColour, type Phase } from './light';
-import { classify, type Pt } from './strokes';
+import { MAX_CLOUDS, dryness, fireflyLight, isRaining, newCloud, orbit, rainbow, stepCloud, under, wilt, type Cloud } from './sky';
+import { classify, features, type Pt } from './strokes';
 import { CropIcon, PlantView } from './PlantView';
 import styles from './Garden.module.css';
 
@@ -40,6 +41,9 @@ interface Fly {
  * with you: plants grow where it falls, lean after it, and their shadows swing
  * round. Lower it behind the fence and night comes (the moonflower's time).
  * Plant by drawing a shape in the soil; pick by swiping across a ripe plant.
+ * Strong sun dries the beds out, so draw a cloud in the sky for rain (with the
+ * sun on the other side, a rainbow). At night the fireflies follow you, and
+ * their light is what the moonflowers grow by.
  */
 export default function Garden() {
   const world = useWorld();
@@ -59,7 +63,18 @@ export default function Garden() {
   const [phase, setPhase] = useState<Phase>(startNight ? 'night' : 'day');
   const phaseRef = useRef<Phase>(phase);
   const sawNight = useRef(false);
-  const stroke = useRef<{ pts: Pt[]; n: number } | null>(null);
+  const stroke = useRef<{ pts: Pt[]; n: number; where: 'soil' | 'sky' } | null>(null);
+  const clouds = useRef<Cloud[]>([]);
+  const cloudId = useRef(1);
+  const [cloudViews, setCloudViews] = useState<Array<{ id: number; w: number }>>([]);
+  const cloudEls = useRef(new Map<number, HTMLDivElement>());
+  const dry = useRef<number[]>(Array.from({ length: 6 }, () => 0.3));
+  const saidAt = useRef({ thirsty: 0, snap: 0, rain: 0 });
+  const sawRainbow = useRef(false);
+  const swarm = useRef({ x: 0, y: 0, ready: false });
+  const hand = useRef({ x: 0, y: 0, inside: false });
+  const flyEls = useRef<Array<HTMLSpanElement | null>>([]);
+  const snapAt = useRef<number[]>(Array.from({ length: 6 }, () => 0));
   const strokeN = useRef(0);
   const dirty = useRef(false);
   const kindsPlanted = useRef(new Set<PlantKind>());
@@ -190,7 +205,7 @@ export default function Garden() {
   // the sun, the sky, the light on each plant
   useEffect(
     () =>
-      onFrame((dt) => {
+      onFrame((dt, now) => {
         const el = sceneRef.current;
         const fence = fenceRef.current;
         if (!el || !fence) return;
@@ -218,13 +233,64 @@ export default function Garden() {
           setPhase(ph);
         }
 
+        // clouds drift downwind, rain, and thin out
+        const wind = weatherRef.current === 'windy' ? 0.03 : 0.008;
+        const before = clouds.current.length;
+        clouds.current = clouds.current.map((c) => stepCloud(c, dt, wind, r.width)).filter((c): c is Cloud => c !== null);
+        if (clouds.current.length !== before) setCloudViews(clouds.current.map((c) => ({ id: c.id, w: c.w })));
+        for (const c of clouds.current) {
+          const ce = cloudEls.current.get(c.id);
+          if (!ce) continue;
+          ce.style.transform = `translate(${(c.x - c.w / 2).toFixed(1)}px, ${(c.y - c.w * 0.25).toFixed(1)}px)`;
+          ce.style.setProperty('--rain-h', `${Math.max(0, r.height * 0.9 - c.y).toFixed(0)}px`);
+          ce.style.opacity = Math.min(1, c.life / 1800).toFixed(2);
+          ce.dataset.rain = String(isRaining(c));
+          const bow = rainbow(c, sunX, s.e, r.width);
+          ce.dataset.bow = String(bow);
+          if (bow && !sawRainbow.current) {
+            sawRainbow.current = true;
+            world.effects.discover('rainbow-maker');
+            say(setBipLine, pick(GARDEN_LINES.bipRainbow));
+          }
+        }
+
+        // at night the fireflies follow your hand (or wander, if you've gone)
+        const sw = swarm.current;
+        if (ph === 'night') {
+          const h = hand.current;
+          const tx = h.inside ? h.x : r.width * (0.5 + Math.sin(now / 4000) * 0.3);
+          const ty = h.inside ? h.y : r.height * (0.62 + Math.cos(now / 3100) * 0.08);
+          if (!sw.ready) Object.assign(sw, { x: tx, y: ty, ready: true });
+          const kf = 1 - Math.exp(-dt / 450);
+          sw.x += (tx - sw.x) * kf;
+          sw.y += (ty - sw.y) * kf;
+          flyEls.current.forEach((fe, i) => {
+            if (!fe) return;
+            const o = orbit(i, now, sw.x, sw.y);
+            fe.style.transform = `translate(${o.x.toFixed(1)}px, ${o.y.toFixed(1)}px)`;
+          });
+        } else sw.ready = false;
+        const wet = weatherRef.current === 'rain' || weatherRef.current === 'storm';
+
         plotsRef.current.forEach((p, i) => {
           const plantEl = plantEls.current[i];
           const plotEl = plotEls.current[i];
           if (!plotEl) return;
           const b = plotEl.getBoundingClientRect();
           const cx = b.left - r.left + b.width / 2;
-          const light = lightAt(cx, sunX, s.e, r.width);
+          const cover = clouds.current.filter((c) => under(c, cx));
+          const rained = wet || cover.some(isRaining);
+          const light = lightAt(cx, sunX, s.e, r.width) * (cover.length ? 0.35 : 1);
+          const was = dry.current[i]!;
+          const d = dryness(was, p && p.growth < 1 ? light : light * 0.5, dt, rained);
+          dry.current[i] = d;
+          plotEl.style.setProperty('--dry', d.toFixed(3));
+          if (rained && was > 0.6 && d <= 0.6 && p && now - saidAt.current.rain > 8000) {
+            saidAt.current.rain = now;
+            say(setInchLine, pick(GARDEN_LINES.rain));
+          }
+          const headY = b.top - r.top + b.height * 0.35;
+          const glow = ph === 'night' && sw.ready ? fireflyLight(cx, headY, sw.x, sw.y) : 0;
           const sh = shadow(cx, sunX, s.e);
           plotEl.style.setProperty('--lit', light.toFixed(3));
           plotEl.style.setProperty('--sh-dx', `${sh.dx.toFixed(1)}px`);
@@ -232,10 +298,28 @@ export default function Garden() {
           plotEl.style.setProperty('--sh-a', sh.alpha.toFixed(3));
           if (plantEl) {
             plantEl.style.setProperty('--lean', `${leanTowards(cx, sunX, s.e, r.width).toFixed(1)}deg`);
+            plantEl.style.setProperty('--wilt', wilt(d).toFixed(3));
+            if (p?.kind === 'moonflower' && glow > 0.6) world.effects.discover('night-light');
+            if (p?.kind === 'snapdragon' && p.growth >= 1 && glow > 0.7 && now - snapAt.current[i]! > 1500) {
+              snapAt.current[i] = now;
+              plantEl.dataset.snap = 'true';
+              window.setTimeout(() => delete plantEl.dataset.snap, 380);
+              if (now - saidAt.current.snap > 15000) {
+                saidAt.current.snap = now;
+                say(setInchLine, pick(GARDEN_LINES.snap));
+              }
+            }
             plantEl.style.setProperty('--look', `${Math.max(-35, Math.min(35, ((sunX - cx) / r.width) * 80)).toFixed(1)}deg`);
           }
           if (!p || p.growth >= 1) return;
-          const q = sunGrow(p, dt, light, ph === 'night', weatherRef.current);
+          if (d >= 1) {
+            if (now - saidAt.current.thirsty > 20000) {
+              saidAt.current.thirsty = now;
+              say(setInchLine, pick(GARDEN_LINES.thirsty));
+            }
+            return; // parched: nothing grows until it rains
+          }
+          const q = sunGrow(p, dt, ph === 'night' ? glow : light, ph === 'night', weatherRef.current);
           if (q === p) return;
           plotsRef.current[i] = q;
           dirty.current = true;
@@ -248,7 +332,7 @@ export default function Garden() {
           }
         });
       }),
-    [bloomed],
+    [bloomed, say, world],
   );
 
   // dusk, night and morning: the neighbours notice
@@ -307,21 +391,36 @@ export default function Garden() {
     sceneRef.current?.setPointerCapture?.(e.pointerId);
     const { x, y } = toLocal(e);
     const n = ++strokeN.current;
-    stroke.current = { pts: [{ x, y }], n };
-    if (trailSvg.current) trailSvg.current.dataset.state = 'drawing';
+    stroke.current = { pts: [{ x, y }], n, where: 'soil' };
+    if (trailSvg.current) {
+      trailSvg.current.dataset.state = 'drawing';
+      trailSvg.current.dataset.where = 'soil';
+    }
     drawTrail();
   };
 
   const onSceneDown = (e: React.PointerEvent) => {
-    // touch has no hover: press and move over the sky to carry the sun
-    if (e.pointerType !== 'mouse' && !stroke.current) {
-      sceneRef.current?.setPointerCapture?.(e.pointerId);
-      aimSun(e);
+    if (stroke.current || e.button !== 0 || (e.target as Element).closest('button')) return;
+    const { x, y, r } = toLocal(e);
+    const fence = fenceRef.current?.getBoundingClientRect();
+    if (!fence || y > fence.top - r.top) return;
+    // pressing in the sky: draw (a curl makes a cloud) while the sun still follows
+    sceneRef.current?.setPointerCapture?.(e.pointerId);
+    const n = ++strokeN.current;
+    stroke.current = { pts: [{ x, y }], n, where: 'sky' };
+    if (trailSvg.current) {
+      trailSvg.current.dataset.state = 'drawing';
+      trailSvg.current.dataset.where = 'sky';
     }
+    drawTrail();
+    aimSun(e);
   };
 
   const onMove = (e: React.PointerEvent) => {
+    const here = toLocal(e);
+    Object.assign(hand.current, { x: here.x, y: here.y, inside: true });
     const st = stroke.current;
+    if (st?.where === 'sky') aimSun(e);
     if (st) {
       const { x, y } = toLocal(e);
       const last = st.pts[st.pts.length - 1]!;
@@ -366,6 +465,24 @@ export default function Garden() {
     return hit;
   };
 
+  /** A curl or a scribble in the sky becomes a raincloud there. */
+  const drawCloud = (pts: Pt[]) => {
+    if (pts.length < 6) return false;
+    const shape = classify(pts);
+    const f = features(pts);
+    if (!(shape === 'loop' || shape === 'spiral' || (f.openness < 0.35 && f.length > 140))) return false;
+    const fence = fenceRef.current!.getBoundingClientRect();
+    const r = sceneRef.current!.getBoundingClientRect();
+    const cx = pts.reduce((a, p) => a + p.x, 0) / pts.length;
+    const cy = Math.min(fence.top - r.top - 40, pts.reduce((a, p) => a + p.y, 0) / pts.length);
+    const c = newCloud(cloudId.current++, cx, Math.max(30, cy), f.width * 1.3);
+    clouds.current = [...clouds.current, c].slice(-MAX_CLOUDS);
+    setCloudViews(clouds.current.map((k) => ({ id: k.id, w: k.w })));
+    world.emit('OBJECT_STATE_CHANGED', { target: 'garden:cloud', key: 'rain', value: true });
+    world.effects.discover('make-it-rain');
+    return true;
+  };
+
   const showMark = (text: string, at: Pt, ok: boolean) => {
     const n = strokeN.current;
     setMark({ text, x: at.x, y: at.y, ok, n });
@@ -389,6 +506,7 @@ export default function Garden() {
     if (e.type === 'pointercancel') return finish(false);
     const pts = st.pts;
     const end = pts[pts.length - 1]!;
+    if (st.where === 'sky') return finish(drawCloud(pts));
     if (pts.length < 3) {
       finish(false);
       say(setInchLine, pick(GARDEN_LINES.tap));
@@ -449,7 +567,7 @@ export default function Garden() {
     <section className={styles.room} data-phase={phase} aria-labelledby="garden-title">
       <header className={styles.head}>
         <LivingTitle id="garden-title" lines={['Gar', 'den']} label="Garden" size="room" />
-        <p className={styles.blurb}>You’re the sun. Move over the sky and the light follows; things grow where it falls. Sink it behind the fence for night. Draw shapes in the soil to plant, and swipe across anything ripe to pick it.</p>
+        <p className={styles.blurb}>You’re the sun. Move over the sky and the light follows; things grow where it falls. Sink it behind the fence for night. Draw shapes in the soil to plant, swipe across anything ripe to pick it, and if the beds dry out, draw them a cloud.</p>
       </header>
 
       {/* keyboard and screen-reader controls (hidden until focused) */}
@@ -469,13 +587,38 @@ export default function Garden() {
         </label>
       </div>
 
-      <div ref={sceneRef} className={styles.scene} data-weather={weather} onPointerDown={onSceneDown} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp}>
+      <div
+        ref={sceneRef}
+        className={styles.scene}
+        data-weather={weather}
+        onPointerDown={onSceneDown}
+        onPointerMove={onMove}
+        onPointerUp={onUp}
+        onPointerCancel={onUp}
+        onPointerLeave={() => (hand.current.inside = false)}
+      >
         <div className={styles.sky}>
           <span className={styles.stars} aria-hidden="true" />
           <span className={styles.moonDisc} aria-hidden="true" />
           <WeatherLayer />
         </div>
         <div className={styles.sun} aria-hidden="true" />
+        {cloudViews.map((c) => (
+          <div
+            key={c.id}
+            className={styles.cloud}
+            aria-hidden="true"
+            style={{ width: c.w, height: c.w * 0.5 }}
+            ref={(el) => {
+              if (el) cloudEls.current.set(c.id, el);
+              else cloudEls.current.delete(c.id);
+            }}
+          >
+            <span className={styles.bow} />
+            <span className={styles.rain} />
+            <span className={styles.puff} />
+          </div>
+        ))}
         <div ref={fenceRef} className={styles.fence} aria-hidden="true" />
         <div className={styles.pool} aria-hidden="true" />
         <div className={styles.house} aria-hidden="true">
@@ -508,6 +651,12 @@ export default function Garden() {
                 {PACKETS[k].name}
               </li>
             ))}
+            <li className={styles.cardSky}>
+              <svg viewBox="0 0 24 24">
+                <path d={CLOUD_GLYPH} />
+              </svg>
+              {CARD_SKY}
+            </li>
           </ul>
         </div>
 
@@ -543,7 +692,17 @@ export default function Garden() {
         </ol>
 
         {night
-          ? Array.from({ length: FIREFLIES }, (_, i) => <span key={i} className={styles.firefly} aria-hidden="true" style={{ left: `${12 + ((i * 37) % 80)}%`, top: `${48 + ((i * 23) % 38)}%`, animationDelay: `${-i * 0.7}s` }} />)
+          ? Array.from({ length: FIREFLIES }, (_, i) => (
+              <span
+                key={i}
+                className={styles.firefly}
+                aria-hidden="true"
+                style={{ animationDelay: `${-i * 0.37}s` }}
+                ref={(el) => {
+                  flyEls.current[i] = el;
+                }}
+              />
+            ))
           : null}
 
         <svg ref={trailSvg} className={styles.trail} aria-hidden="true">

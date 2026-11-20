@@ -1,5 +1,6 @@
 import { elevation, leanTowards, lightAt, phaseOf, shadow, skyColour } from './light';
 import { classify, type Pt } from './strokes';
+import { CLOUD_LIFE, RAIN_FOR, THIRST_MS, dryness, fireflyLight, isRaining, newCloud, rainbow, stepCloud, under, wilt, type Cloud } from './sky';
 
 const arc = (cx: number, cy: number, r: number, from: number, to: number, n = 40): Pt[] =>
   Array.from({ length: n }, (_, i) => {
@@ -60,5 +61,39 @@ describe('the garden day', () => {
     expect(shadow(400, 500, 0.1).stretch).toBeGreaterThan(shadow(400, 500, 0.9).stretch);
     expect(skyColour(1)).toBe('rgb(207, 224, 255)');
     expect(skyColour(-0.5)).toBe('rgb(42, 40, 64)');
+  });
+});
+
+describe('weather by hand', () => {
+  it('a drawn cloud rains, drifts downwind, then goes', () => {
+    let c: Cloud | null = newCloud(1, 100, 50, 120);
+    expect(isRaining(c)).toBe(true);
+    c = stepCloud(c, 1000, 0.02, 1000)!;
+    expect(c.x).toBeCloseTo(120);
+    c = stepCloud(c, RAIN_FOR, 0, 1000)!;
+    expect(isRaining(c)).toBe(false);
+    expect(stepCloud(c, CLOUD_LIFE, 0, 1000)).toBeNull();
+    expect(under(newCloud(2, 300, 50, 100), 330)).toBe(true);
+    expect(under(newCloud(2, 300, 50, 100), 400)).toBe(false);
+  });
+
+  it('a strong sun dries the soil out; rain soaks it; dry plants wilt', () => {
+    expect(dryness(0, 1, THIRST_MS, false)).toBe(1);
+    expect(dryness(0, 0.3, THIRST_MS / 2, false)).toBeCloseTo(0.15);
+    expect(dryness(1, 1, 1000, true)).toBeLessThan(0.5);
+    expect(wilt(0.5)).toBe(0);
+    expect(wilt(1)).toBe(1);
+  });
+
+  it('rainbows need the sun up and the rain off to one side', () => {
+    const c = newCloud(1, 800, 60, 120);
+    expect(rainbow(c, 200, 0.7, 1000)).toBe(true);
+    expect(rainbow(c, 780, 0.7, 1000)).toBe(false);
+    expect(rainbow(c, 200, 0.1, 1000)).toBe(false);
+  });
+
+  it('fireflies light what they are near', () => {
+    expect(fireflyLight(100, 100, 100, 100)).toBe(1);
+    expect(fireflyLight(100, 100, 400, 100)).toBe(0);
   });
 });

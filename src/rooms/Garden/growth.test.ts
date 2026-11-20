@@ -59,6 +59,8 @@ describe('growing in the light', () => {
   });
   it('the moonflower only grows in the dark', () => {
     expect(sunGrow(seed('moonflower'), 20_000, 1, false, 'clear').growth).toBe(0);
-    expect(sunGrow(seed('moonflower'), 20_000, 0, true, 'clear').growth).toBeGreaterThan(0.6);
+    expect(sunGrow(seed('moonflower'), 20_000, 0, true, 'clear').growth).toBeGreaterThan(0.35);
+    // fireflies close by speed it up
+    expect(sunGrow(seed('moonflower'), 20_000, 1, true, 'clear').growth).toBeGreaterThan(sunGrow(seed('moonflower'), 20_000, 0, true, 'clear').growth);
   });
 });

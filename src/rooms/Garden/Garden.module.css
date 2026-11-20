@@ -301,13 +301,12 @@
   right: 4%;
   bottom: 0;
   height: 16%;
-  background: #6b4f3a;
+  background:
+    repeating-linear-gradient(115deg, transparent 0 9px, rgba(60, 40, 25, calc(var(--dry, 0) * 0.5 - 0.15)) 9px 10.5px),
+    color-mix(in srgb, #4f3828, #b49773 calc(var(--dry, 0.3) * 100%));
   border: 2.5px solid var(--char-ink);
   border-radius: 40% 40% 6px 6px;
   z-index: -1;
-}
-.plot[data-stage='empty']:hover .soil {
-  background: #7a5b43;
 }
 /* a shadow on the soil, thrown away from the sun */
 .shadow {
@@ -328,9 +327,9 @@
   position: absolute;
   inset: 0;
   transform-origin: 50% 92%;
-  transform: rotate(var(--lean, 0deg));
+  transform: rotate(calc(var(--lean, 0deg) + var(--wilt, 0) * 16deg)) scaleY(calc(1 - var(--wilt, 0) * 0.14));
   transition: transform 240ms var(--ease-out);
-  filter: saturate(calc(0.75 + var(--lit, 0.5) * 0.4)) brightness(calc(1 - var(--night) * 0.35));
+  filter: saturate(calc(0.75 + var(--lit, 0.5) * 0.4 - var(--wilt, 0) * 0.6)) sepia(calc(var(--wilt, 0) * 0.5)) brightness(calc(1 - var(--night) * 0.35));
   pointer-events: none;
 }
 .plantSvg {
@@ -381,6 +380,9 @@
 /* night things */
 .firefly {
   position: absolute;
+  left: -3px;
+  top: -3px;
+  will-change: transform;
   width: 6px;
   height: 6px;
   border-radius: 50%;
@@ -388,19 +390,17 @@
   box-shadow: 0 0 10px 3px rgba(240, 255, 140, 0.7);
   pointer-events: none;
   z-index: 4;
-  animation: firefly 5.5s var(--ease-in-out) infinite alternate;
+  animation: firefly 1.4s var(--ease-in-out) infinite alternate;
 }
 @keyframes firefly {
   0% {
-    transform: translate(0, 0);
-    opacity: 0.2;
+    opacity: 0.25;
   }
-  40% {
+  50% {
     opacity: 1;
   }
   100% {
-    transform: translate(26px, -22px);
-    opacity: 0.3;
+    opacity: 0.4;
   }
 }
 
@@ -568,4 +568,107 @@
 [data-motion='reduced'] .firefly,
 [data-motion='reduced'] .plot[data-stage='4'] .plantSvg {
   animation: none !important;
+}
+
+/* the snapdragon goes for a firefly */
+.plant[data-snap='true'] .jaw {
+  animation: snap 380ms var(--ease-spring);
+  transform-box: fill-box;
+  transform-origin: 50% 0;
+}
+
+/* a cloud you drew: it rains, it shades, it drifts off */
+.cloud {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 1;
+  pointer-events: none;
+  will-change: transform, opacity;
+  animation: cloud-in 500ms var(--ease-spring);
+}
+@keyframes cloud-in {
+  from {
+    scale: 0.4;
+  }
+}
+.puff {
+  position: absolute;
+  inset: 0;
+  border-radius: 50px;
+  background:
+    radial-gradient(circle at 28% 62%, #fbfbff 0 26%, transparent 27%),
+    radial-gradient(circle at 50% 42%, #fbfbff 0 32%, transparent 33%),
+    radial-gradient(circle at 72% 60%, #fbfbff 0 25%, transparent 26%),
+    linear-gradient(#fbfbff, #fbfbff) 22% 70% / 58% 32% no-repeat;
+  filter: drop-shadow(0 0 1px var(--char-ink)) drop-shadow(0 0 1px var(--char-ink)) drop-shadow(0 6px 0 rgba(36, 35, 43, 0.12));
+}
+.cloud[data-rain='true'] .puff {
+  filter: drop-shadow(0 0 1px var(--char-ink)) drop-shadow(0 0 1px var(--char-ink)) brightness(0.86);
+}
+.rain {
+  position: absolute;
+  left: 16%;
+  right: 16%;
+  top: 70%;
+  height: var(--rain-h, 200px);
+  opacity: 0;
+  transition: opacity 600ms;
+  background: repeating-linear-gradient(100deg, transparent 0 9px, rgba(90, 130, 210, 0.75) 9px 11px, transparent 11px 22px);
+  background-size: 22px 34px;
+  mask-image: linear-gradient(#000 70%, transparent);
+  -webkit-mask-image: linear-gradient(#000 70%, transparent);
+  animation: rain-fall 420ms linear infinite;
+}
+.cloud[data-rain='true'] .rain {
+  opacity: 1;
+}
+@keyframes rain-fall {
+  to {
+    background-position: -6px 34px;
+  }
+}
+.bow {
+  position: absolute;
+  left: 50%;
+  top: 60%;
+  width: 260%;
+  aspect-ratio: 2 / 1;
+  translate: -50% -40%;
+  border-radius: 999px 999px 0 0;
+  background: radial-gradient(circle at 50% 100%, transparent 54%, rgba(160, 90, 220, 0.5) 55% 58%, rgba(80, 140, 230, 0.5) 58% 61%, rgba(90, 200, 140, 0.5) 61% 64%, rgba(250, 220, 90, 0.55) 64% 67%, rgba(250, 150, 80, 0.5) 67% 70%, rgba(235, 90, 90, 0.5) 70% 73%, transparent 74%);
+  opacity: 0;
+  transition: opacity 900ms;
+  z-index: -1;
+}
+.cloud[data-bow='true'] .bow {
+  opacity: 1;
+}
+.trail[data-where='sky'] polyline {
+  stroke: #fbfbff;
+  stroke-dasharray: 2 9;
+}
+.trail[data-where='sky'][data-state='ok'] polyline {
+  stroke: #fbfbff;
+}
+.cardSky {
+  margin-top: 3px;
+  padding-top: 4px;
+  border-top: 1.5px dashed rgba(36, 35, 43, 0.3);
+  font-style: italic;
+  font-weight: 500 !important;
+}
+.card svg path {
+  vector-effect: non-scaling-stroke;
+}
+[data-motion='reduced'] .rain,
+[data-motion='reduced'] .cloud {
+  animation: none !important;
+}
+@media (max-width: 720px) {
+  .cardSky {
+    grid-column: 1 / -1;
+    flex-direction: row !important;
+    justify-content: center;
+  }
 }

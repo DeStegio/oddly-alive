@@ -104,11 +104,12 @@ const SKY: Partial<Record<Weather, number>> = { sunny: 1.25, fog: 0.6, snow: 0.4
 
 /**
  * Growth while you're here and the sun is yours: plants grow from the light
- * that falls on them (0..1); the moonflower only grows in the dark.
+ * that falls on them (0..1); the moonflower only grows in the dark, faster
+ * when the fireflies (passed in as `light` at night) are close.
  */
 export function sunGrow(plot: StoredPlot, dtMs: number, light: number, night: boolean, weather: Weather): StoredPlot {
   if (!isPlantKind(plot.kind) || plot.growth >= 1 || dtMs <= 0) return plot;
-  const r = plot.kind === 'moonflower' ? (night ? 1 : 0) : light * (SKY[weather] ?? 1);
+  const r = plot.kind === 'moonflower' ? (night ? 0.6 + light : 0) : light * (SKY[weather] ?? 1);
   if (r <= 0) return plot;
   return { ...plot, growth: Math.min(1, plot.growth + (dtMs / PLANTS[plot.kind].growMs) * r * SUN_SPEED) };
 }
