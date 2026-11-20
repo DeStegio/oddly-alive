@@ -137,6 +137,7 @@ export default function Garden() {
       say(setInchLine, pick(GARDEN_LINES.harvestRadish));
     } else {
       useKeepsakes.getState().addToVase(kind);
+      useObjects.getState().setLiving({ vaseNew: true });
       say(setInchLine, pick(GARDEN_LINES.harvestVase));
     }
     world.emit('OBJECT_STATE_CHANGED', { target: `garden:${kind}`, key: 'harvest', value: true });

@@ -185,4 +185,52 @@ export const comboBehaviors = [
     when: (c) => Math.abs(c.event.payload.velocity) > 2,
     react: (c) => act('ferdinand', 800, () => void anim(c, 'ferdinand', 'wiggle'), { ambient: true }),
   }),
+
+  // ---------------------------------------------------------------- Phase 2 glue
+  // flowers picked in the garden turn up on the Living Room windowsill
+  defineBehavior({
+    id: 'cross.vase',
+    on: ['ROOM_ENTERED'],
+    rooms: LIVING,
+    priority: Priority.CHARACTER,
+    when: (c) => c.view.flag('living.vaseNew') === true,
+    react: (c) =>
+      act('ferdinand', 4200, (ctl) => {
+        c.effects.setFlag('living.vaseNew', false);
+        ctl.after(800, () => say(c, 'ferdinand', ['flowers. from outside.', 'cousins. in a jar.'], 2400));
+        ctl.after(2600, () => say(c, 'pim', ['someone put flowers on the windowsill.', 'oh. they’re from the garden. that’s nice.'], 2400));
+      }),
+  }),
+  // radishes from the garden drop into the Playground
+  defineBehavior({
+    id: 'cross.radish',
+    on: ['OBJECT_STATE_CHANGED'],
+    rooms: ['playground'],
+    priority: Priority.CHARACTER,
+    when: (c) => c.event.payload.target === 'playground' && c.event.payload.key === 'radish',
+    react: (c) =>
+      act('dot', 2400, () => {
+        anim(c, 'dot', 'jump');
+        say(c, 'dot', ['a RADISH. from the garden. it has a face now.', 'radish! throw it at Bip. THROW IT.'], 2400);
+      }),
+  }),
+  // Dot has opinions about the weather
+  defineBehavior({
+    id: 'cross.weather.dot',
+    on: ['WEATHER_CHANGED'],
+    rooms: ['playground', 'mood'],
+    priority: Priority.AMBIENT,
+    cooldownMs: 25_000,
+    when: (c) => ['rain', 'snow', 'windy', 'storm', 'rainbow'].includes(c.event.payload.to),
+    react: (c) => {
+      const lines: Record<string, string[]> = {
+        rain: ['PUDDLES. later. definitely later.', 'rain! I’m waterproof. probably.'],
+        snow: ['SNOW. snow snow snow.', 'I’m going to catch every single one.'],
+        windy: ['the wind took my eye. no wait. still here.', 'everything’s leaning. I’m leaning.'],
+        storm: ['thunder doesn’t scare me. it’s just loud.', 'that was LOUD. again?'],
+        rainbow: ['rainbow! upside down. still counts.', 'the colours are the wrong way up. I love it.'],
+      };
+      return act('dot', 2400, () => void say(c, 'dot', lines[c.event.payload.to] ?? ['weather.'], 2400), { ambient: true });
+    },
+  }),
 ];

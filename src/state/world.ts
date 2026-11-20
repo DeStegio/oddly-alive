@@ -20,6 +20,8 @@ export interface LivingObjects {
   pimForm: number;
   /** A secret found elsewhere that Pim hasn't gossiped about yet. */
   gossip: string;
+  /** Flowers from the garden arrived on the windowsill and nobody's remarked on them yet. */
+  vaseNew: boolean;
 }
 
 export interface MoodObjects {
@@ -83,6 +85,7 @@ export const OBJECT_DEFAULTS: ObjectsState = {
     rearranged: false,
     pimForm: 0,
     gossip: '',
+    vaseNew: false,
   },
   mood: { lastUsed: '', teaPoured: 0, napping: false, mirrorLooks: 0 },
   secret: { slots: '', chestOpen: false, candleLit: false, keyFound: false },
