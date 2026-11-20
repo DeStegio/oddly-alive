@@ -132,6 +132,8 @@ export const characterBehaviors = [
     when: (c) => c.event.payload.level === 'long',
     react: (c) =>
       act('room', 600_000, () => {
+        // sitting still until the whole Living Room nods off is its own small reward
+        if (c.view.room === 'living') c.effects.discover('patient');
         for (const id of ['pim', 'tick', 'dot', 'nimbus'] as const) face(c, id, 'asleep', 600_000);
         return () => {
           for (const id of ['pim', 'tick', 'dot', 'nimbus'] as const) send(c, id, { type: 'reset' });

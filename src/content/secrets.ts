@@ -8,8 +8,13 @@ export interface SecretDef {
   hint: string;
   /** What happened, shown after discovery. */
   found: string;
+  /**
+   * Layered hints: this hint stays folded until the named discovery is found
+   * (so the cabinet never reads like a checklist of everything at once).
+   */
+  after?: string;
   /** A small glyph for the cabinet shelf. */
-  glyph: 'key' | 'eye' | 'spiral' | 'button' | 'clock' | 'wave' | 'letter' | 'music' | 'board' | 'tower' | 'moon' | 'mirror' | 'rainbow' | 'chest' | 'aunt' | 'candle' | 'worm' | 'glitch' | 'star' | 'moth' | 'heart' | 'ball' | 'cloud' | 'flower' | 'ladder' | 'hat' | 'book';
+  glyph: 'key' | 'eye' | 'spiral' | 'button' | 'clock' | 'wave' | 'letter' | 'music' | 'board' | 'tower' | 'moon' | 'mirror' | 'rainbow' | 'chest' | 'aunt' | 'candle' | 'worm' | 'glitch' | 'star' | 'moth' | 'heart' | 'ball' | 'cloud' | 'flower' | 'ladder' | 'hat' | 'book' | 'map' | 'chair';
 }
 
 /**
@@ -27,22 +32,28 @@ export const SECRETS: SecretDef[] = [
   { id: 'floorboard', name: 'The Creaky One', room: 'living', glyph: 'board', hint: 'Go all the way down. Mind the floorboards.', found: 'Found the loose floorboard and its tenant.' },
   { id: 'tower', name: 'Architecture', room: 'playground', glyph: 'tower', hint: 'Things stand taller together.', found: 'Stacked five shapes into a tower.' },
   { id: 'volley', name: 'Over the Net', room: 'playground', glyph: 'ball', hint: 'Someone next door plays a mean game of volleyball.', found: 'Kept a rally of three going with Bip.' },
-  { id: 'rally', name: 'Rally Legend', room: 'playground', glyph: 'ball', hint: 'Ten in a row, and never let it touch the floor.', found: 'Kept a rally of ten going with Bip. Bip is exhausted.' },
+  { id: 'rally', name: 'Rally Legend', room: 'playground', glyph: 'ball', hint: 'Ten in a row, and never let it touch the floor.', found: 'Kept a rally of ten going with Bip. Bip is exhausted.', after: 'volley' },
   { id: 'key', name: 'Lost & Found', room: 'playground', glyph: 'key', hint: 'Something golden turns up once a keyhole is known.', found: 'Delivered the golden key to the lost-and-found.' },
-  { id: 'almanac', name: 'The Almanac', room: 'mood', glyph: 'cloud', hint: 'Nimbus keeps a page for every kind of sky. Some only come if you ask.', found: 'Filled every page of Nimbus’s almanac.' },
+  { id: 'almanac', name: 'The Almanac', room: 'mood', glyph: 'cloud', hint: 'Nimbus keeps a page for every kind of sky. Some only come if you ask.', found: 'Filled every page of Nimbus’s almanac.', after: 'indoor-weather' },
   { id: 'indoor-weather', name: 'Indoor Weather', room: 'mood', glyph: 'cloud', hint: 'Clouds can go visiting too.', found: 'Sent Nimbus to rain on another room.' },
   { id: 'green-thumb', name: 'Green Thumb', room: 'garden', glyph: 'flower', hint: 'Great-Aunt Pim left a tin of seeds by the back door.', found: 'Grew something all the way to flowering.' },
   { id: 'came-back', name: 'Came Back For It', room: 'garden', glyph: 'flower', hint: 'Some things grow better when nobody’s watching.', found: 'Came back to find the garden had grown without you.' },
-  { id: 'night-shift', name: 'Night Shift', room: 'garden', glyph: 'moon', hint: 'One packet in the tin only works after dark.', found: 'Got a moonflower to open.' },
-  { id: 'full-bed', name: 'Full Bloom', room: 'garden', glyph: 'flower', hint: 'Six plots. All at once.', found: 'Had every plot in the garden in flower at the same time.' },
-  { id: 'radish-volley', name: 'Root Vegetable Sports', room: 'playground', glyph: 'ball', hint: 'Bip will hit back anything. Anything.', found: 'Played volleyball with a radish.' },
+  { id: 'night-shift', name: 'Night Shift', room: 'garden', glyph: 'moon', hint: 'One packet in the tin only works after dark.', found: 'Got a moonflower to open.', after: 'green-thumb' },
+  { id: 'full-bed', name: 'Full Bloom', room: 'garden', glyph: 'flower', hint: 'Six plots. All at once.', found: 'Had every plot in the garden in flower at the same time.', after: 'green-thumb' },
+  { id: 'radish-volley', name: 'Root Vegetable Sports', room: 'playground', glyph: 'ball', hint: 'Bip will hit back anything. Anything.', found: 'Played volleyball with a radish.', after: 'green-thumb' },
   { id: 'attic', name: 'Up the Ladder', room: 'attic', glyph: 'ladder', hint: 'Look up in the Living Room. There’s always been a cord.', found: 'Found the attic.' },
-  { id: 'dress-rehearsal', name: 'Dress Rehearsal', room: 'attic', glyph: 'hat', hint: 'Marguerite would wear anything, given the chance. Four things, in fact.', found: 'Tried every hat from the boxes on Marguerite.' },
-  { id: 'needle-drop', name: 'Needle Drop', room: 'attic', glyph: 'music', hint: 'There’s a record still on the gramophone.', found: 'Played Great-Aunt Pim’s record.' },
-  { id: 'dear-diary', name: 'Dear Diary', room: 'attic', glyph: 'book', hint: 'The house keeps a diary. It needs a few things to write about first.', found: 'Read a diary the house wrote about your visits.' },
+  { id: 'dress-rehearsal', name: 'Dress Rehearsal', room: 'attic', glyph: 'hat', hint: 'Marguerite would wear anything, given the chance. Four things, in fact.', found: 'Tried every hat from the boxes on Marguerite.', after: 'attic' },
+  { id: 'needle-drop', name: 'Needle Drop', room: 'attic', glyph: 'music', hint: 'There’s a record still on the gramophone.', found: 'Played Great-Aunt Pim’s record.', after: 'attic' },
+  { id: 'dear-diary', name: 'Dear Diary', room: 'attic', glyph: 'book', hint: 'The house keeps a diary. It needs a few things to write about first.', found: 'Read a diary the house wrote about your visits.', after: 'attic' },
   { id: 'correspondent', name: 'Correspondent', room: 'anywhere', glyph: 'letter', hint: 'Great-Aunt Pim left letters around the house. Each room hides one in its own way.', found: 'Found one of Great-Aunt Pim’s letters.' },
-  { id: 'whole-story', name: 'The Whole Story', room: 'attic', glyph: 'letter', hint: 'Eight rooms, eight letters. Her trunk will tell you which are missing.', found: 'Found all eight of Great-Aunt Pim’s letters.' },
-  { id: 'family-reunion', name: 'Family Reunion', room: 'after-hours', glyph: 'star', hint: 'Her last letter says where everyone will be.', found: 'Went up on the roof after the last letter. Everyone was there.' },
+  { id: 'whole-story', name: 'The Whole Story', room: 'attic', glyph: 'letter', hint: 'Eight rooms, eight letters. Her trunk will tell you which are missing.', found: 'Found all eight of Great-Aunt Pim’s letters.', after: 'correspondent' },
+  { id: 'family-reunion', name: 'Family Reunion', room: 'after-hours', glyph: 'star', hint: 'Her last letter says where everyone will be.', found: 'Went up on the roof after the last letter. Everyone was there.', after: 'whole-story' },
+  { id: 'patient', name: 'Patient', room: 'living', glyph: 'clock', hint: 'Sit with them a while. Don’t touch anything.', found: 'Sat so quietly the whole Living Room nodded off.' },
+  { id: 'gentle-hands', name: 'Gentle Hands', room: 'living', glyph: 'heart', hint: 'Pim likes company more than poking.', found: 'Kept Pim company without poking her once. She told you a secret.' },
+  { id: 'night-owl', name: 'Night Owl', room: 'anywhere', glyph: 'moon', hint: 'The house is different in the small hours. Your clock, not ours.', found: 'Came by between midnight and four in the morning.' },
+  { id: 'tourist', name: 'Tourist', room: 'anywhere', glyph: 'map', hint: 'Every room you know, quick as you can.', found: 'Went through every room you know in a minute and a half.' },
+  { id: 'homebody', name: 'Homebody', room: 'anywhere', glyph: 'chair', hint: 'Pick a room. Stay in it.', found: 'Spent five minutes in one room without leaving.' },
+  { id: 'puddle-jumper', name: 'Puddle Jumper', room: 'playground', glyph: 'cloud', hint: 'Bip doesn’t stop for weather.', found: 'Played volleyball with Bip in the rain.', after: 'volley' },
   { id: 'nap', name: 'Nap O’Clock', room: 'mood', glyph: 'moon', hint: 'A warm drink, then something soft.', found: 'Tea and a blanket put Nimbus to sleep.' },
   { id: 'mirror', name: 'The Other Cloud', room: 'mood', glyph: 'mirror', hint: 'Look long enough and something looks back.', found: 'Caught Nimbus’s reflection winking.' },
   { id: 'moodswing', name: 'Changeable Weather', room: 'anywhere', glyph: 'rainbow', hint: 'See the house in many moods in one visit.', found: 'Witnessed six kinds of weather in one visit.' },

@@ -189,8 +189,8 @@ export default function LivingRoom() {
               onActivate={() => {
                 setLiving((s) => ({ pictureNudges: s.pictureNudges + 1, pictureTilt: s.pictureTilt > 0 ? -7 : 8 }));
                 world.emit('OBJECT_CLICKED', { target: 'picture', repeat: living.pictureNudges + 1, via: 'pointer' });
-                // once the keyhole is known, there's something else behind the frame
-                if (living.keyholeRevealed) findLetter(world, 'living');
+                // once the keyhole has given up its key, there's something else behind the frame
+                if (living.keyholeRevealed && useObjects.getState().secret.keyFound) findLetter(world, 'living');
               }}
             />
           </div>

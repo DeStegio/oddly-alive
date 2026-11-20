@@ -126,9 +126,12 @@ describe('world integration', () => {
     world.personality = { ...world.personality, vars: { ...world.personality.vars, trust: 0.7 } };
     world.emit('OBJECT_CLICKED', { target: 'pim', repeat: 1, via: 'pointer' });
     advance(IDLE_LONG_MS + 1000);
+    // (sitting still that long can itself be a discovery, which nudges trust up)
+    const before = world.personality.vars.trust;
+    expect(before).toBeGreaterThanOrEqual(0.7);
     world.resetSession();
     expect(getWorldState().counts).toEqual({});
     expect(world.scheduler.activeCount()).toBe(0);
-    expect(world.personality.vars.trust).toBeCloseTo(0.7, 1);
+    expect(world.personality.vars.trust).toBeCloseTo(before, 5);
   });
 });

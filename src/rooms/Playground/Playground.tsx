@@ -484,6 +484,7 @@ export default function Playground() {
     if (n >= 5) completeGoal('rally5');
     if (n === 3) world.effects.discover('volley');
     if (f.kind === 'radish') world.effects.discover('radish-volley');
+    if (weatherRef.current === 'rain' || weatherRef.current === 'storm') world.effects.discover('puddle-jumper');
     if (n === 10) world.effects.discover('rally');
     if (!hasRoom()) {
       dropFlight(f.id);
@@ -564,11 +565,19 @@ export default function Playground() {
           continue;
         }
       } else {
-        const floored = stepBall(b, dt, G.air);
+        // step in small slices and look for Bip's hit in each one: on a slow frame the
+        // ball could otherwise pass straight through the window where he can reach it
+        const hitY = bipTop - b.r * 0.4;
+        const canHit = () => bip !== null && b.vy > 0 && b.y >= hitY && b.y <= hitY + bip.height * 0.5 && Math.abs(b.x - bipX) < bip.width * 0.55 + b.r;
+        let floored = false;
+        let hit = false;
+        for (let left = dt; left > 0 && !hit; left -= 16) {
+          floored = stepBall(b, Math.min(16, left), G.air) || floored;
+          hit = f.volleyable && canHit();
+        }
         if (f.volleyable && bip) {
           incoming = true;
-          const hitY = bipTop - b.r * 0.4;
-          if (b.vy > 0 && b.y >= hitY && b.y <= hitY + bip.height * 0.5 && Math.abs(b.x - bipX) < bip.width * 0.55 + b.r) {
+          if (hit) {
             volley(f, G);
             continue;
           }
@@ -586,7 +595,8 @@ export default function Playground() {
         } else if (bip) {
           // missed: roll over, pick it up and serve it back
           yard?.moveTo(b.x + G.room.left);
-          if (isResting(b, G.air) && Math.abs(b.x - bipX) < bip.width * 0.4) {
+          // generous reach: a ball resting in a corner by the net must still be reachable
+          if (isResting(b, G.air) && Math.abs(b.x - bipX) < bip.width * 0.5 + b.r) {
             dropFlight(f.id);
             yard?.hold(f.kind);
             const kind = f.kind;

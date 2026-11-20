@@ -4,7 +4,8 @@ import { useWorld } from '../../app/worldInstance';
 import { ThoughtBubble } from '../../characters/ThoughtBubble';
 import { useCharacter } from '../../characters/useCharacter';
 import { LivingTitle } from '../../components/LivingTitle';
-import { SECRETS } from '../../content/secrets';
+import { ROOM_LIST } from '../../app/rooms';
+import { SECRETS, type SecretDef } from '../../content/secrets';
 import { onFrame } from '../../engine/frameLoop';
 import { pointer } from '../../engine/pointer';
 import { isReducedMotion } from '../../state/settings';
@@ -14,6 +15,9 @@ import { Glyph } from './Glyph';
 import { SOLUTION, TOKENS } from './puzzle';
 import styles from './SecretSpace.module.css';
 
+
+/** Cabinet shelves, in the order of the house. */
+const SHELVES: Array<{ room: SecretDef['room']; label: string }> = [...ROOM_LIST.map((r) => ({ room: r.id, label: r.label })), { room: 'anywhere', label: 'Anywhere' }];
 
 export default function SecretSpace() {
   const world = useWorld();
@@ -75,18 +79,32 @@ export default function SecretSpace() {
               {showHints ? 'Hide hints' : 'Show hints'}
             </button>
           </div>
-          <ul className={styles.shelves}>
-            {SECRETS.map((s) => {
-              const found = s.id in discoveries;
-              return (
-                <li key={s.id} className={styles.slot} data-found={found}>
-                  <span className={styles.glyph}>{found ? <Glyph name={s.glyph} /> : <span className={styles.q}>?</span>}</span>
-                  <span className={styles.slotName}>{found ? s.name : '???'}</span>
-                  {found ? <span className={styles.slotText}>{s.found}</span> : showHints ? <span className={styles.slotText}>{s.hint}</span> : null}
-                </li>
-              );
-            })}
-          </ul>
+          {/* one shelf per room; some hints stay folded until a related find */}
+          {SHELVES.map((shelf) => {
+            const items = SECRETS.filter((x) => x.room === shelf.room);
+            if (!items.length) return null;
+            const got = items.filter((x) => x.id in discoveries).length;
+            return (
+              <section key={shelf.room} className={styles.shelf} aria-label={`${shelf.label}: ${got} of ${items.length}`}>
+                <h3 className={styles.shelfTitle}>
+                  {shelf.label} <span>{got} / {items.length}</span>
+                </h3>
+                <ul className={styles.shelves}>
+                  {items.map((x) => {
+                    const found = x.id in discoveries;
+                    const folded = x.after !== undefined && !(x.after in discoveries);
+                    return (
+                      <li key={x.id} className={styles.slot} data-found={found}>
+                        <span className={styles.glyph}>{found ? <Glyph name={x.glyph} /> : <span className={styles.q}>?</span>}</span>
+                        <span className={styles.slotName}>{found ? x.name : '???'}</span>
+                        {found ? <span className={styles.slotText}>{x.found}</span> : showHints ? <span className={styles.slotText}>{folded ? 'Find something nearby first.' : x.hint}</span> : null}
+                      </li>
+                    );
+                  })}
+                </ul>
+              </section>
+            );
+          })}
         </div>
 
         <div className={styles.side}>
