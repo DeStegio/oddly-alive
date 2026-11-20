@@ -99,8 +99,8 @@ No backend, accounts, analytics or 3D.
 | Action | Clears |
 | --- | --- |
 | Reset Session | personality variables, active reactions, current-session counters |
-| Reset World | room object states, playground arrangement, transformations, After Hours toggle |
-| Clear Local Memory | everything stored in `localStorage` (visits, discoveries, counts, nickname, settings) and the live session |
+| Reset World | room object states, playground arrangement, transformations, After Hours toggle, garden beds and attic dress-up (letters, almanac, diary and personal bests stay) |
+| Clear Local Memory | everything stored in `localStorage` (visits, discoveries, counts, nickname, settings, keepsakes) and the live session |
 
 Shared links carry only a seed, room id and an arrangement — never memory.
 
@@ -114,12 +114,24 @@ implementation:
 | Plugins | `World.use({ onEvent, onTick })` | Memory, audio and the surprise director plug in without the world knowing about them. |
 | Event queue | `World.emit` | Follow-up events are queued breadth-first and depth-limited (`MAX_EVENT_DEPTH = 4`). |
 | Objects | `state/world.ts` | Per-room object slices addressed by string flags (`'living.lampOn'`) and type-checked against defaults. "Reset World" restores them. |
-| Memory | `engine/memory.ts`, `app/memorySync.ts` | Schema v2 with v1 migration, validation, an off switch, and a "forgotten" latch so Forget me stays forgotten. Sound is never restored. |
+| Memory | `engine/memory.ts`, `app/memorySync.ts`, `state/keepsakes.ts` | Schema v3 (Phase 2) adds `world` keepsakes: garden, letters, weather almanac, a capped diary, personal bests, attic. v1→v2→v3 migration. Schema v2 with v1 migration, validation, an off switch, and a "forgotten" latch so Forget me stays forgotten. Sound is never restored. |
 | Surprises | `engine/surpriseDirector.ts` | Rare events gated by activity, minimum interval, room, per-session limits and novelty; behaviors decide how they look. |
 | Audio | `engine/audio.ts`, `app/audioSync.ts` | Web Audio synthesis, created only after opt-in; actor-channel observers give characters voices. |
 | Sharing | `app/share.ts`, `app/postcard.ts`, `rooms/Playground/share.ts` | Seeded scene variants; links with allow-listed keys; SVG plus canvas postcard. |
 | Line variety | `behaviors/helpers.ts` `pickLine` | Characters don't repeat a line while fresher ones exist. |
 | Loading | `app/App.tsx` | Rooms are code-split, then prefetched when idle (physics last). |
+
+### Phase 2 additions
+
+| Area | Module | Notes |
+| --- | --- | --- |
+| Weather | `engine/weather.ts`, `app/weatherSync.ts`, `components/WeatherLayer.tsx` | Mood → weather map plus a 3-minute pin; `WEATHER_CHANGED`; `html[data-weather]`; CSS-only particles. |
+| Keepsakes | `state/keepsakes.ts` | Memory v3 `world`: garden, letters, almanac, diary, records, attic. |
+| Flights | `rooms/Playground/flight.ts` | Ballistics between the trays, Bip's landing prediction, lobs. |
+| Garden | `rooms/Garden/growth.ts` | Pure growth model (weather rates, away catch-up). |
+| Letters | `content/letters.ts`, `app/letters.ts` | `findLetter` keeps, notes, announces; finale in After Hours. |
+| Watchers | `app/watchers.ts` | Night Owl, Tourist, Homebody. |
+| Voice | `VOICE.md`, `content/__tests__/copy.test.ts` | |
 
 Behavior files: `character.ts` (moods, idle, tab return), `living.ts`,
 `playground.ts`, `mood.ts`, `secret.ts`, `rare.ts`, `memory.ts`,

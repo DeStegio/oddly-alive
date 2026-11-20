@@ -17,7 +17,7 @@ its cooldown and priority. It also says what it changes: actor commands,
 from `run`; the scheduler calls it on finish, cancel and room exit. Keyboard
 or touch alternatives are noted where they differ from the pointer.
 
-**Totals:** 110 of 110 are built: 55 `verified`, 55 `implemented`, 0 `deferred`.
+**Totals:** 110 of 110 are built: 55 `verified`, 55 `implemented`, 0 `deferred`. Phase 2 adds INT-111 … INT-136 (24 `verified`, 2 `implemented`).
 That is 125 registered behaviors in all, plus presentation-level reactions
 in components. Several ideas are deliberately small, e.g. INT-033. The
 "Notes" column calls out anything that is lighter than its name suggests.
@@ -183,3 +183,36 @@ Paths are relative to `src/`. `T:` lists the tests.
 | INT-108 | Reproducible scene seed | verified | `app/share.ts` `sceneVariant` | T: `share.test.ts`, E2E |
 | INT-109 | Share a visual arrangement | verified | `rooms/Playground/share.ts` | T: `Playground.test.tsx` |
 | INT-110 | Copyable scene link, no accounts | verified | `components/ShareSheet.tsx` | T: E2E share-link test |
+
+## K. Phase 2: weather, garden, attic, letters, volleyball
+
+Added in Phase 2 (`PHASE_2_PLAN.md`). Same legend as above.
+
+| ID | Behavior | Status | Where | Evidence / notes |
+| --- | --- | --- | --- | --- |
+| INT-111 | Hard throws leave the tray (count drops) | verified | `Playground.tsx` `throwOut`, `flight.ts` | T: `physics.test.ts`, `flight.test.ts`, E2E volleyball |
+| INT-112 | Bip runs under a throw and volleys it back | verified | `NextDoor.tsx`, `flight.ts` `predictHit` | T: `flight.test.ts`, E2E volleyball |
+| INT-113 | Rally: catch the return before it lands | implemented | `Playground.tsx` `checkRallyBall`, floaty ball | Rally of 2 reached in automated runs |
+| INT-114 | Throw straight up still arcs over to Bip | verified | `flight.ts` `throwToYard` | T: `flight.test.ts` |
+| INT-115 | House weather follows mood or a pin | verified | `engine/weather.ts`, `app/weatherSync.ts` | T: `weather.test.ts`, `weatherSync.test.tsx` |
+| INT-116 | Barometer pins weather; Nimbus refuses once when grumpy | verified | `MoodRoom/Barometer.tsx` | T: `MoodRoom.test.tsx` |
+| INT-117 | Almanac collects every weather seen | verified | `MoodRoom/Almanac.tsx`, keepsakes | T: `MoodRoom.test.tsx` |
+| INT-118 | Send Nimbus to rain on another room | verified | `components/NimbusVisitor.tsx` | T: `MoodRoom.test.tsx` |
+| INT-119 | Weather in the Playground (wind, slippery rain, snow caps, thunder) | verified | `physics.ts` `setEnvironment` | T: `physics.test.ts` |
+| INT-120 | Living Room window shows the weather; cast remarks | implemented | `LivingRoom/HouseWindow.tsx`, `living.weather.remark` | |
+| INT-121 | Garden grows in real time and while away | verified | `Garden/growth.ts` | T: `growth.test.ts`, `Garden.test.tsx` |
+| INT-122 | Moonflower only grows at night | verified | `growth.ts` `rate` | T: `growth.test.ts` |
+| INT-123 | Flowers go to the Living Room vase | verified | `Garden.tsx`, `HouseWindow.tsx` | T: `Garden.test.tsx`, `combos.test.ts` |
+| INT-124 | Radishes travel to the Playground | verified | `Garden.tsx`, Playground spawn | T: `Garden.test.tsx`, `combos.test.ts` |
+| INT-125 | Ceiling cord drops the attic ladder | verified | `LivingRoom/PullCord.tsx` | T: `Attic.test.tsx` |
+| INT-126 | Boxes, hats and Marguerite | verified | `Attic/Attic.tsx`, `Marguerite.tsx` | T: `Attic.test.tsx` |
+| INT-127 | House Diary written from this browser | verified | `Attic/Diary.tsx`, keepsakes `diary` | T: `Attic.test.tsx`, `keepsakes.test.ts` |
+| INT-128 | Gramophone waltz (opt-in sound) | verified | `engine/audio.ts` `waltz` | T: `Attic.test.tsx` (discovery) |
+| INT-129 | Eight letters, one per room | verified | `content/letters.ts`, `app/letters.ts` | T: `letters.test.tsx` |
+| INT-130 | Trunk reads letters, hints at missing ones | verified | `Attic/Trunk.tsx` | T: `letters.test.tsx` |
+| INT-131 | Rooftop finale after all letters | verified | `AfterHours/RooftopParty.tsx` | T: `letters.test.tsx` |
+| INT-132 | Visit-shaped discoveries (night owl, tourist, homebody) | verified | `app/watchers.ts` | T: `watchers.test.ts` |
+| INT-133 | Patient / Gentle Hands | verified | `character.ts` `idle.long`, `living.ts` `pim.gentle` | T: `world.test.ts`, `SecretSpace.test.tsx` |
+| INT-134 | Layered hints, cabinet by room | verified | `content/secrets.ts` `after`, `SecretSpace.tsx` | T: `SecretSpace.test.tsx` |
+| INT-135 | Rooms notice each other (vase, radish, Dot on weather) | verified | `behaviors/combos.ts` | T: `combos.test.ts` |
+| INT-136 | Copy lint keeps the voice human | verified | `content/__tests__/copy.test.ts`, `VOICE.md` | T: `copy.test.ts` |

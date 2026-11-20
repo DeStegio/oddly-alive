@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { findLetter } from '../../app/letters';
 import { Link } from 'react-router-dom';
 import { clearMemory, composeMemory, getMemoryManager, resetSession, resetWorld, setMemoryEnabled } from '../../app/memorySync';
 import { ROOMS } from '../../app/rooms';
@@ -64,6 +65,11 @@ export default function MemoryRoom() {
   const [confirm, setConfirm] = useState(false);
   const [showRaw, setShowRaw] = useState(false);
   const [notice, setNotice] = useState('');
+  // a letter comes by post on the third visit
+  const visits = s.visits;
+  useEffect(() => {
+    if (visits >= 3) findLetter(world, 'memory');
+  }, [visits, world]);
 
   const lifetime = useMemo(() => mergeCounts(s.pastCounts, Object.fromEntries(Object.entries(s.counts).filter(([k]) => !k.startsWith('hover:')))), [s.pastCounts, s.counts]);
   const favorites = Object.entries(lifetime)
@@ -183,8 +189,10 @@ export default function MemoryRoom() {
             <li>totals of a few interaction kinds, rooms visited, the last room</li>
             <li>how much the house trusts you (a number between 0 and 1)</li>
             <li>your motion and After Hours settings (sound always starts off)</li>
+            <li>keepsakes: what grows in the garden, letters found, kinds of weather seen, personal bests</li>
+            <li>a short house diary (up to 40 lines) with the date of a few big moments, like a first discovery</li>
           </ul>
-          <p className={styles.small}>Never stored: where your pointer went, what you typed, timestamps of actions, anything about you.</p>
+          <p className={styles.small}>Never stored: where your pointer went, what you typed, a log of everything you did, anything about you.</p>
 
           <label className={styles.toggle}>
             <input

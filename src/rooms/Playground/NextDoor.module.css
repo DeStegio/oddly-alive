@@ -1,0 +1,191 @@
+/* Bip's yard: a second paper tray, the same size as the Playground's.
+   --s is the shared world scale, set by the Playground. */
+.yard {
+  position: relative;
+  border: var(--stroke) solid var(--ink);
+  border-radius: var(--radius-lg);
+  background:
+    radial-gradient(circle at 1px 1px, color-mix(in srgb, var(--ink) 14%, transparent) 1.2px, transparent 1.4px) 0 0 / 28px 28px,
+    color-mix(in srgb, var(--mint) 22%, var(--paper));
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  min-height: 160px;
+}
+/* the ground, as thick as the Playground's */
+.yard::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: calc(20px * var(--s, 1));
+  background: var(--floor);
+  border-top: var(--stroke) solid var(--char-ink);
+  pointer-events: none;
+}
+
+.label {
+  position: absolute;
+  top: 12px;
+  left: 16px;
+  font-family: var(--font-ui);
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+.score {
+  position: absolute;
+  top: 10px;
+  right: 14px;
+  padding: 3px 10px;
+  border: 2px solid var(--ink);
+  border-radius: var(--radius-pill);
+  background: var(--paper);
+  font-size: var(--fs-xs);
+  font-variant-numeric: tabular-nums;
+  box-shadow: var(--shadow-sm);
+}
+.score strong {
+  font-family: var(--font-display);
+  font-size: 1.05em;
+}
+
+/* a little picket fence on the side facing the Playground */
+.fence {
+  position: absolute;
+  left: 10px;
+  bottom: calc(20px * var(--s, 1));
+  width: 64px;
+  height: 46px;
+  background:
+    linear-gradient(var(--cut-paper), var(--cut-paper)) 0 14px / 100% 6px no-repeat,
+    repeating-linear-gradient(90deg, var(--cut-paper) 0 10px, transparent 10px 16px);
+  filter: drop-shadow(0 0 0.8px var(--char-ink)) drop-shadow(0 0 0.8px var(--char-ink));
+  pointer-events: none;
+}
+
+/* ---------------------------------------------------------------- Bip */
+.bip {
+  position: absolute;
+  left: 62%;
+  bottom: calc(20px * var(--s, 1) - 2px);
+  width: max(64px, calc(150px * var(--s, 1)));
+  translate: -50% 0;
+  z-index: 2;
+}
+/* speech sits to Bip's left */
+.bubble {
+  z-index: var(--z-bubbles);
+  left: 0;
+  bottom: 70%;
+}
+.hit {
+  width: 100%;
+}
+.svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  transform-origin: 50% 100%;
+  animation: bip-idle 2.8s var(--ease-in-out) infinite alternate;
+}
+@keyframes bip-idle {
+  to {
+    transform: translateY(-2px) rotate(1deg);
+  }
+}
+/* leaning into the roll */
+.bip[data-rolling='true'][data-dir='right'] .svg {
+  animation: none;
+  transform: rotate(6deg);
+}
+.bip[data-rolling='true'][data-dir='left'] .svg {
+  animation: none;
+  transform: rotate(-6deg);
+}
+.wheel {
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+}
+.bip[data-rolling='true'] .wheel {
+  animation: wheel-spin 300ms linear infinite;
+}
+.bip[data-rolling='true'][data-dir='left'] .wheel {
+  animation-direction: reverse;
+}
+@keyframes wheel-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+/* the volley: a hop and a swing */
+.bip[data-anim='volley'] .svg {
+  animation: bip-volley 320ms var(--ease-out);
+}
+@keyframes bip-volley {
+  35% {
+    transform: translateY(-16%) scale(1.04, 0.97);
+  }
+}
+
+.faceReady,
+.faceHappy,
+.faceWorried {
+  display: none;
+}
+.bip:not([data-mood='idle']) .faceIdle {
+  display: none;
+}
+.bip[data-mood='ready'] .faceReady,
+.bip[data-mood='happy'] .faceHappy,
+.bip[data-mood='worried'] .faceWorried {
+  display: inline;
+}
+
+.bulb {
+  fill: var(--coral);
+  transition: fill var(--dur-ui);
+}
+.bip[data-mood='ready'] .bulb,
+.bip[data-anim='volley'] .bulb {
+  fill: var(--yellow);
+}
+
+/* arms: up when ready or holding, a sharp swing on the volley */
+.armL,
+.armR {
+  transform-box: fill-box;
+  transition: transform 140ms var(--ease-out);
+}
+.armL {
+  transform-origin: 100% 100%;
+}
+.armR {
+  transform-origin: 0 100%;
+}
+.bip[data-mood='ready'] .armL,
+.bip[data-holding='true'] .armL {
+  transform: rotate(32deg) translateY(-6px);
+}
+.bip[data-mood='ready'] .armR,
+.bip[data-holding='true'] .armR {
+  transform: rotate(-32deg) translateY(-6px);
+}
+.bip[data-anim='volley'] .armL {
+  transform: rotate(48deg) translateY(-10px);
+}
+.bip[data-anim='volley'] .armR {
+  transform: rotate(-48deg) translateY(-10px);
+}
+
+/* something held overhead (when your floor is full) */
+.held {
+  position: absolute;
+  left: 50%;
+  bottom: 92%;
+  translate: -50% 0;
+  pointer-events: none;
+}

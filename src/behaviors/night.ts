@@ -72,7 +72,7 @@ export const nightBehaviors = [
     chance: 0.3,
     cooldownMs: 8000,
     when: (c) => changed(c, 'sky', 'link'),
-    react: (c) => act('pim', 1800, () => void say(c, 'pim', ['ooh, a line.', 'connect the dots! literally.'], 1600), { ambient: true }),
+    react: (c) => act('pim', 1800, () => void say(c, 'pim', ['ooh. a line.', 'keep going. it looks like a saucepan so far.'], 1600), { ambient: true }),
   }),
   defineBehavior({
     id: 'night.constellation',
@@ -96,7 +96,7 @@ export const nightBehaviors = [
     rooms: NIGHT,
     priority: Priority.RARE,
     when: (c) => (c.event.payload as { event: string }).event === 'shooting-star',
-    react: (c) => act('pim', 2400, (ctl) => ctl.after(400, () => say(c, 'pim', ['a shooting star! make a wish!', 'did you see that?!'], 2200))),
+    react: (c) => act('pim', 2400, (ctl) => ctl.after(400, () => say(c, 'pim', ['a shooting star! make a wish!', 'did you see that? over the chimney.'], 2200))),
   }),
   defineBehavior({
     id: 'night.welcome',

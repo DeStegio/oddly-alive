@@ -1,5 +1,6 @@
 import type { RoomId } from '../app/rooms';
 import type { ActorId, Mood } from './types';
+import type { Weather } from './weather';
 
 /** Identifier of anything that can be interacted with: 'pim', 'lamp', 'shape:3'… */
 export type ObjectId = string;
@@ -40,6 +41,7 @@ export interface EventPayloads {
   ROOM_ENTERED: { room: RoomId; from: RoomId | null; visits: number };
   ROOM_EXITED: { room: RoomId; dwellMs: number };
   MOOD_CHANGED: { from: Mood; to: Mood };
+  WEATHER_CHANGED: { from: Weather; to: Weather; pinned: boolean };
   SECRET_DISCOVERED: { secret: string; firstTime: boolean };
   CHARACTER_INTERACTED: { a: ActorId; b: ActorId; kind: string };
   MEMORY_RESTORED: { visits: number; returning: boolean; awayMs: number };

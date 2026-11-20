@@ -1,0 +1,191 @@
+/* a sheet of notebook paper pinned beside the tray */
+.notes {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  padding: var(--sp-5) var(--sp-5) var(--sp-4);
+  border: var(--stroke) solid var(--ink);
+  border-radius: var(--radius-lg);
+  background:
+    repeating-linear-gradient(
+        transparent 0 27px,
+        color-mix(in srgb, var(--blue) 14%, transparent) 27px 28px
+      )
+      0 64px / 100% 100% no-repeat,
+    var(--paper);
+  box-shadow: var(--shadow-md);
+  rotate: 0.6deg;
+}
+/* a strip of tape holding it up */
+.notes::before {
+  content: '';
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  width: 86px;
+  height: 24px;
+  translate: -50% 0;
+  rotate: -3deg;
+  background: color-mix(in srgb, var(--yellow) 70%, transparent);
+  border: 1.5px solid color-mix(in srgb, var(--ink) 25%, transparent);
+  border-radius: 3px;
+}
+
+.head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0 var(--sp-3);
+}
+.title {
+  font-size: var(--fs-xl);
+}
+.byline {
+  font-size: var(--fs-xs);
+  color: var(--ink-soft);
+  font-style: italic;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(78px, 1fr));
+  gap: var(--sp-2);
+  margin: 0;
+}
+.stats > div {
+  padding: var(--sp-2) var(--sp-3);
+  border: 2px solid var(--ink);
+  border-radius: var(--radius-md);
+  background: var(--canvas);
+}
+.stats dt {
+  font-size: var(--fs-xs);
+  color: var(--ink-soft);
+  line-height: 1.2;
+}
+.stats dd {
+  margin: 2px 0 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-lg);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+
+.goals {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+.goalsHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+.goalsTitle {
+  font-size: var(--fs-lg);
+}
+.progress {
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.bar {
+  height: 10px;
+  border: 2px solid var(--ink);
+  border-radius: var(--radius-pill);
+  background: var(--canvas);
+  overflow: hidden;
+}
+.bar > span {
+  display: block;
+  height: 100%;
+  background: var(--mint);
+  border-right: 2px solid var(--ink);
+  transition: width var(--dur-char) var(--ease-spring);
+}
+.bar > span[style*='width: 0%'] {
+  border-right: 0;
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.goal {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-size: var(--fs-sm);
+  line-height: 1.3;
+}
+.goal[data-done='true'] > span {
+  text-decoration: line-through;
+  text-decoration-thickness: 2px;
+  text-decoration-color: var(--coral);
+}
+.box {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  overflow: visible;
+}
+.box rect {
+  fill: var(--paper);
+  stroke: var(--ink);
+  stroke-width: 2;
+}
+.goal[data-done='true'] .box rect {
+  fill: var(--yellow);
+}
+.tick {
+  fill: none;
+  stroke: var(--char-ink);
+  stroke-width: 2.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 20;
+  animation: tick-draw 420ms var(--ease-out) both;
+}
+@keyframes tick-draw {
+  from {
+    stroke-dashoffset: 20;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+.allDone {
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--blue-ink);
+}
+
+.tip {
+  margin-top: auto;
+  font-size: var(--fs-xs);
+  color: var(--ink-soft);
+}
+.tipTag {
+  display: inline-block;
+  margin-right: 4px;
+  padding: 1px 7px;
+  border-radius: var(--radius-pill);
+  background: var(--ink);
+  color: var(--canvas);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.7rem;
+}
+
+[data-motion='reduced'] .notes,
+[data-motion='reduced'] .notes::before {
+  rotate: none;
+}

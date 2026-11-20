@@ -46,3 +46,30 @@ Short architecture/design decision log. Newest at the bottom.
     that spec (its screencast alone halved the frame rate).
 16. **Deployment via a `gh-pages` branch**, built with `BASE_PATH`. Hash
     routing means no SPA rewrites are needed.
+
+## Phase 2
+
+17. **Weather is derived, not stored.** It follows the mood unless the Mood
+    Room barometer pins it for three minutes. Rain and snow only come from a
+    pin, which gives the barometer a reason to exist.
+18. **Flights outside the trays are hand-integrated, not Matter.** A thrown
+    shape leaves the physics world and flies on a small, tested integrator
+    (`flight.ts`) that Bip also uses to predict where it will come down;
+    it rejoins Matter when it lands back in the tray. Sub-stepping keeps
+    slow frames from tunnelling through the net or Bip's reach.
+19. **Keepsakes are the only new persistence.** Memory v3 adds one validated
+    `world` section (garden, letters, almanac, a 40-line diary, personal
+    bests, attic) with v1/v2 migration. Reset World tidies garden beds and
+    attic dress-up; letters, almanac, diary and bests stay.
+20. **The garden catches up on the way in.** Growth is a pure function of
+    elapsed time; time away is applied once when the Garden opens, at half
+    speed and capped, so a return visit has a payoff without a timer
+    running in the background.
+21. **Nothing new is gated.** The Attic is unlisted until its cord is pulled,
+    but its address always works; the cord appears after three discoveries
+    or five minutes.
+22. **The voice is tested where it can be.** `copy.test.ts` rejects formula
+    sentences, banned words, long bubbles, em-dash habits and duplicates;
+    `VOICE.md` covers the rest.
+23. **Discoveries are a cabinet, not a checklist.** Deeper secrets keep their
+    hint folded until a related find; shelves are grouped by room.

@@ -1,7 +1,7 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
 
-const ROOMS = ['', 'playground', 'mood', 'secret', 'memory', 'after-hours'];
+const ROOMS = ['', 'playground', 'garden', 'mood', 'secret', 'memory', 'after-hours', 'attic'];
 
 for (const room of ROOMS) {
   test(`no serious accessibility violations: ${room || 'living'}`, async ({ page }) => {

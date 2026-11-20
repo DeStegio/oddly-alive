@@ -1,0 +1,316 @@
+.room {
+  position: relative;
+  min-height: 100vh;
+  min-height: 100svh;
+  padding: calc(var(--nav-h) + 2vh) var(--gutter) var(--sp-7);
+  overflow: hidden;
+  isolation: isolate;
+}
+.head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--sp-3) var(--sp-6);
+}
+.blurb {
+  max-width: 40ch;
+  color: var(--ink-soft);
+  font-size: var(--fs-md);
+  padding-bottom: 0.6em;
+}
+
+/* ---------- seed tin ---------- */
+.tools {
+  margin-top: var(--sp-5);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+  align-items: stretch;
+}
+.tin {
+  flex-basis: 100%;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: var(--fs-sm);
+  color: var(--ink-soft);
+}
+.packet {
+  appearance: none;
+  text-align: left;
+  font: inherit;
+  color: var(--ink);
+  background: var(--paper);
+  border: 2px solid var(--ink);
+  border-radius: var(--radius-md);
+  padding: 8px 12px 9px 26px;
+  width: 168px;
+  position: relative;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  touch-action: manipulation;
+  transition:
+    transform var(--dur-tap) var(--ease-out),
+    background-color var(--dur-ui);
+}
+.packet::before {
+  content: '';
+  position: absolute;
+  left: 9px;
+  top: 12px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid var(--char-ink);
+  background: var(--packet, var(--mint));
+}
+.packet[data-kind='sunflower'] {
+  --packet: var(--yellow);
+}
+.packet[data-kind='radish'],
+.packet[data-kind='snapdragon'] {
+  --packet: var(--coral);
+}
+.packet[data-kind='moonflower'] {
+  --packet: var(--cut-paper);
+}
+.can {
+  --packet: var(--blue);
+}
+.packet:hover {
+  transform: translateY(-2px);
+}
+.packet[aria-pressed='true'] {
+  background: var(--yellow);
+  color: #24232b;
+  transform: translateY(-3px) rotate(-1deg);
+}
+.packetName {
+  display: block;
+  font-weight: 700;
+  font-size: var(--fs-sm);
+}
+.packetNote {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.74rem;
+  line-height: 1.3;
+  color: inherit;
+  opacity: 0.85;
+}
+
+/* ---------- the garden itself ---------- */
+.scene {
+  position: relative;
+  margin-top: var(--sp-5);
+  height: clamp(380px, 52vh, 560px);
+  border: var(--stroke) solid var(--ink);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+  background: linear-gradient(to bottom, var(--garden-sky, #cfe0ff) 0 52%, #8fc49b 52% 100%);
+  transition: background var(--dur-scene) var(--ease-in-out);
+}
+.scene[data-weather='rain'],
+.scene[data-weather='storm'] {
+  --garden-sky: #a9b6cf;
+}
+.scene[data-weather='fog'] {
+  --garden-sky: #dcd8e0;
+}
+.scene[data-weather='snow'] {
+  --garden-sky: #e3e9f2;
+}
+.scene[data-weather='sunny'] {
+  --garden-sky: #ffe9a8;
+}
+.room[data-night='true'] .scene {
+  --garden-sky: #2a2840;
+}
+.sky {
+  position: absolute;
+  inset: 0 0 48% 0;
+}
+.fence {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 38%;
+  height: 18%;
+  background:
+    linear-gradient(var(--cut-paper), var(--cut-paper)) 0 30% / 100% 8px no-repeat,
+    repeating-linear-gradient(90deg, var(--cut-paper) 0 22px, transparent 22px 34px);
+  filter: drop-shadow(0 0 1px var(--char-ink)) drop-shadow(0 0 1px var(--char-ink));
+}
+.bip {
+  position: absolute;
+  right: 7%;
+  top: calc(38% - 46px);
+  width: 76px;
+  z-index: 2;
+}
+.bipHit {
+  width: 100%;
+}
+.bipHit svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* three raised beds of two plots */
+.beds {
+  list-style: none;
+  margin: 0;
+  padding: 0 4%;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 9%;
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  column-gap: 1.2%;
+  align-items: end;
+}
+.plotWrap {
+  position: relative;
+}
+.plotWrap[data-bed='1'],
+.plotWrap[data-bed='2'] {
+  margin-left: 0;
+}
+.plotWrap:nth-child(3),
+.plotWrap:nth-child(5) {
+  margin-left: 18%;
+}
+.plotWrap:nth-child(2),
+.plotWrap:nth-child(4) {
+  margin-right: 18%;
+}
+/* the wooden edge of each bed */
+.plotWrap::after {
+  content: '';
+  position: absolute;
+  left: -6%;
+  right: -6%;
+  bottom: -14px;
+  height: 18px;
+  background: #b98a5e;
+  border: 2.5px solid var(--char-ink);
+  border-radius: 5px;
+  z-index: 0;
+}
+.plot {
+  appearance: none;
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.soil {
+  position: absolute;
+  left: 4%;
+  right: 4%;
+  bottom: 0;
+  height: 16%;
+  background: #6b4f3a;
+  border: 2.5px solid var(--char-ink);
+  border-radius: 40% 40% 6px 6px;
+  z-index: -1;
+}
+.plantSvg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.plot[data-stage='empty']:hover .soil {
+  background: #7a5b43;
+}
+.plot[data-stage='4'] .plantSvg {
+  animation: bloom-sway 3.6s var(--ease-in-out) infinite alternate;
+  transform-origin: 50% 92%;
+}
+@keyframes bloom-sway {
+  to {
+    transform: rotate(3deg);
+  }
+}
+.head {
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+}
+.moon {
+  filter: drop-shadow(0 0 0 transparent);
+  transition: filter var(--dur-scene);
+}
+.room[data-night='true'] .moon {
+  filter: drop-shadow(0 0 10px rgba(255, 250, 241, 0.9));
+}
+.plot:hover .jaw,
+.plot:focus-visible .jaw {
+  animation: snap 360ms var(--ease-spring) 2;
+  transform-box: fill-box;
+  transform-origin: 50% 0;
+}
+@keyframes snap {
+  50% {
+    transform: scaleY(0.4);
+  }
+}
+
+.inch {
+  position: absolute;
+  bottom: 1.5%;
+  left: 4%;
+  width: 70px;
+  z-index: 3;
+  animation: inch-commute 46s linear infinite alternate;
+}
+@keyframes inch-commute {
+  to {
+    left: calc(96% - 70px);
+  }
+}
+
+@media (max-width: 720px) {
+  .packet {
+    width: calc(50% - 4px);
+  }
+  .scene {
+    height: auto;
+    min-height: 420px;
+    /* two rows of beds: the lawn starts higher */
+    background: linear-gradient(to bottom, var(--garden-sky, #cfe0ff) 0 26%, #8fc49b 26% 100%);
+  }
+  .sky {
+    inset: 0 0 74% 0;
+  }
+  .beds {
+    grid-template-columns: repeat(3, 1fr);
+    row-gap: 34px;
+    column-gap: 5%;
+    bottom: 10%;
+  }
+  .plotWrap:nth-child(n) {
+    margin: 0;
+  }
+  .fence {
+    top: 18%;
+    height: 12%;
+  }
+  .bip {
+    top: calc(18% - 40px);
+    width: 60px;
+  }
+}
+[data-motion='reduced'] .inch,
+[data-motion='reduced'] .plot[data-stage='4'] .plantSvg {
+  animation: none !important;
+}

@@ -1,4 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
+import { allLettersFound } from '../../app/letters';
+import { useKeepsakes } from '../../state/keepsakes';
+import { RooftopParty } from './RooftopParty';
+import { findLetter } from '../../app/letters';
 import { useWorld } from '../../app/worldInstance';
 import { Pim } from '../../characters/Pim';
 import { ThoughtBubble } from '../../characters/ThoughtBubble';
@@ -11,9 +15,16 @@ import { pointer } from '../../engine/pointer';
 import { useSettings } from '../../state/settings';
 import { useObjects } from '../../state/world';
 import { CONSTELLATION_SIZE, MAX_LINKS, STARS, constellationName, largestGroup, linkKey, type Link } from './sky';
+import { WeatherLayer } from '../../components/WeatherLayer';
+import { useWeather } from '../../components/useWeather';
+import type { Weather } from '../../engine/weather';
 import styles from './AfterHours.module.css';
 
+const NIGHT_WEATHER = new Set<Weather>(['rain', 'snow', 'storm', 'fog', 'windy']);
+
 export default function AfterHours() {
+  const weather = useWeather();
+  const party = useKeepsakes((k) => allLettersFound(k.letters));
   const world = useWorld();
   const after = useObjects((s) => s.after);
   const setSlice = useObjects((s) => s.setSlice);
@@ -82,6 +93,7 @@ export default function AfterHours() {
       setNamed(name);
       setSlice('after', { constellations: after.constellations + 1 });
       world.emit('OBJECT_STATE_CHANGED', { target: 'sky', key: 'constellation', value: name });
+      if (after.radioOn) findLetter(world, 'after-hours');
     }
   };
 
@@ -98,6 +110,8 @@ export default function AfterHours() {
     <section className={styles.room} data-light={after.lightOn} data-radio={after.radioOn} aria-labelledby="ah-title">
       <StarTrail />
       <div ref={skyRef} className={styles.sky}>
+        {/* the house weather, where it makes sense at night */}
+        {NIGHT_WEATHER.has(weather) ? <WeatherLayer variant="ambient" /> : null}
         <svg className={styles.lines} viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
           {links.map(([a, b]) => (
             <line key={linkKey(a, b)} x1={STARS[a]!.x} y1={STARS[a]!.y} x2={STARS[b]!.x} y2={STARS[b]!.y} className={styles.link} />
@@ -154,6 +168,8 @@ export default function AfterHours() {
 
       {/* the rooftop */}
       <div className={styles.roof}>
+        {/* the finale: after all eight letters, everyone comes up */}
+        {party ? <RooftopParty /> : null}
         <div className={styles.neon} aria-hidden="true">
           open <em>late</em>
         </div>

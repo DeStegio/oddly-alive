@@ -42,6 +42,15 @@ export const ShapeView = memo(function ShapeView({ kind }: { kind: ShapeKind }) 
       </svg>
     );
   }
+  if (kind === 'radish') {
+    return (
+      <svg viewBox={`0 0 ${w} ${h}`} className={styles.shapeSvg} aria-hidden="true">
+        <path d={`M${w / 2} 12 q -10 -10 -16 -8 M${w / 2} 12 q 2 -12 10 -12 M${w / 2} 12 q 10 -6 14 0`} fill="none" stroke="#3f7a52" strokeWidth="3.5" strokeLinecap="round" />
+        <path d={`M${w / 2} 12 C ${w - 2} 14 ${w - 2} ${h - 14} ${w / 2} ${h - 2} C 2 ${h - 14} 2 14 ${w / 2} 12 Z`} fill={s.color} {...INK} />
+        <Face cx={w / 2} cy={h / 2 + 2} scale={0.75} />
+      </svg>
+    );
+  }
   if (kind === 'balloon') {
     return (
       <svg viewBox={`0 0 ${w} ${h}`} className={styles.shapeSvg} aria-hidden="true">

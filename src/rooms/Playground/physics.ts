@@ -2,7 +2,8 @@ import Matter from 'matter-js';
 
 const { Engine, Bodies, Body, Composite, Constraint, Events, Sleeping, Vector } = Matter;
 
-export const SHAPE_KINDS = ['ball', 'block', 'pebble', 'balloon', 'domino', 'pill', 'key'] as const;
+// order matters for share links: only ever append
+export const SHAPE_KINDS = ['ball', 'block', 'pebble', 'balloon', 'domino', 'pill', 'key', 'radish'] as const;
 export type ShapeKind = (typeof SHAPE_KINDS)[number];
 
 export interface ShapeSpec {
@@ -27,6 +28,7 @@ export const SHAPES: Record<ShapeKind, ShapeSpec> = {
   balloon: { w: 64, h: 76, color: 'var(--yellow)', circle: true, density: 0.0005, restitution: 0.5, friction: 0.05, buoyant: true, label: 'a floaty yellow balloon' },
   domino: { w: 24, h: 118, color: 'var(--mint)', chamfer: 4, density: 0.0022, restitution: 0.05, friction: 0.4, label: 'a tall mint domino' },
   pill: { w: 118, h: 48, color: 'var(--yellow)', chamfer: 24, density: 0.0016, restitution: 0.3, friction: 0.3, label: 'a yellow pill-shaped cushion' },
+  radish: { w: 46, h: 56, color: 'var(--coral)', circle: true, density: 0.0012, restitution: 0.45, friction: 0.2, label: 'a radish from the garden' },
   key: { w: 84, h: 36, color: '#e9b949', chamfer: 8, density: 0.0018, restitution: 0.2, friction: 0.5, label: 'a small golden key' },
 };
 
@@ -89,6 +91,20 @@ export interface SimBody {
   body: Matter.Body;
 }
 
+/** A drag released faster than this (logical px/ms) is thrown out of the tray. */
+export const EJECT_SPEED = 2.0;
+/** Matter's default gravity, expressed in logical px/ms² (used for flights outside the sim). */
+export const GRAVITY = 0.001;
+
+/** Weather in the tray: sideways wind (fraction of gravity), floor grip, gravity strength. */
+export interface Environment {
+  wind: number;
+  slip: number;
+  gravity: number;
+}
+
+export const CALM: Environment = { wind: 0, slip: 1, gravity: 1 };
+
 export interface CollisionInfo {
   a: SimBody;
   b: SimBody | null;
@@ -106,10 +122,13 @@ export class PlaygroundSim {
   private shapes = new Map<number, SimBody>();
   private byBody = new Map<number, SimBody>();
   private nextId = 1;
-  private drag: { constraint: Matter.Constraint; shape: SimBody; startedAt: number; start: Matter.Vector; last: Matter.Vector; lastT: number; speed: number } | null = null;
+  private drag: { constraint: Matter.Constraint; shape: SimBody; startedAt: number; start: Matter.Vector; last: Matter.Vector; lastT: number; speed: number; vel: Matter.Vector } | null = null;
   private acc = 0;
   private static readonly STEP = 1000 / 60;
   onCollision: ((c: CollisionInfo) => void) | null = null;
+  /** Shapes that fall slower than gravity says (0..1 of gravity cancelled). */
+  private floaty = new Map<number, number>();
+  private env: Environment = { ...CALM };
 
   constructor(layout: Layout) {
     this.layout = layout;
@@ -159,7 +178,7 @@ export class PlaygroundSim {
   spawn(kind: ShapeKind, x: number, y: number, angle = 0): SimBody | null {
     if (this.shapes.size >= MAX_BODIES) return null;
     const s = SHAPES[kind];
-    const common = { density: s.density, restitution: s.restitution, friction: s.friction, frictionAir: s.buoyant ? 0.04 : 0.01, angle, label: kind, sleepThreshold: 90 };
+    const common = { density: s.density, restitution: s.restitution, friction: s.friction * this.env.slip, frictionAir: s.buoyant ? 0.04 : 0.01, angle, label: kind, sleepThreshold: 90 };
     const body = s.circle
       ? Bodies.circle(x, y, s.w / 2, common)
       : Bodies.rectangle(x, y, s.w, s.h, s.chamfer ? { ...common, chamfer: { radius: s.chamfer } } : common);
@@ -175,6 +194,7 @@ export class PlaygroundSim {
     if (!s) return;
     if (this.drag?.shape.id === id) this.endDrag();
     Composite.remove(this.engine.world, s.body);
+    this.floaty.delete(id);
     this.shapes.delete(id);
     this.byBody.delete(s.body.id);
   }
@@ -185,9 +205,14 @@ export class PlaygroundSim {
     let steps = 0;
     while (this.acc >= PlaygroundSim.STEP && steps < 4) {
       for (const s of this.shapes.values()) {
-        if (SHAPES[s.kind].buoyant && !s.body.isSleeping) {
+        if (this.env.wind && !s.body.isSleeping) {
           const g = this.engine.gravity;
-          Body.applyForce(s.body, s.body.position, { x: 0, y: -s.body.mass * g.y * g.scale * 1.08 });
+          Body.applyForce(s.body, s.body.position, { x: s.body.mass * g.scale * this.env.wind, y: 0 });
+        }
+        const lift = SHAPES[s.kind].buoyant ? 1.08 : (this.floaty.get(s.id) ?? 0);
+        if (lift && !s.body.isSleeping) {
+          const g = this.engine.gravity;
+          Body.applyForce(s.body, s.body.position, { x: 0, y: -s.body.mass * g.y * g.scale * lift });
         }
       }
       Engine.update(this.engine, PlaygroundSim.STEP);
@@ -214,31 +239,78 @@ export class PlaygroundSim {
       length: 0,
     });
     Composite.add(this.engine.world, constraint);
-    this.drag = { constraint, shape: s, startedAt: now, start: { x, y }, last: { x, y }, lastT: now, speed: 0 };
+    this.drag = { constraint, shape: s, startedAt: now, start: { x, y }, last: { x, y }, lastT: now, speed: 0, vel: { x: 0, y: 0 } };
   }
 
   moveDrag(x: number, y: number, now: number) {
     if (!this.drag) return;
     const d = this.drag;
     const dt = Math.max(1, now - d.lastT);
-    const inst = Vector.magnitude(Vector.sub({ x, y }, d.last)) / dt;
+    const step = Vector.div(Vector.sub({ x, y }, d.last), dt);
+    const inst = Vector.magnitude(step);
     d.speed = d.speed * 0.6 + inst * 0.4;
+    d.vel = Vector.add(Vector.mult(d.vel, 0.6), Vector.mult(step, 0.4));
     d.last = { x, y };
     d.lastT = now;
     d.constraint.pointA = { x, y };
   }
 
   /** Release; the body keeps its momentum (INT-061). Returns drag stats. */
-  endDrag(): { shape: SimBody; speed: number; distance: number } | null {
+  endDrag(): { shape: SimBody; speed: number; distance: number; direction: Matter.Vector } | null {
     if (!this.drag) return null;
     const d = this.drag;
     Composite.remove(this.engine.world, d.constraint);
     this.drag = null;
-    return { shape: d.shape, speed: d.speed, distance: Vector.magnitude(Vector.sub(d.last, d.start)) };
+    const m = Vector.magnitude(d.vel);
+    const direction = m > 0 ? Vector.div(d.vel, m) : { x: 0, y: 0 };
+    return { shape: d.shape, speed: d.speed, distance: Vector.magnitude(Vector.sub(d.last, d.start)), direction };
   }
 
   get dragging(): number | null {
     return this.drag?.shape.id ?? null;
+  }
+
+  /**
+   * Add a shape that arrives already moving (something thrown in from outside).
+   * Velocity is in logical px/ms. Null when the floor is full.
+   */
+  launch(kind: ShapeKind, x: number, y: number, vx: number, vy: number, angle = 0, spin = 0): SimBody | null {
+    const s = this.spawn(kind, x, y, angle);
+    if (!s) return null;
+    const STEP = PlaygroundSim.STEP;
+    Body.setVelocity(s.body, { x: vx * STEP, y: vy * STEP });
+    Body.setAngularVelocity(s.body, spin * STEP);
+    return s;
+  }
+
+  /**
+   * Make a shape float like a volleyball (less gravity, more air drag, so it
+   * hangs and drops roughly where it looks like it will), or 0 to undo.
+   */
+  setFloaty(id: number, lift: number) {
+    const s = this.shapes.get(id);
+    if (!s) return;
+    if (lift > 0) {
+      this.floaty.set(id, Math.min(0.9, lift));
+      s.body.frictionAir = 0.04;
+    } else {
+      this.floaty.delete(id);
+      s.body.frictionAir = SHAPES[s.kind].buoyant ? 0.04 : 0.01;
+    }
+  }
+
+  /** Change the weather in the tray (Phase 2). Wakes everything so the change shows. */
+  setEnvironment(e: Partial<Environment>) {
+    this.env = { ...this.env, ...e };
+    this.engine.gravity.y = this.env.gravity;
+    for (const s of this.shapes.values()) {
+      s.body.friction = SHAPES[s.kind].friction * this.env.slip;
+      Sleeping.set(s.body, false);
+    }
+  }
+
+  get environment(): Environment {
+    return this.env;
   }
 
   // ------------------------------------------------------------- impulses
@@ -329,6 +401,7 @@ export class PlaygroundSim {
     Engine.clear(this.engine);
     this.shapes.clear();
     this.byBody.clear();
+    this.floaty.clear();
     this.onCollision = null;
   }
 }

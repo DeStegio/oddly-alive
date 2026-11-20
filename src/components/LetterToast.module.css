@@ -1,0 +1,27 @@
+.right {
+  left: auto;
+  right: var(--gutter);
+}
+/* an envelope, not a sticky note */
+.letter {
+  background: #fffaf1;
+  rotate: 1.5deg;
+  border-style: solid;
+}
+.letter::before {
+  content: '';
+  position: absolute;
+  right: 14px;
+  top: -10px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--coral);
+  border: 2px solid var(--char-ink);
+}
+@media (max-width: 720px) {
+  .right {
+    right: var(--gutter);
+    bottom: 140px;
+  }
+}

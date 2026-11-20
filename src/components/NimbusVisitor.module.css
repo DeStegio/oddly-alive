@@ -1,0 +1,28 @@
+/* Nimbus visiting: top right of the room, with a narrow column of rain */
+.visitor {
+  position: fixed;
+  right: clamp(16px, 6vw, 96px);
+  top: calc(var(--nav-h) + 16px);
+  width: clamp(90px, 9vw, 140px);
+  z-index: var(--z-characters);
+  pointer-events: none;
+  animation: oa-pop-in 600ms var(--ease-spring) both;
+}
+.cloud {
+  position: relative;
+  pointer-events: auto;
+}
+.shower {
+  position: absolute;
+  left: 18%;
+  right: 18%;
+  top: 55%;
+  height: 46vh;
+  -webkit-mask: linear-gradient(#000 60%, transparent);
+  mask: linear-gradient(#000 60%, transparent);
+}
+@media (max-width: 720px) {
+  .visitor {
+    top: calc(var(--nav-h) + 4px);
+  }
+}

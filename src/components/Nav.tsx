@@ -1,11 +1,13 @@
-import { NavLink } from 'react-router-dom';
-import { useEffect, useState, type ReactNode } from 'react';
+import { NavLink, useLocation } from 'react-router-dom';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { ROOM_LIST, type RoomId } from '../app/rooms';
 import styles from './Nav.module.css';
 
 interface NavProps {
   /** Rooms whose label should stay mysterious. */
   hiddenLabels?: ReadonlySet<RoomId>;
+  /** Rooms not shown at all yet (still reachable by URL). */
+  hiddenRooms?: ReadonlySet<RoomId>;
   onNavigate?: (room: RoomId) => void;
   controls?: ReactNode;
   /** The current room is dark by design (Secret Space, After Hours). */
@@ -16,7 +18,18 @@ interface NavProps {
  * Persistent navigation. It never moves, hides or animates away — motion and
  * secrets must never prevent leaving a scene.
  */
-export function Nav({ hiddenLabels, onNavigate, controls, dark }: NavProps) {
+export function Nav({ hiddenLabels, hiddenRooms, onNavigate, controls, dark }: NavProps) {
+  const listRef = useRef<HTMLUListElement>(null);
+  const location = useLocation();
+  // on the phone dock (which scrolls sideways), keep the current room in view.
+  // Scrolls the dock itself: scrollIntoView would also move the Tab starting point.
+  useEffect(() => {
+    const dock = listRef.current?.parentElement;
+    const active = listRef.current?.querySelector<HTMLElement>('[aria-current="page"]');
+    if (!dock || !active || dock.scrollWidth <= dock.clientWidth) return;
+    const left = active.offsetLeft - dock.clientWidth / 2 + active.offsetWidth / 2;
+    dock.scrollTo?.({ left: Math.max(0, left) });
+  }, [location.pathname]);
   const [scrolled, setScrolled] = useState(false);
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -44,8 +57,8 @@ export function Nav({ hiddenLabels, onNavigate, controls, dark }: NavProps) {
       </NavLink>
 
       <nav aria-label="Rooms" className={styles.rooms}>
-        <ul>
-          {ROOM_LIST.map((room) => {
+        <ul ref={listRef}>
+          {ROOM_LIST.filter((room) => !hiddenRooms?.has(room.id)).map((room) => {
             const mysterious = hiddenLabels?.has(room.id) ?? false;
             return (
               <li key={room.id}>

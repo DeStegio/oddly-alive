@@ -1,6 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
+import { SECRETS } from '../src/content/secrets';
 
-const ROOMS = ['', 'playground', 'mood', 'secret', 'memory', 'after-hours'];
+const ROOMS = ['', 'playground', 'garden', 'mood', 'secret', 'memory', 'after-hours', 'attic'];
 
 function collectErrors(page: Page) {
   const errors: string[] = [];
@@ -83,7 +84,7 @@ test('memory: discoveries survive a reload and Forget me erases them', async ({ 
   await page.waitForTimeout(300);
   await page.goto('./#/memory');
   await page.reload();
-  await expect(page.getByText('/ 21').first()).toBeVisible();
+  await expect(page.getByText(`/ ${SECRETS.length}`).first()).toBeVisible();
   const stored = await page.evaluate(() => localStorage.getItem('oddly-alive:memory'));
   expect(stored).toContain('hello');
   await page.getByRole('button', { name: 'Forget me' }).click();
@@ -102,6 +103,41 @@ test('playground: drop, shake and reset', async ({ page }) => {
   await page.getByRole('button', { name: 'Shake' }).click();
   await page.getByRole('button', { name: 'Reset' }).click();
   await expect(status).toContainText(`${before} things`);
+});
+
+test('playground: a really hard throw leaves the tray; Bip volleys back what comes over', async ({ page }) => {
+  test.setTimeout(60_000);
+  await page.goto('./#/playground');
+  const status = page.getByRole('status').filter({ hasText: 'things on the floor' });
+  await expect(status).toBeVisible();
+  await page.waitForTimeout(1500);
+  const count = async () => Number((await status.textContent())?.match(/\d+/)?.[0]);
+  const fling = async (label: string, dx: number, dy: number) => {
+    const shape = page.locator(`button[aria-label^="${label}"]`);
+    // on phones the floor can sit under the bottom nav: bring it to the middle first
+    await shape.evaluate((el) => el.scrollIntoView({ block: 'center' }));
+    await page.waitForTimeout(150);
+    const b = (await shape.boundingBox())!;
+    await page.mouse.move(b.x + b.width / 2, b.y + b.height / 2);
+    await page.mouse.down();
+    // big steps: the measured speed must stay well over the throw threshold even on a busy machine
+    for (let i = 1; i <= 4; i++) await page.mouse.move(b.x + b.width / 2 + i * dx * 2.5, b.y + b.height / 2 + i * dy * 2.5);
+    await page.mouse.up();
+  };
+  const start = await count();
+  // to the right: over to Bip, who volleys it back
+  await fling('a light lavender pebble', 120, -50);
+  await expect.poll(count, { timeout: 6000 }).toBe(start - 1);
+  await expect.poll(count, { timeout: 20_000 }).toBe(start);
+  await expect(page.locator('section[aria-labelledby="pg-nextdoor-title"] p[aria-live]')).toContainText(/best\s*1/);
+  // to the left: gone for good
+  await fling('a bouncy coral ball', -120, -60);
+  await expect.poll(count, { timeout: 6000 }).toBe(start - 1);
+  await page.waitForTimeout(2500);
+  expect(await count()).toBe(start - 1);
+  // straight down, hard: through the floor and gone as well
+  await fling('a heavy blue block', 10, 120);
+  await expect.poll(count, { timeout: 6000 }).toBe(start - 2);
 });
 
 test('after hours: manual switch changes the whole house; stars connect', async ({ page }) => {

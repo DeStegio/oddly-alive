@@ -1,0 +1,85 @@
+/* hangs from the top of the room, between the clock and the portrait */
+.cord {
+  position: absolute;
+  left: 53%;
+  top: 0;
+  z-index: var(--z-props);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: oa-pop-in 700ms var(--ease-spring) both;
+}
+.string {
+  display: block;
+  width: 2px;
+  height: calc(var(--nav-h) + 90px);
+  background: var(--char-ink);
+  transform-origin: 50% 0;
+  animation: cord-sway 3.4s var(--ease-in-out) infinite alternate;
+}
+@keyframes cord-sway {
+  from {
+    transform: rotate(-2deg);
+  }
+  to {
+    transform: rotate(2deg);
+  }
+}
+.knob {
+  width: 22px;
+  margin-top: -2px;
+}
+.knob span {
+  display: block;
+  width: 22px;
+  height: 30px;
+  border-radius: 40% 40% 50% 50%;
+  background: var(--coral);
+  border: 2.5px solid var(--char-ink);
+  transition: transform var(--dur-tap) var(--ease-out);
+}
+.knob:active span {
+  transform: translateY(8px);
+}
+.ladder {
+  margin-top: -2px;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+  padding: 0 6px 4px;
+  border-radius: var(--radius-sm);
+}
+.rungs {
+  display: block;
+  width: 34px;
+  height: 64px;
+  border-left: 3px solid #8a5a3c;
+  border-right: 3px solid #8a5a3c;
+  background: repeating-linear-gradient(transparent 0 10px, #8a5a3c 10px 14px);
+  animation: ladder-down 700ms var(--ease-spring) both;
+  transform-origin: 50% 0;
+}
+@keyframes ladder-down {
+  from {
+    transform: scaleY(0);
+  }
+}
+.ladder:hover .rungs {
+  transform: translateY(-3px);
+}
+@media (max-width: 720px) {
+  .cord {
+    left: 62%;
+  }
+  .string {
+    height: calc(var(--nav-h) + 40px);
+  }
+}
+[data-motion='reduced'] .string {
+  animation: none;
+}

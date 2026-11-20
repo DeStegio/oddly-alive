@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { allLettersFound, findLetter } from '../../app/letters';
+import { useKeepsakes } from '../../state/keepsakes';
 import { sceneVariant } from '../../app/share';
 import { useWorld } from '../../app/worldInstance';
 import { Clock } from '../../characters/Clock';
@@ -19,6 +21,8 @@ import { useWorldStore } from '../../state/worldStore';
 import { Link } from 'react-router-dom';
 import { ROOMS } from '../../app/rooms';
 import { Basement } from './Basement';
+import { HouseWindow } from './HouseWindow';
+import { PullCord } from './PullCord';
 import { DoNotPress, Door, Picture, Rug, Sofa } from './Scenery';
 import styles from './LivingRoom.module.css';
 
@@ -34,6 +38,8 @@ const MAX_STICKERS = 6;
 const MAX_POOFS = 4;
 
 export default function LivingRoom() {
+  // after all of her letters, Great-Aunt Pim smiles for good
+  const allLetters = useKeepsakes((k) => allLettersFound(k.letters));
   const world = useWorld();
   const living = useObjects((s) => s.living);
   const setLiving = useObjects((s) => s.setLiving);
@@ -137,6 +143,7 @@ export default function LivingRoom() {
         data-rearranged={living.rearranged}
         aria-labelledby="living-title"
       >
+        <PullCord />
         <div className={styles.intro}>
           <LivingTitle
             id="living-title"
@@ -175,13 +182,15 @@ export default function LivingRoom() {
             <Picture
               tilt={living.pictureTilt}
               revealed={living.keyholeRevealed}
-              face={living.pictureNudges}
+              face={allLetters ? 1 : living.pictureNudges}
               sky={variant.pictureSky}
               rootRef={picture.rootRef}
               thought={picture.thought}
               onActivate={() => {
                 setLiving((s) => ({ pictureNudges: s.pictureNudges + 1, pictureTilt: s.pictureTilt > 0 ? -7 : 8 }));
                 world.emit('OBJECT_CLICKED', { target: 'picture', repeat: living.pictureNudges + 1, via: 'pointer' });
+                // once the keyhole has given up its key, there's something else behind the frame
+                if (living.keyholeRevealed && useObjects.getState().secret.keyFound) findLetter(world, 'living');
               }}
             />
           </div>
@@ -194,6 +203,9 @@ export default function LivingRoom() {
               spins={living.clockSpins}
               onActivate={click('tick')}
             />
+          </div>
+          <div className={`${styles.prop} ${styles.window}`}>
+            <HouseWindow />
           </div>
           <div className={`${styles.prop} ${styles.door}`}>
             <Door to="/playground" label="Door to the Playground" sign="Play →" />

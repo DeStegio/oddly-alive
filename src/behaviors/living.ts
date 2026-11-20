@@ -1,3 +1,4 @@
+import { LADDER_LINES } from '../content/attic';
 import { LINES } from '../content/lines';
 import { defineBehavior } from '../engine/behaviorEngine';
 import { Priority } from '../engine/scheduler';
@@ -592,7 +593,7 @@ export const livingBehaviors = [
     priority: Priority.CHARACTER,
     cooldownMs: 15_000,
     when: (c) => c.event.payload.target === 'wall' && c.event.payload.key === 'sticker',
-    react: (c) => act('pim', 2000, () => void say(c, 'pim', ['ooh, decor.', 'very avant-garde.', 'the wall is wearing a sticker now.'], 2000)),
+    react: (c) => act('pim', 2000, () => void say(c, 'pim', ['ooh. a sticker.', 'Great-Aunt Pim would’ve had words about that.', 'the wall’s wearing a sticker now.'], 2000)),
   }),
 
   // ---------------------------------------------------------------- Title
@@ -745,6 +746,33 @@ export const livingBehaviors = [
             2400,
           ),
         );
+      }),
+  }),
+  // ---- Phase 2: the attic ladder comes down
+  defineBehavior({
+    id: 'living.cord',
+    on: ['OBJECT_STATE_CHANGED'],
+    rooms: ['living'],
+    priority: Priority.DIRECT,
+    when: (c) => c.event.payload.target === 'cord' && c.event.payload.key === 'pulled',
+    react: (c) =>
+      act('pim', 2600, () => {
+        face(c, 'pim', 'surprised', 1600);
+        say(c, 'pim', LADDER_LINES, 2600);
+      }),
+  }),
+  // ---- Phase 2: keeping Pim company without poking her
+  defineBehavior({
+    id: 'pim.gentle',
+    on: ['POINTER_ENTERED'],
+    rooms: ['living'],
+    priority: Priority.DIRECT,
+    when: (c) => isTarget(c, 'pim') && c.view.count('hover:pim') >= 10 && c.view.count('pim') === 0 && !c.view.discovered('gentle-hands'),
+    react: (c) =>
+      act('pim', 3600, () => {
+        face(c, 'pim', 'affectionate', 3200);
+        say(c, 'pim', ['you haven’t poked me once. okay. there’s a cord in the ceiling.', 'you’re gentle. I’ll tell you something. Great-Aunt Pim wrote letters.'], 3600);
+        c.effects.discover('gentle-hands');
       }),
   }),
 ];

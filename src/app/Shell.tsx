@@ -1,8 +1,12 @@
-import { Suspense, useMemo, type ReactNode } from 'react';
+import { Suspense, useMemo, useState, type ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
+import { ClickRipple } from '../components/ClickRipple';
 import { DiscoveryToast } from '../components/DiscoveryToast';
+import { LetterToast } from '../components/LetterToast';
+import { NimbusVisitor } from '../components/NimbusVisitor';
 import { Nav } from '../components/Nav';
 import { RareLayer } from '../components/RareLayer';
+import { useKeepsakes } from '../state/keepsakes';
 import { useWorldStore } from '../state/worldStore';
 import { ErrorBoundary } from './ErrorBoundary';
 import { ROOMS, roomFromPath, type RoomId } from './rooms';
@@ -17,31 +21,52 @@ export function SceneFallback() {
   );
 }
 
+/**
+ * Plays the mood-flavoured entrance once per room visit. The mood is frozen at
+ * mount: if it followed live mood changes, the CSS animation name would swap
+ * mid-visit and the browser would replay the whole entrance (the room blinking
+ * out and back in after a burst of clicks).
+ */
+function RoomEntrance({ mood, children }: { mood: string; children: ReactNode }) {
+  const [entranceMood] = useState(mood);
+  return (
+    <div className={styles.enter} data-mood={entranceMood}>
+      {children}
+    </div>
+  );
+}
+
 export function Shell({ children, controls }: { children: ReactNode; controls?: ReactNode }) {
   const location = useLocation();
   const room = roomFromPath(location.pathname);
   const mood = useWorldStore((s) => s.mood);
   // the Secret Space keeps a mysterious label until you've been there or found the keyhole
-  const secretKnown = useWorldStore((s) => Boolean(s.roomVisits.secret) || 'keyhole' in s.discoveries);
+  const secretKnown = useWorldStore((s) => Boolean(s.roomVisits.secret || s.pastRoomVisits.secret) || 'keyhole' in s.discoveries);
   const hidden = useMemo<ReadonlySet<RoomId>>(() => (secretKnown ? new Set() : new Set(['secret'])), [secretKnown]);
+  // the Attic isn't listed until its ladder comes down (its URL always works)
+  const atticKnown = useKeepsakes((k) => k.attic.unlocked) || room === 'attic';
+  const unlisted = useMemo<ReadonlySet<RoomId>>(() => (atticKnown ? new Set() : new Set(['attic'])), [atticKnown]);
   return (
     <>
       <a className="skip-link" href="#scene">
         Skip to the room
       </a>
-      <Nav hiddenLabels={hidden} controls={controls} dark={room === 'secret' || room === 'after-hours'} />
+      <Nav hiddenLabels={hidden} hiddenRooms={unlisted} controls={controls} dark={room === 'secret' || room === 'after-hours' || room === 'attic'} />
       <main id="scene" className={styles.main} data-room={room} tabIndex={-1}>
         <ErrorBoundary resetKey={room} label={ROOMS[room].label}>
           <Suspense fallback={<SceneFallback />}>
             {/* the way a room arrives depends on the house's mood (INT-040) */}
-            <div key={room} className={styles.enter} data-mood={mood}>
+            <RoomEntrance key={room} mood={mood}>
               {children}
-            </div>
+            </RoomEntrance>
           </Suspense>
         </ErrorBoundary>
       </main>
       <RareLayer />
+      <NimbusVisitor />
       <DiscoveryToast />
+      <LetterToast />
+      <ClickRipple />
     </>
   );
 }

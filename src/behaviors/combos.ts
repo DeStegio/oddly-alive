@@ -47,10 +47,10 @@ export const comboBehaviors = [
         'argue',
         5200,
         (ctl) => {
-          say(c, 'tick', ['it is exactly now o’clock.', 'technically it’s later than you think.'], 1800);
+          say(c, 'tick', ['it is precisely now. I checked twice.', 'later than you think. it always is.'], 1800);
           anim(c, 'tick', 'shake');
           ctl.after(tempo(c, 1700), () => {
-            say(c, 'lumen', ['it’s LAMP o’clock.', 'wrong. it’s bedtime for clocks.'], 1800);
+            say(c, 'lumen', ['wrong. it is curtain-up o’clock.', 'nobody asked the clock.'], 1800);
             anim(c, 'lumen', 'wiggle');
           });
           ctl.after(tempo(c, 3500), () => say(c, 'pim', ['please don’t make me pick a side.', 'they do this every day.'], 1700));
@@ -132,7 +132,7 @@ export const comboBehaviors = [
     rooms: ['mood'],
     priority: Priority.AMBIENT,
     when: (c) => c.view.flag('living.lampOn') === false,
-    react: (c) => act('nimbus:cross', 3600, (ctl) => ctl.after(3200, () => say(c, 'nimbus', ['someone turned the lamp off downstairs. very moody of you.'], 2600)), { ambient: true }),
+    react: (c) => act('nimbus:cross', 3600, (ctl) => ctl.after(3200, () => say(c, 'nimbus', ['lamp’s off downstairs. outlook: dim, spreading east.'], 2600)), { ambient: true }),
   }),
   defineBehavior({
     id: 'cross.key.chest',
@@ -184,5 +184,53 @@ export const comboBehaviors = [
     cooldownMs: 6000,
     when: (c) => Math.abs(c.event.payload.velocity) > 2,
     react: (c) => act('ferdinand', 800, () => void anim(c, 'ferdinand', 'wiggle'), { ambient: true }),
+  }),
+
+  // ---------------------------------------------------------------- Phase 2 glue
+  // flowers picked in the garden turn up on the Living Room windowsill
+  defineBehavior({
+    id: 'cross.vase',
+    on: ['ROOM_ENTERED'],
+    rooms: LIVING,
+    priority: Priority.CHARACTER,
+    when: (c) => c.view.flag('living.vaseNew') === true,
+    react: (c) =>
+      act('ferdinand', 4200, (ctl) => {
+        c.effects.setFlag('living.vaseNew', false);
+        ctl.after(800, () => say(c, 'ferdinand', ['flowers. from outside.', 'cousins. in a jar.'], 2400));
+        ctl.after(2600, () => say(c, 'pim', ['someone put flowers on the windowsill.', 'oh. they’re from the garden. that’s nice.'], 2400));
+      }),
+  }),
+  // radishes from the garden drop into the Playground
+  defineBehavior({
+    id: 'cross.radish',
+    on: ['OBJECT_STATE_CHANGED'],
+    rooms: ['playground'],
+    priority: Priority.CHARACTER,
+    when: (c) => c.event.payload.target === 'playground' && c.event.payload.key === 'radish',
+    react: (c) =>
+      act('dot', 2400, () => {
+        anim(c, 'dot', 'jump');
+        say(c, 'dot', ['a RADISH. from the garden. it has a face now.', 'radish! throw it at Bip. THROW IT.'], 2400);
+      }),
+  }),
+  // Dot has opinions about the weather
+  defineBehavior({
+    id: 'cross.weather.dot',
+    on: ['WEATHER_CHANGED'],
+    rooms: ['playground', 'mood'],
+    priority: Priority.AMBIENT,
+    cooldownMs: 25_000,
+    when: (c) => ['rain', 'snow', 'windy', 'storm', 'rainbow'].includes(c.event.payload.to),
+    react: (c) => {
+      const lines: Record<string, string[]> = {
+        rain: ['PUDDLES. later. definitely later.', 'rain! I’m waterproof. probably.'],
+        snow: ['SNOW. snow snow snow.', 'I’m going to catch every single one.'],
+        windy: ['the wind took my eye. no wait. still here.', 'everything’s leaning. I’m leaning.'],
+        storm: ['thunder doesn’t scare me. it’s just loud.', 'that was LOUD. again?'],
+        rainbow: ['rainbow! upside down. still counts.', 'the colours are the wrong way up. I love it.'],
+      };
+      return act('dot', 2400, () => void say(c, 'dot', lines[c.event.payload.to] ?? ['weather.'], 2400), { ambient: true });
+    },
   }),
 ];
