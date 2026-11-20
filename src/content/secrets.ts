@@ -40,6 +40,8 @@ export const SECRETS: SecretDef[] = [
   { id: 'came-back', name: 'Came Back For It', room: 'garden', glyph: 'flower', hint: 'Some things grow better when nobody’s watching.', found: 'Came back to find the garden had grown without you.' },
   { id: 'night-shift', name: 'Night Shift', room: 'garden', glyph: 'moon', hint: 'One packet in the tin only works after dark.', found: 'Got a moonflower to open.', after: 'green-thumb' },
   { id: 'full-bed', name: 'Full Bloom', room: 'garden', glyph: 'flower', hint: 'Six plots. All at once.', found: 'Had every plot in the garden in flower at the same time.', after: 'green-thumb' },
+  { id: 'long-shot', name: 'Long Shot', room: 'garden', glyph: 'flower', hint: 'Seeds go where you throw them. Even the far beds.', found: 'Threw a seed all the way into one of the far beds.' },
+  { id: 'bip-bouquet', name: 'A Bouquet for Bip', room: 'garden', glyph: 'heart', hint: 'Not everything thrown over the fence has to be a radish.', found: 'Threw flowers over the fence. Bip kept them.', after: 'green-thumb' },
   { id: 'radish-volley', name: 'Root Vegetable Sports', room: 'playground', glyph: 'ball', hint: 'Bip will hit back anything. Anything.', found: 'Played volleyball with a radish.', after: 'green-thumb' },
   { id: 'attic', name: 'Up the Ladder', room: 'attic', glyph: 'ladder', hint: 'Look up in the Living Room. There’s always been a cord.', found: 'Found the attic.' },
   { id: 'dress-rehearsal', name: 'Dress Rehearsal', room: 'attic', glyph: 'hat', hint: 'Marguerite would wear anything, given the chance. Four things, in fact.', found: 'Tried every hat from the boxes on Marguerite.', after: 'attic' },

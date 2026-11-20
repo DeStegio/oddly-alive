@@ -27,18 +27,18 @@ describe('<Garden />', () => {
   it('plant, water, wait, bloom, pick: radishes go to the Playground', () => {
     renderGarden();
     expect(screen.getAllByRole('button', { name: /empty/ })).toHaveLength(6);
-    fireEvent.click(screen.getByRole('button', { name: /^Radish/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'Radish seeds' }));
     fireEvent.click(screen.getByRole('button', { name: 'Plot 1: empty' }));
     expect(screen.getByRole('button', { name: /Plot 1: radish, just planted/ })).toBeInTheDocument();
     expect(useKeepsakes.getState().garden.plots[0]?.kind).toBe('radish');
 
     // tap with nothing in hand = water
-    fireEvent.click(screen.getByRole('button', { name: /^Radish/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'Radish seeds' }));
     fireEvent.click(screen.getByRole('button', { name: /Plot 1: radish/ }));
     expect(useKeepsakes.getState().garden.plots[0]!.wateredAt).toBeGreaterThan(0);
 
     act(() => void vi.advanceTimersByTime(3.2 * MIN));
-    expect(screen.getByRole('button', { name: /Plot 1: radish, in bloom \(pick it\)/ })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Plot 1: radish, in bloom \(ready to pull\)/ })).toBeInTheDocument();
     act(() => void vi.runOnlyPendingTimers());
     expect(getWorldState().discoveries['green-thumb']).toBeDefined();
 
