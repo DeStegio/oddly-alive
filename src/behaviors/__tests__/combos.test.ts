@@ -118,3 +118,31 @@ describe('first minute', () => {
     expect(world).toBeDefined();
   });
 });
+
+describe('phase 2 glue between rooms', () => {
+  function world() {
+    setWorldState(initialWorldState());
+    useObjects.getState().resetObjects();
+    const actors = new ActorChannel();
+    for (const id of ['pim', 'dot', 'ferdinand'] as const) actors.subscribe(id, () => {});
+    const w = new World({ clock: new ManualClock(), actors, seed: 6, behaviors: allBehaviors() });
+    return { w, actors, fired: () => w.scheduler.log.map((l) => l.id) };
+  }
+
+  it('flowers from the garden get noticed in the Living Room, once', () => {
+    const { w, fired } = world();
+    useObjects.getState().setLiving({ vaseNew: true });
+    w.enterRoom('living');
+    expect(fired()).toContain('cross.vase');
+    expect(useObjects.getState().living.vaseNew).toBe(false);
+  });
+
+  it('Dot greets a radish in the Playground and has views on snow', () => {
+    const { w, fired } = world();
+    w.enterRoom('playground');
+    w.emit('OBJECT_STATE_CHANGED', { target: 'playground', key: 'radish', value: 1 });
+    expect(fired()).toContain('cross.radish');
+    w.emit('WEATHER_CHANGED', { from: 'clear', to: 'snow', pinned: true });
+    expect(fired()).toContain('cross.weather.dot');
+  });
+});

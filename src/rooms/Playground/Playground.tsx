@@ -155,7 +155,10 @@ export default function Playground() {
     // radishes harvested in the Garden arrive here
     const radishes = useObjects.getState().playground.radishes;
     for (let i = 0; i < radishes; i++) sim.spawn('radish', layout.width * (0.35 + 0.08 * i), 40 + i * 10);
-    if (radishes) useObjects.getState().setSlice('playground', { radishes: 0 });
+    if (radishes) {
+      useObjects.getState().setSlice('playground', { radishes: 0 });
+      window.setTimeout(() => world.emit('OBJECT_STATE_CHANGED', { target: 'playground', key: 'radish', value: radishes }), 800);
+    }
     let lastCollisionEmit = 0;
     sim.onCollision = ({ a, b, force }) => {
       const now = performance.now();
