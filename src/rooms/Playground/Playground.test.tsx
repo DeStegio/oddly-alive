@@ -7,6 +7,7 @@ import { World } from '../../engine/world';
 import { useObjects } from '../../state/world';
 import { getWorldState, initialWorldState, setWorldState } from '../../state/worldStore';
 import Playground from './Playground';
+import { GOALS } from './goals';
 import { defaultLayout } from './physics';
 import { decodeArrangement, encodeArrangement } from './share';
 
@@ -74,6 +75,21 @@ describe('<Playground />', () => {
     fireEvent.keyDown(ball, { key: 'ArrowUp' });
     fireEvent.click(ball, { detail: 0 });
     expect(getWorldState().counts['shape:ball']).toBe(1);
+  });
+
+  it('Field Notes tick a goal after three shakes and keep it for the session', () => {
+    render(
+      <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+        <Playground />
+      </MemoryRouter>,
+    );
+    const notes = screen.getByRole('complementary', { name: 'Field notes' });
+    const goal = () => screen.getByText('Shake the room three times').closest('li')!;
+    expect(goal()).toHaveAttribute('data-done', 'false');
+    for (let i = 0; i < 3; i++) fireEvent.click(screen.getByRole('button', { name: 'Shake' }));
+    expect(goal()).toHaveAttribute('data-done', 'true');
+    expect(notes).toHaveTextContent(`1 / ${GOALS.length}`);
+    expect(useObjects.getState().playground.goals).toBe('shake');
   });
 
   it('shows the golden key only after the keyhole has been found', () => {

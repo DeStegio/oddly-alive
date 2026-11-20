@@ -1,5 +1,6 @@
-import { Suspense, useMemo, type ReactNode } from 'react';
+import { Suspense, useMemo, useState, type ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
+import { ClickRipple } from '../components/ClickRipple';
 import { DiscoveryToast } from '../components/DiscoveryToast';
 import { Nav } from '../components/Nav';
 import { RareLayer } from '../components/RareLayer';
@@ -13,6 +14,21 @@ export function SceneFallback() {
     <div className={styles.fallback} role="status">
       <span className={styles.fallbackDot} aria-hidden="true" />
       <span>Tidying up before you come in…</span>
+    </div>
+  );
+}
+
+/**
+ * Plays the mood-flavoured entrance once per room visit. The mood is frozen at
+ * mount: if it followed live mood changes, the CSS animation name would swap
+ * mid-visit and the browser would replay the whole entrance (the room blinking
+ * out and back in after a burst of clicks).
+ */
+function RoomEntrance({ mood, children }: { mood: string; children: ReactNode }) {
+  const [entranceMood] = useState(mood);
+  return (
+    <div className={styles.enter} data-mood={entranceMood}>
+      {children}
     </div>
   );
 }
@@ -34,14 +50,15 @@ export function Shell({ children, controls }: { children: ReactNode; controls?: 
         <ErrorBoundary resetKey={room} label={ROOMS[room].label}>
           <Suspense fallback={<SceneFallback />}>
             {/* the way a room arrives depends on the house's mood (INT-040) */}
-            <div key={room} className={styles.enter} data-mood={mood}>
+            <RoomEntrance key={room} mood={mood}>
               {children}
-            </div>
+            </RoomEntrance>
           </Suspense>
         </ErrorBoundary>
       </main>
       <RareLayer />
       <DiscoveryToast />
+      <ClickRipple />
     </>
   );
 }

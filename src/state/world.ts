@@ -45,11 +45,17 @@ export interface AfterHoursObjects {
   constellations: number;
 }
 
+export interface PlaygroundObjects {
+  /** Comma-separated ids of the Field Notes goals reached this session. */
+  goals: string;
+}
+
 export interface ObjectsState {
   living: LivingObjects;
   mood: MoodObjects;
   secret: SecretObjects;
   after: AfterHoursObjects;
+  playground: PlaygroundObjects;
 }
 
 export const OBJECT_DEFAULTS: ObjectsState = {
@@ -69,6 +75,7 @@ export const OBJECT_DEFAULTS: ObjectsState = {
   mood: { lastUsed: '', teaPoured: 0, napping: false, mirrorLooks: 0 },
   secret: { slots: '', chestOpen: false, candleLit: false, keyFound: false },
   after: { radioOn: false, lightOn: false, constellations: 0 },
+  playground: { goals: '' },
 };
 
 type SliceKey = keyof ObjectsState;
@@ -129,5 +136,5 @@ export function setFlag(path: string, value: boolean | number | string) {
 /** Serializable snapshot (for memory persistence). */
 export function snapshotObjects(): ObjectsState {
   const s = useObjects.getState();
-  return { living: s.living, mood: s.mood, secret: s.secret, after: s.after };
+  return { living: s.living, mood: s.mood, secret: s.secret, after: s.after, playground: s.playground };
 }

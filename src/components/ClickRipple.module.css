@@ -1,0 +1,44 @@
+.layer {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: calc(var(--z-toast) + 1);
+  overflow: hidden;
+}
+
+/* a faint ring: "you pressed here, nothing lives here" */
+.ring {
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  margin: -14px 0 0 -14px;
+  border-radius: 50%;
+  border: 2px solid color-mix(in srgb, var(--ink) 35%, transparent);
+  animation: click-ring 520ms var(--ease-out) forwards;
+}
+
+/* a firm, filled ring: "that landed on something" */
+.hit {
+  width: 34px;
+  height: 34px;
+  margin: -17px 0 0 -17px;
+  border: 2.5px solid var(--blue-ink);
+  background: color-mix(in srgb, var(--yellow) 45%, transparent);
+  animation-duration: 640ms;
+}
+
+/* grows fast, then lingers before fading, so it is actually seen */
+@keyframes click-ring {
+  0% {
+    transform: scale(0.35);
+    opacity: 1;
+  }
+  45% {
+    transform: scale(1.1);
+    opacity: 0.95;
+  }
+  100% {
+    transform: scale(1.35);
+    opacity: 0;
+  }
+}

@@ -9,7 +9,7 @@ export interface SecretDef {
   /** What happened, shown after discovery. */
   found: string;
   /** A small glyph for the cabinet shelf. */
-  glyph: 'key' | 'eye' | 'spiral' | 'button' | 'clock' | 'wave' | 'letter' | 'music' | 'board' | 'tower' | 'moon' | 'mirror' | 'rainbow' | 'chest' | 'aunt' | 'candle' | 'worm' | 'glitch' | 'star' | 'moth' | 'heart';
+  glyph: 'key' | 'eye' | 'spiral' | 'button' | 'clock' | 'wave' | 'letter' | 'music' | 'board' | 'tower' | 'moon' | 'mirror' | 'rainbow' | 'chest' | 'aunt' | 'candle' | 'worm' | 'glitch' | 'star' | 'moth' | 'heart' | 'ball';
 }
 
 /**
@@ -26,6 +26,8 @@ export const SECRETS: SecretDef[] = [
   { id: 'dance', name: 'House Party', room: 'anywhere', glyph: 'music', hint: 'Everyone knows the steps. Ask them to.', found: 'Typed dance. The furniture has rhythm.' },
   { id: 'floorboard', name: 'The Creaky One', room: 'living', glyph: 'board', hint: 'Go all the way down. Mind the floorboards.', found: 'Found the loose floorboard and its tenant.' },
   { id: 'tower', name: 'Architecture', room: 'playground', glyph: 'tower', hint: 'Things stand taller together.', found: 'Stacked five shapes into a tower.' },
+  { id: 'volley', name: 'Over the Net', room: 'playground', glyph: 'ball', hint: 'Someone next door plays a mean game of volleyball.', found: 'Kept a rally of three going with Bip.' },
+  { id: 'rally', name: 'Rally Legend', room: 'playground', glyph: 'ball', hint: 'Ten in a row, and never let it touch the floor.', found: 'Kept a rally of ten going with Bip. Bip is exhausted.' },
   { id: 'key', name: 'Lost & Found', room: 'playground', glyph: 'key', hint: 'Something golden turns up once a keyhole is known.', found: 'Delivered the golden key to the lost-and-found.' },
   { id: 'nap', name: 'Nap O’Clock', room: 'mood', glyph: 'moon', hint: 'A warm drink, then something soft.', found: 'Tea and a blanket put Nimbus to sleep.' },
   { id: 'mirror', name: 'The Other Cloud', room: 'mood', glyph: 'mirror', hint: 'Look long enough and something looks back.', found: 'Caught Nimbus’s reflection winking.' },
