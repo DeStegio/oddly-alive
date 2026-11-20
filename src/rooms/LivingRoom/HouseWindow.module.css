@@ -87,3 +87,53 @@
 [data-motion='reduced'] .curtain {
   animation: none !important;
 }
+
+/* the vase of garden flowers on the sill */
+.vase {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 30px;
+  height: 44px;
+  translate: -50% 0;
+}
+.jar {
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  bottom: 0;
+  height: 18px;
+  border: 2px solid var(--char-ink);
+  border-radius: 4px 4px 8px 8px;
+  background: color-mix(in srgb, var(--blue) 35%, var(--paper));
+}
+.stem {
+  position: absolute;
+  left: 50%;
+  bottom: 10px;
+  width: 2px;
+  height: 30px;
+  background: #3f7a52;
+  transform-origin: 50% 100%;
+}
+.stem::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: -6px;
+  width: 11px;
+  height: 11px;
+  translate: -50% 0;
+  border-radius: 50%;
+  border: 2px solid var(--char-ink);
+  background: var(--flower, var(--yellow));
+}
+.stem[data-kind='snapdragon'] {
+  --flower: var(--coral);
+}
+.stem[data-kind='moonflower'] {
+  --flower: var(--cut-paper);
+}
+.stem[data-kind='mint'] {
+  --flower: var(--mint);
+}

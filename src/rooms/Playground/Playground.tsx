@@ -151,6 +151,10 @@ export default function Playground() {
     if (getFlag('living.keyholeRevealed') === true && getFlag('secret.keyFound') !== true) {
       sim.spawn('key', layout.width * 0.55, 60);
     }
+    // radishes harvested in the Garden arrive here
+    const radishes = useObjects.getState().playground.radishes;
+    for (let i = 0; i < radishes; i++) sim.spawn('radish', layout.width * (0.35 + 0.08 * i), 40 + i * 10);
+    if (radishes) useObjects.getState().setSlice('playground', { radishes: 0 });
     let lastCollisionEmit = 0;
     sim.onCollision = ({ a, b, force }) => {
       const now = performance.now();
@@ -477,6 +481,7 @@ export default function Playground() {
     completeGoal('catch');
     if (n >= 5) completeGoal('rally5');
     if (n === 3) world.effects.discover('volley');
+    if (f.kind === 'radish') world.effects.discover('radish-volley');
     if (n === 10) world.effects.discover('rally');
     if (!hasRoom()) {
       dropFlight(f.id);
