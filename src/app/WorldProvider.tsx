@@ -8,6 +8,7 @@ import { roomFromPath } from './rooms';
 import { startAudio } from './audioSync';
 import { parseShareHash } from './share';
 import { startMemory } from './memorySync';
+import { startWeather } from './weatherSync';
 import { getWorld } from './worldInstance';
 
 /** Applies mood + settings to the document as attributes and CSS variables. */
@@ -45,9 +46,11 @@ export function WorldProvider({ children }: { children: ReactNode }) {
     // a shared link can ask for the night version of the scene
     if (parseShareHash(window.location.hash).night) useSettings.getState().setAfterHours(true);
     world.start();
+    const stopWeather = startWeather(world);
     const removeSensors = installSensors(world);
     return () => {
       removeSensors();
+      stopWeather();
       stopAudio();
       stopMemory();
       world.stop();

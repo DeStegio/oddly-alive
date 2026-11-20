@@ -195,6 +195,7 @@ describe('behavior engine', () => {
     return {
       room: 'living',
       mood: 'neutral',
+      weather: 'clear',
       vars: { curiosity: 0.4, energy: 0.5, trust: 0.3, mischief: 0.2, stimulation: 0, fatigue: 0 },
       afterHours: false,
       reducedMotion: false,
