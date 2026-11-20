@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { findLetter } from '../../app/letters';
 import { useWorld } from '../../app/worldInstance';
 import { Inch } from '../../characters/Inch';
 import { ThoughtBubble } from '../../characters/ThoughtBubble';
@@ -139,6 +140,7 @@ export default function Garden() {
       say(setInchLine, pick(GARDEN_LINES.harvestVase));
     }
     world.emit('OBJECT_STATE_CHANGED', { target: `garden:${kind}`, key: 'harvest', value: true });
+    if (kind === 'moonflower') findLetter(world, 'garden');
   };
 
   const night = afterHours || weather === 'night';

@@ -1,4 +1,5 @@
 import { useRef } from 'react';
+import { findLetter } from '../../app/letters';
 import { Link } from 'react-router-dom';
 import { sendNimbus } from '../../app/nimbusVisit';
 import { ROOMS, type RoomId } from '../../app/rooms';
@@ -61,6 +62,8 @@ export default function MoodRoom() {
     world.emit('OBJECT_CLICKED', { target: `mood:${id}`, repeat: 1, via: e.detail === 0 ? 'keyboard' : 'pointer' });
     world.emit('OBJECT_STATE_CHANGED', { target: `mood:${id}`, key: 'use', value: true });
     world.effects.sound(`obj-${id}`);
+    // the reflection hands something over when the rainbow is out
+    if (id === 'mirror' && weather === 'rainbow') findLetter(world, 'mood');
   };
 
   const pin = (w: HouseWeather) => {

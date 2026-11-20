@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { findLetter } from '../../app/letters';
 import { useWorld } from '../../app/worldInstance';
 import { ThoughtBubble } from '../../characters/ThoughtBubble';
 import { LivingTitle } from '../../components/LivingTitle';
@@ -46,7 +47,9 @@ export default function Attic() {
     if (!box || opened.includes(id)) return;
     useObjects.getState().setSlice('attic', { opened: [...opened, id].join(',') });
     if (box.hat) useKeepsakes.getState().addHat(box.hat);
-    setFound({ title: box.title, story: box.story });
+    const last = opened.length + 1 === BOXES.length;
+    setFound(last ? { title: box.title, story: `${box.story} And under everything, an envelope.` } : { title: box.title, story: box.story });
+    if (last) findLetter(world, 'attic');
     world.emit('OBJECT_STATE_CHANGED', { target: `attic:${id}`, key: 'open', value: true });
     world.effects.sound('pop');
   };

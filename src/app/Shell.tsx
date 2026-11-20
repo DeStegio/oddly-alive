@@ -2,6 +2,7 @@ import { Suspense, useMemo, useState, type ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
 import { ClickRipple } from '../components/ClickRipple';
 import { DiscoveryToast } from '../components/DiscoveryToast';
+import { LetterToast } from '../components/LetterToast';
 import { NimbusVisitor } from '../components/NimbusVisitor';
 import { Nav } from '../components/Nav';
 import { RareLayer } from '../components/RareLayer';
@@ -64,6 +65,7 @@ export function Shell({ children, controls }: { children: ReactNode; controls?: 
       <RareLayer />
       <NimbusVisitor />
       <DiscoveryToast />
+      <LetterToast />
       <ClickRipple />
     </>
   );

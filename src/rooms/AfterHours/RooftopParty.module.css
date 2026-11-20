@@ -1,0 +1,117 @@
+/* the right-hand part of the roof: clear of Pim's chair and the intro */
+.party {
+  position: absolute;
+  left: 47%;
+  right: 2%;
+  bottom: 100%;
+  height: 26vh;
+  pointer-events: none;
+  z-index: 2;
+}
+/* little flags strung across the roof */
+.bunting {
+  position: absolute;
+  left: 4%;
+  right: 4%;
+  top: 0;
+  height: 22px;
+  background:
+    linear-gradient(135deg, var(--coral) 25%, transparent 25%) 0 0 / 28px 22px,
+    linear-gradient(225deg, var(--coral) 25%, transparent 25%) 0 0 / 28px 22px,
+    linear-gradient(135deg, var(--yellow) 25%, transparent 25%) 14px 0 / 28px 22px,
+    linear-gradient(225deg, var(--yellow) 25%, transparent 25%) 14px 0 / 28px 22px;
+  border-top: 2px solid #f3ede2;
+}
+.fireworks {
+  position: absolute;
+  inset: -60% 0 50% 0;
+}
+.burst {
+  position: absolute;
+  top: 10%;
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  background: radial-gradient(circle, transparent 30%, rgba(245, 216, 115, 0.85) 32% 36%, transparent 38% 52%, rgba(245, 121, 99, 0.7) 54% 57%, transparent 59%);
+  opacity: 0;
+  animation: burst 5.2s var(--ease-out) infinite;
+}
+@keyframes burst {
+  0% {
+    transform: scale(0.2);
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  60%,
+  100% {
+    transform: scale(1.4);
+    opacity: 0;
+  }
+}
+.caption {
+  position: absolute;
+  left: 50%;
+  bottom: 46%;
+  translate: -50% 0;
+  margin: 0;
+  font-size: var(--fs-sm);
+  padding: 6px 14px;
+  border: 2px solid #f3ede2;
+  border-radius: var(--radius-pill);
+  background: #2a2838;
+  color: #f3ede2;
+  font-family: var(--font-display);
+  font-style: italic;
+  white-space: nowrap;
+}
+.guests {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  translate: -50% 0;
+  display: flex;
+  gap: clamp(4px, 1.4vw, 18px);
+  align-items: flex-end;
+}
+.guest svg {
+  display: block;
+  width: clamp(30px, 3.4vw, 46px);
+  height: auto;
+  overflow: visible;
+  animation: sway 2.6s var(--ease-in-out) infinite alternate;
+}
+.guest:nth-child(even) svg {
+  animation-delay: -1.3s;
+}
+@keyframes sway {
+  to {
+    transform: translateY(-4px) rotate(3deg);
+  }
+}
+[data-motion='reduced'] .burst,
+[data-motion='reduced'] .guest svg {
+  animation: none;
+}
+[data-motion='reduced'] .burst {
+  opacity: 0.6;
+}
+
+@media (max-width: 720px) {
+  /* above Pim's chair and her speech bubble */
+  .party {
+    left: 2%;
+    height: 22vh;
+    bottom: calc(100% + 72px);
+  }
+  .caption {
+    white-space: normal;
+    width: max-content;
+    max-width: 80vw;
+    text-align: center;
+  }
+}
