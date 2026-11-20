@@ -10,10 +10,12 @@ import type { EventType } from './events';
 export const MEMORY_KEY = 'oddly-alive:memory';
 export const MEMORY_OFF_KEY = 'oddly-alive:memory-off';
 export const SESSION_KEY = 'oddly-alive:session';
-export const SCHEMA_VERSION = 2;
+export const SCHEMA_VERSION = 3;
 
 const MAX_COUNTS = 40;
 const ID_PATTERN = /^[a-z][a-z0-9:-]{0,40}$/;
+/** Record names are camelCase (bestRally, tallestTower). */
+const RECORD_KEY = /^[a-z][a-zA-Z0-9]{0,30}$/;
 const PERSISTED_EVENTS: readonly EventType[] = [
   'OBJECT_CLICKED',
   'OBJECT_DRAGGED',
@@ -49,6 +51,58 @@ export interface MemoryV2 {
   settings: MemorySettings;
 }
 
+/** A garden plot as stored: what was planted, and how far it has grown. */
+export interface StoredPlot {
+  kind: string;
+  plantedAt: number;
+  /** Last time growth was brought up to date. */
+  updatedAt: number;
+  /** Last watering (0 = never). */
+  wateredAt: number;
+  /** Growth so far, 0..1 (1 = in bloom). */
+  growth: number;
+}
+
+export interface DiaryEntry {
+  at: number;
+  kind: string;
+  detail: string;
+}
+
+/**
+ * Things the house keeps between visits (v3). Everything here is about what
+ * happened on this page; nothing about the visitor.
+ */
+export interface WorldMemory {
+  garden: { plots: Array<StoredPlot | null>; vase: string[] };
+  letters: string[];
+  /** Weather kinds seen, with the first time each was seen. */
+  almanac: Record<string, number>;
+  diary: DiaryEntry[];
+  /** Personal bests (best rally, tallest tower, …). */
+  records: Record<string, number>;
+  attic: { unlocked: boolean; hats: string[] };
+}
+
+export const GARDEN_PLOTS = 6;
+export const MAX_DIARY = 40;
+
+export function emptyWorldMemory(): WorldMemory {
+  return {
+    garden: { plots: Array.from({ length: GARDEN_PLOTS }, () => null), vase: [] },
+    letters: [],
+    almanac: {},
+    diary: [],
+    records: {},
+    attic: { unlocked: false, hats: [] },
+  };
+}
+
+export interface MemoryV3 extends Omit<MemoryV2, 'version'> {
+  version: 3;
+  world: WorldMemory;
+}
+
 /** Legacy shape kept for migration tests and old visitors. */
 export interface MemoryV1 {
   version: 1;
@@ -65,9 +119,9 @@ export type LoadStatus = 'fresh' | 'restored' | 'migrated' | 'corrupt' | 'unavai
 
 export const DEFAULT_SETTINGS: MemorySettings = { sound: false, motion: 'full', motionExplicit: false, afterHours: false };
 
-export function emptyMemory(now: number): MemoryV2 {
+export function emptyMemory(now: number): MemoryV3 {
   return {
-    version: 2,
+    version: 3,
     visits: 0,
     firstVisit: now,
     lastVisit: now,
@@ -78,6 +132,7 @@ export function emptyMemory(now: number): MemoryV2 {
     lastRoom: null,
     trust: 0,
     settings: { ...DEFAULT_SETTINGS },
+    world: emptyWorldMemory(),
   };
 }
 
@@ -128,6 +183,61 @@ export function validateV2(raw: unknown): MemoryV2 | null {
   };
 }
 
+const cleanId = (v: unknown): v is string => typeof v === 'string' && ID_PATTERN.test(v);
+const cleanIds = (v: unknown, max: number): string[] => (Array.isArray(v) ? [...new Set(v.filter(cleanId))].slice(0, max) : []);
+/** Plain text only: control characters become spaces, and it stays short. */
+const cleanText = (v: unknown, max = 120): string =>
+  typeof v === 'string' ? Array.from(v, (ch) => (ch.charCodeAt(0) < 32 ? ' ' : ch)).join('').slice(0, max) : '';
+
+function cleanPlot(v: unknown): StoredPlot | null {
+  if (!isObj(v) || !cleanId(v.kind) || !isNat(v.plantedAt) || !isNat(v.updatedAt)) return null;
+  const growth = typeof v.growth === 'number' && Number.isFinite(v.growth) ? clamp01(v.growth) : 0;
+  return { kind: v.kind, plantedAt: v.plantedAt, updatedAt: v.updatedAt, wateredAt: isNat(v.wateredAt) ? v.wateredAt : 0, growth };
+}
+
+/** Validate the v3 keepsakes; anything odd falls back to its default. */
+export function cleanWorld(v: unknown): WorldMemory {
+  const w = emptyWorldMemory();
+  if (!isObj(v)) return w;
+  if (isObj(v.garden)) {
+    const plots = Array.isArray(v.garden.plots) ? v.garden.plots : [];
+    w.garden.plots = w.garden.plots.map((_, i) => cleanPlot(plots[i]));
+    w.garden.vase = (Array.isArray(v.garden.vase) ? v.garden.vase.filter(cleanId) : []).slice(-12);
+  }
+  w.letters = cleanIds(v.letters, 16);
+  w.almanac = cleanCounts(v.almanac, 16);
+  if (Array.isArray(v.diary)) {
+    w.diary = v.diary
+      .filter((e): e is Record<string, unknown> => isObj(e) && isNat(e.at) && cleanId(e.kind))
+      .map((e) => ({ at: e.at as number, kind: e.kind as string, detail: cleanText(e.detail) }))
+      .slice(-MAX_DIARY);
+  }
+  if (isObj(v.records)) {
+    w.records = Object.fromEntries(
+      Object.entries(v.records)
+        .filter(([k, n]) => RECORD_KEY.test(k) && isNat(n) && (n as number) < 1e6)
+        .slice(0, 20)
+        .map(([k, n]) => [k, Math.floor(n as number)]),
+    );
+  }
+  if (isObj(v.attic)) w.attic = { unlocked: v.attic.unlocked === true, hats: cleanIds(v.attic.hats, 8) };
+  return w;
+}
+
+/** Strictly validate a v3 object; returns null if it isn't one. */
+export function validateV3(raw: unknown): MemoryV3 | null {
+  if (!isObj(raw) || raw.version !== 3) return null;
+  const base = validateV2({ ...raw, version: 2 });
+  if (!base) return null;
+  return { ...base, version: 3, world: cleanWorld(raw.world) };
+}
+
+/** v2 → v3: everything carries over; the keepsakes start empty. */
+export function migrateV2(raw: unknown): MemoryV3 | null {
+  const v2 = validateV2(raw);
+  return v2 ? { ...v2, version: 3, world: emptyWorldMemory() } : null;
+}
+
 /** v1 → v2: discoveries become a timestamped map; room visits/totals start empty. */
 export function migrateV1(raw: unknown): MemoryV2 | null {
   if (!isObj(raw) || raw.version !== 1) return null;
@@ -150,7 +260,7 @@ export function migrateV1(raw: unknown): MemoryV2 | null {
 }
 
 export interface LoadResult {
-  data: MemoryV2;
+  data: MemoryV3;
   status: LoadStatus;
 }
 
@@ -197,9 +307,10 @@ export class MemoryManager {
       this.safeRemove();
       return { data: emptyMemory(now), status: 'corrupt' };
     }
-    const v2 = validateV2(parsed);
-    if (v2) return { data: v2, status: 'restored' };
-    const migrated = migrateV1(parsed);
+    const v3 = validateV3(parsed);
+    if (v3) return { data: v3, status: 'restored' };
+    const fromV1 = migrateV1(parsed);
+    const migrated = migrateV2(fromV1 ?? parsed);
     if (migrated) {
       this.save(migrated);
       return { data: migrated, status: 'migrated' };
@@ -208,10 +319,10 @@ export class MemoryManager {
     return { data: emptyMemory(now), status: 'corrupt' };
   }
 
-  save(data: MemoryV2): boolean {
+  save(data: MemoryV3): boolean {
     if (!this.storage || this.isDisabled()) return false;
     try {
-      const clean = validateV2(data);
+      const clean = validateV3(data);
       if (!clean) return false;
       this.storage.setItem(MEMORY_KEY, JSON.stringify(clean));
       return true;

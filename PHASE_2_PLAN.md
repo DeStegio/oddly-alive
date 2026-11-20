@@ -305,7 +305,7 @@ cross-room, Marguerite's 4th hat, Tourist/Homebody discoveries.
 | 0 | done | Refresh fix, cursor clarity, Field Notes, Bip volleyball, rally discoveries, this plan. |
 | 1 | done | VOICE.md (rules, character sheet, before/after) + copy lint test (banned formulas/words, bubble length, em-dash budget, duplicates). Fixed the 3 existing violations. |
 | 2 | done | LINES rewritten per character voice and grown ~1.5×; 21 behavior pools rewritten (Nimbus as weather presenter, Dot as kid referee, Lumen as stage actor); Playground/Mood copy. New rooms will be written in-voice from the start. |
-| 3 | todo | |
+| 3 | done | Schema v3 (`world` keepsakes: garden, letters, almanac, diary ≤40, records, attic) with v2→v3 and v1→v3 migration and hostile-input cleaning; `state/keepsakes.ts`; diary lines for first visit, discoveries, rally/tower records; best rally persists; Memory Room "what is stored" updated honestly. |
 | 4 | todo | |
 | 5 | todo | |
 | 6 | todo | |
