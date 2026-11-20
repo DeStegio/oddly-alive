@@ -5,7 +5,7 @@
 
 ## What it is
 
-Oddly Alive is a small interactive world built out of a website. Six rooms of one
+Oddly Alive is a small interactive world built out of a website. Eight rooms of one
 slightly too-awake house share a single, consistent fictional personality. The
 house notices what you do *inside the page* — where your pointer goes, what you
 click, how fast you scroll, when you wander off — and it answers through

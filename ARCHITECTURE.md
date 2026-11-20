@@ -121,6 +121,18 @@ implementation:
 | Line variety | `behaviors/helpers.ts` `pickLine` | Characters don't repeat a line while fresher ones exist. |
 | Loading | `app/App.tsx` | Rooms are code-split, then prefetched when idle (physics last). |
 
+### Phase 2 additions
+
+| Area | Module | Notes |
+| --- | --- | --- |
+| Weather | `engine/weather.ts`, `app/weatherSync.ts`, `components/WeatherLayer.tsx` | Mood → weather map plus a 3-minute pin; `WEATHER_CHANGED`; `html[data-weather]`; CSS-only particles. |
+| Keepsakes | `state/keepsakes.ts` | Memory v3 `world`: garden, letters, almanac, diary, records, attic. |
+| Flights | `rooms/Playground/flight.ts` | Ballistics between the trays, Bip's landing prediction, lobs. |
+| Garden | `rooms/Garden/growth.ts` | Pure growth model (weather rates, away catch-up). |
+| Letters | `content/letters.ts`, `app/letters.ts` | `findLetter` keeps, notes, announces; finale in After Hours. |
+| Watchers | `app/watchers.ts` | Night Owl, Tourist, Homebody. |
+| Voice | `VOICE.md`, `content/__tests__/copy.test.ts` | |
+
 Behavior files: `character.ts` (moods, idle, tab return), `living.ts`,
 `playground.ts`, `mood.ts`, `secret.ts`, `rare.ts`, `memory.ts`,
 `night.ts`, `combos.ts` (cross-room chains and multi-character gags).

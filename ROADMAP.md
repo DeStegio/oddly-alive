@@ -21,6 +21,24 @@ Phase numbers follow the master plan (`oddly-alive-master-plan.txt`).
 | 14 | QA, E2E, accessibility, performance | done |
 | 15 | README, deployment | done |
 
+## Phase 2 — "The House Has a Story"
+
+Planned and tracked in `PHASE_2_PLAN.md` (steps, branches, progress log).
+
+| Step | Scope | Status |
+| --- | --- | --- |
+| 0 | Playground volleyball with Bip, Field Notes, refresh fix, clearer clicks | done |
+| 1–2 | Voice guide (`VOICE.md`), copy lint, copy pass | done |
+| 3 | Memory schema v3 keepsakes | done |
+| 4–5 | House-wide weather; Mood Room barometer, almanac, Nimbus visits | done |
+| 6 | Navigation for eight rooms | done |
+| 7 | The Garden | done |
+| 8 | The Attic | done |
+| 9 | Great-Aunt Pim's letters and the rooftop finale | done |
+| 10 | Deeper discoveries, layered hints, cabinet by room | done |
+| 11 | Glue between rooms | done |
+| 12 | QA and docs | done |
+
 ## Phase 1 implementation plan
 
 1. `npm create vite` equivalent by hand (React + TS), strict `tsconfig`.
