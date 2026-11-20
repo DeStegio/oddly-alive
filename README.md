@@ -4,14 +4,16 @@
 
 ![The Living Room](docs/screenshots/living-room.png)
 
-Oddly Alive is an interactive house of six rooms. The whole site behaves like
+Oddly Alive is an interactive house of eight rooms. The whole site behaves like
 one character with moods. It notices what you do on the page and answers
 through behavior:
 - title letters lean away from your pointer
 - a shy blob looks away if you stare
 - a lamp sulks if you flick it too often
 - a fern grows a leaf for every secret you find
-- the weather in the Mood Room *is* the house's mood
+- the weather follows the house's mood, and every room feels it
+- a robot next door plays volleyball with whatever you throw over the fence
+- Great-Aunt Pim left a letter in every room
 
 There is no goal, score, tutorial or chatbot. The activity is the website itself.
 
@@ -22,11 +24,13 @@ There is no goal, score, tutorial or chatbot. The activity is the website itself
 | | |
 | --- | --- |
 | **Living Room**: Pim the shy blob, Dot the follower, Lumen the lamp, Tick the clock, Ferdinand the fern, a dust bunny and a do-not-press button. Scroll down for how the house works, and a creaky floorboard. | ![Living Room on a phone](docs/screenshots/mobile-living-room.png) |
-| **Playground**: Matter.js shapes with faces. They have momentum, stack and collide, and the room opens with a ramp-and-domino chain reaction. | ![Playground](docs/screenshots/playground.png) |
-| **Mood Room**: a tall window whose weather is the shared mood. Six objects on the sill (tea, a party horn, a blanket, a mirror, a feather, a kind letter) nudge the whole house. | ![Mood Room](docs/screenshots/mood-room.png) |
+| **Playground**: Matter.js shapes with faces. They have momentum, stack and collide, and the room opens with a ramp-and-domino chain reaction. Throw something hard enough and it leaves the tray: over the fence, Bip runs under it and volleys it back, so you can keep a rally going. Field Notes keep score. | ![Playground](docs/screenshots/playground.png) |
+| **Mood Room**: a tall window onto the house weather. Six objects on the sill nudge the mood; a barometer pins the weather for a few minutes (rain on every window, wind in the Playground, snow on the shapes); Nimbus keeps an almanac and can be sent to rain on another room. | ![Mood Room](docs/screenshots/mood-room.png) |
 | **Secret Space**: a dark cabinet lit by a torch that follows your pointer. It shows every secret, with optional hints, plus a chest, a token puzzle and invisible ink. | ![Secret Space](docs/screenshots/secret-space.png) |
 | **Memory Room**: everything the house remembers about this browser: visits, secrets, favourite things to poke and a silly nickname. It also has Reset Session, Reset World and Forget me. | ![Memory Room](docs/screenshots/memory-room.png) |
 | **After Hours**: a rooftop at night with a moon that's too close, stars you can connect, a radio, and a porch light that attracts a moth. A manual night switch themes the whole house. | ![After Hours](docs/screenshots/after-hours.png) |
+| **Garden**: Great-Aunt Pim's seed tin and six plots. Plants grow in real time, a little while you're away, and the weather helps or stops them. Flowers end up in a vase in the Living Room; radishes end up in the Playground. | ![Garden](docs/screenshots/garden.png) |
+| **Attic**: up a ladder from the Living Room. Boxes nobody sorted, Marguerite the dress form and her hats, a gramophone, the House Diary (written from your own visits) and Great-Aunt Pim's trunk of letters. | ![Attic](docs/screenshots/attic.png) |
 
 You can share any scene as a link or as a generated postcard:
 
@@ -40,8 +44,12 @@ You can share any scene as a link or as a generated postcard:
 - Type `hello`, `wonk` or `dance` anywhere.
 - In the Mood Room, pour tea and then unfold the blanket.
 - Find something in one room, then go back to the Living Room and listen.
+- Throw a pebble hard over the fence in the Playground. Catch it when it comes back.
+- Pin rain in the Mood Room, then visit the Garden. Pin a rainbow and hold up the mirror.
+- Plant a moonflower and come back after dark.
+- Look up in the Living Room once you have found a few things.
 
-There are 21 secrets. None of them is required for anything.
+There are 43 secrets and eight letters. None of them is required for anything.
 
 ## How it works
 
@@ -86,6 +94,8 @@ More detail: [`ARCHITECTURE.md`](ARCHITECTURE.md), [`DECISIONS.md`](DECISIONS.md
   - per-object counts
   - a trust number
   - a few settings
+  - keepsakes: the garden, letters found, weather seen, personal bests, and a
+    short diary (40 lines at most) with the date of a few big moments
 
   The Memory Room shows the raw data and can delete it. Memory can also be
   switched off.

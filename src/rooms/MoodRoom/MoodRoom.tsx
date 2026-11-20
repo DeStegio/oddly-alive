@@ -31,7 +31,7 @@ const SCENERY: Record<HouseWeather, Mood> = {
   rain: 'annoyed',
   storm: 'annoyed',
   fog: 'shy',
-  snow: 'neutral',
+  snow: 'shy',
   rainbow: 'confused',
   night: 'sleepy',
 };
