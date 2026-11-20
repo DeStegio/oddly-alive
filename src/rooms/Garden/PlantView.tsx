@@ -97,3 +97,21 @@ export const PlantView = memo(function PlantView({ kind, stage }: { kind: PlantK
     </svg>
   );
 });
+
+/** A picked crop, small enough to hold and throw. */
+export const CropIcon = memo(function CropIcon({ kind }: { kind: PlantKind }) {
+  if (kind === 'radish') {
+    return (
+      <svg viewBox="0 0 40 48" className={styles.cropSvg} aria-hidden="true">
+        <path d="M20 14 q -8 -10 -14 -8 M20 14 q 1 -12 9 -12 M20 14 q 9 -6 13 0" fill="none" stroke="#3f7a52" strokeWidth="3.5" strokeLinecap="round" />
+        <path d="M20 14 C 36 16 36 36 20 46 C 4 36 4 16 20 14 Z" fill="var(--coral)" {...INK} />
+      </svg>
+    );
+  }
+  return (
+    <svg viewBox="0 30 80 70" className={styles.cropSvg} aria-hidden="true">
+      <path d="M40 92 V 60" {...INK} stroke="#3f7a52" strokeWidth={3} />
+      <Bloom kind={kind} y={32} />
+    </svg>
+  );
+});

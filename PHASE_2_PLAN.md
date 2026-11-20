@@ -357,6 +357,6 @@ stay complete (visually-hidden controls), but pointer play is physical.
 
 | Step | Status | Notes |
 | --- | --- | --- |
-| R1 | in progress | |
+| R1 | done | Garden rewritten by hand: `gardenSim.ts` (pure: seeds, drops, crops; soil / lawn / house / fence landings), seed throwing from the tin (Inch eats misses; over the fence to Bip), watering can stream (only soil drops water; stale hand speed decays), pull-with-tension harvest then throw (house → vase/Playground, fence → Bip), plants lean, sunflowers watch the pointer, snapdragons snap. Keyboard tools hidden until focused. New discoveries: Long Shot, A Bouquet for Bip. |
 | R2 | todo | |
 | R3 | todo | |

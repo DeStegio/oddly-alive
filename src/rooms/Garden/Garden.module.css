@@ -314,3 +314,278 @@
 [data-motion='reduced'] .plot[data-stage='4'] .plantSvg {
   animation: none !important;
 }
+
+/* ===================== Phase 2.1: by hand ===================== */
+.scene {
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.scene[data-holding='seed'],
+.scene[data-holding='crop'],
+.scene[data-holding='can'] {
+  cursor: grabbing;
+}
+/* keyboard / screen-reader tools: out of sight until focused */
+.keys {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+.keys:focus-within {
+  position: static;
+  width: auto;
+  height: auto;
+  clip: auto;
+  margin-top: var(--sp-4);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.keys button {
+  font: inherit;
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  padding: 4px 10px;
+  border: 2px solid var(--ink);
+  border-radius: var(--radius-pill);
+  background: var(--paper);
+  color: var(--ink);
+}
+.keys button[aria-pressed='true'] {
+  background: var(--yellow);
+  color: #24232b;
+}
+
+/* the back of the house on the left: the door things get thrown through */
+.house {
+  position: absolute;
+  left: 0;
+  top: 18%;
+  bottom: 0;
+  width: 6%;
+  min-width: 46px;
+  background: repeating-linear-gradient(0deg, #e6cfae 0 18px, #d9bf99 18px 20px);
+  border-right: var(--stroke) solid var(--char-ink);
+}
+.houseDoor {
+  position: absolute;
+  left: 18%;
+  right: 18%;
+  bottom: 0;
+  height: 46%;
+  background: var(--coral);
+  border: 2.5px solid var(--char-ink);
+  border-bottom: 0;
+  border-radius: 10px 10px 0 0;
+}
+.basket {
+  position: absolute;
+  right: -30px;
+  bottom: 4px;
+  width: 34px;
+  height: 22px;
+  border: 2.5px solid var(--char-ink);
+  border-radius: 4px 4px 12px 12px;
+  background: repeating-linear-gradient(90deg, #c69a64 0 5px, #b98a5e 5px 9px);
+}
+
+/* beds start after the tin and the can */
+.beds {
+  padding: 0 3% 0 24%;
+}
+
+/* the seed tin, on the lawn */
+.tin {
+  position: absolute;
+  left: 8%;
+  bottom: 4%;
+  width: 11%;
+  min-width: 96px;
+  height: 52px;
+  padding: 14px 6px 6px;
+  display: flex;
+  gap: 4px;
+  align-items: flex-end;
+  justify-content: center;
+  border: var(--stroke) solid var(--char-ink);
+  border-radius: 8px;
+  background: #c9a46a;
+  box-shadow: var(--shadow-sm);
+  z-index: 2;
+}
+.tinLabel {
+  position: absolute;
+  top: 2px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 11px;
+  color: #24232b;
+}
+.slot {
+  flex: 1;
+  height: 22px;
+  border-radius: 50% 50% 4px 4px;
+  border: 2px solid var(--char-ink);
+  background: var(--seed, #8a5a3c);
+  cursor: grab;
+  transition: transform var(--dur-tap) var(--ease-out);
+}
+.slot:hover {
+  transform: translateY(-3px);
+}
+.slot[data-kind='sunflower'] {
+  --seed: #3b3a32;
+}
+.slot[data-kind='radish'] {
+  --seed: var(--coral);
+}
+.slot[data-kind='moonflower'] {
+  --seed: var(--cut-paper);
+}
+.slot[data-kind='snapdragon'] {
+  --seed: #d9604a;
+}
+.slot[data-kind='mint'] {
+  --seed: var(--mint);
+}
+
+/* the watering can, resting by the tin */
+.can {
+  position: absolute;
+  left: calc(8% + max(11%, 96px) + 12px);
+  bottom: 3.5%;
+  width: 64px;
+  z-index: 2;
+  cursor: grab;
+}
+.can svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.can[data-held='true'] {
+  opacity: 0.25;
+}
+
+/* plants: lean when brushed, stretch when pulled */
+.plant {
+  position: absolute;
+  inset: 0;
+  transform-origin: 50% 92%;
+  transform: rotate(var(--lean, 0deg)) translateY(calc(var(--pull, 0) * -14px)) scaleY(calc(1 + var(--pull, 0) * 0.35));
+  transition: transform 80ms linear;
+}
+.plot[data-stage='4'] {
+  cursor: grab;
+}
+.plot[data-kind='sunflower'] .head {
+  transform: rotate(var(--look, 0deg));
+  transition: transform 300ms var(--ease-out);
+}
+.plant[data-snap='true'] .jaw {
+  animation: snap 380ms var(--ease-spring);
+  transform-box: fill-box;
+  transform-origin: 50% 0;
+}
+
+/* things in the air and on the lawn */
+.seed,
+.crop,
+.held,
+.drop {
+  position: absolute;
+  left: 0;
+  top: 0;
+  will-change: transform;
+}
+.seed {
+  width: 9px;
+  height: 7px;
+  margin: -3px 0 0 -4px;
+  border-radius: 50%;
+  border: 1.5px solid var(--char-ink);
+  background: #8a5a3c;
+  pointer-events: none;
+  z-index: 4;
+}
+.crop {
+  width: 52px;
+  height: 60px;
+  margin: -30px 0 0 -26px;
+  z-index: 4;
+  cursor: grab;
+}
+.cropSvg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.drop {
+  width: 4px;
+  height: 7px;
+  margin: -3px 0 0 -2px;
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  background: var(--blue);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 4;
+}
+.held {
+  z-index: 6;
+  pointer-events: none;
+}
+.held[data-what='can'] {
+  width: 64px;
+  margin: -24px 0 0 -10px;
+}
+.held[data-what='can'] svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  transform: rotate(-28deg);
+  transform-origin: 70% 60%;
+}
+.held[data-what='crop'] {
+  width: 60px;
+  height: 70px;
+  margin: -35px 0 0 -30px;
+}
+.seedInHand {
+  display: block;
+  width: 12px;
+  height: 9px;
+  margin: -4px 0 0 -6px;
+  border-radius: 50%;
+  border: 2px solid var(--char-ink);
+  background: #8a5a3c;
+}
+
+@media (max-width: 720px) {
+  .house {
+    width: 8%;
+    min-width: 28px;
+    top: 30%;
+  }
+  .beds {
+    padding: 0 4% 0 12%;
+  }
+  .tin {
+    left: 12%;
+    bottom: auto;
+    top: 32%;
+  }
+  .can {
+    left: auto;
+    right: 6%;
+    bottom: auto;
+    top: 32%;
+  }
+}
