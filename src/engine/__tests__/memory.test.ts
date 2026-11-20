@@ -6,7 +6,7 @@ import { useObjects } from '../../state/world';
 import { getWorldState, initialWorldState, setWorldState } from '../../state/worldStore';
 import { ActorChannel } from '../actors';
 import { ManualClock } from '../clock';
-import { MEMORY_KEY, MEMORY_OFF_KEY, MemoryManager, SESSION_KEY, emptyMemory, migrateV1, validateV2, type MemoryV1 } from '../memory';
+import { MEMORY_KEY, MEMORY_OFF_KEY, MemoryManager, SESSION_KEY, cleanWorld, emptyMemory, migrateV1, migrateV2, validateV2, validateV3, type MemoryV1 } from '../memory';
 import { World } from '../world';
 
 class FakeStorage implements Storage {
@@ -55,7 +55,7 @@ describe('memory manager', () => {
     expect(r.data.counts.pim).toBe(7);
   });
 
-  it('migrates schema v1 to v2', () => {
+  it('migrates schema v1 all the way to v3', () => {
     const storage = new FakeStorage();
     const v1: MemoryV1 = {
       version: 1,
@@ -70,12 +70,13 @@ describe('memory manager', () => {
     storage.setItem(MEMORY_KEY, JSON.stringify(v1));
     const r = new MemoryManager(storage).load(NOW);
     expect(r.status).toBe('migrated');
-    expect(r.data.version).toBe(2);
+    expect(r.data.version).toBe(3);
+    expect(r.data.world.letters).toEqual([]);
     expect(Object.keys(r.data.discoveries).sort()).toEqual(['hello', 'keyhole']);
     expect(r.data.lastRoom).toBe('mood');
     expect(r.data.settings.motion).toBe('reduced');
     // migration writes back the new format
-    expect(JSON.parse(storage.getItem(MEMORY_KEY)!).version).toBe(2);
+    expect(JSON.parse(storage.getItem(MEMORY_KEY)!).version).toBe(3);
     expect(migrateV1({ version: 1 })).toBeNull();
   });
 
@@ -92,7 +93,7 @@ describe('memory manager', () => {
   it('validation strips junk, bounds sizes and clamps values', () => {
     const counts: Record<string, number> = { '<script>': 5, pim: 3, 'ok-id': Number.NaN };
     for (let i = 0; i < 100; i++) counts[`obj${i}`] = i;
-    const v = validateV2({ ...emptyMemory(NOW), trust: 7, counts, lastRoom: 'kitchen', roomVisits: { mood: 2, attic: 9 }, eventTotals: { OBJECT_CLICKED: 4, POINTER_MOVED: 9999 } })!;
+    const v = validateV2({ ...emptyMemory(NOW), version: 2, trust: 7, counts, lastRoom: 'kitchen', roomVisits: { mood: 2, kitchen: 9 }, eventTotals: { OBJECT_CLICKED: 4, POINTER_MOVED: 9999 } })!;
     expect(v.trust).toBe(1);
     expect(Object.keys(v.counts).length).toBeLessThanOrEqual(40);
     expect(v.counts['<script>']).toBeUndefined();
@@ -254,5 +255,57 @@ describe('forget me while memory sync is running', () => {
     expect(localStorage.getItem(MEMORY_KEY)).not.toBeNull();
     stop();
     vi.useRealTimers();
+  });
+});
+
+describe('memory v3 keepsakes', () => {
+  it('migrates v2 to v3 keeping everything and starting the keepsakes empty', () => {
+    const v2 = { ...emptyMemory(NOW), version: 2, visits: 5, discoveries: { hello: NOW } };
+    const storage = new FakeStorage();
+    storage.setItem(MEMORY_KEY, JSON.stringify(v2));
+    const r = new MemoryManager(storage).load(NOW);
+    expect(r.status).toBe('migrated');
+    expect(r.data.version).toBe(3);
+    expect(r.data.visits).toBe(5);
+    expect(r.data.discoveries).toEqual({ hello: NOW });
+    expect(r.data.world.garden.plots).toHaveLength(6);
+    expect(migrateV2({ version: 2 })).toBeNull();
+  });
+
+  it('round-trips keepsakes through storage', () => {
+    const storage = new FakeStorage();
+    const mm = new MemoryManager(storage);
+    const data = emptyMemory(NOW);
+    data.world.letters = ['living', 'garden'];
+    data.world.records = { bestRally: 7 };
+    data.world.garden.plots[2] = { kind: 'radish', plantedAt: NOW - 100, updatedAt: NOW, wateredAt: 0, growth: 0.4 };
+    data.world.diary = [{ at: NOW, kind: 'first-visit', detail: 'You came in for the first time.' }];
+    expect(mm.save(data)).toBe(true);
+    const back = mm.load(NOW).data.world;
+    expect(back.letters).toEqual(['living', 'garden']);
+    expect(back.records.bestRally).toBe(7);
+    expect(back.garden.plots[2]?.kind).toBe('radish');
+    expect(back.diary[0]?.detail).toMatch(/first time/);
+  });
+
+  it('cleans hostile or oversized keepsakes', () => {
+    const w = cleanWorld({
+      garden: { plots: [{ kind: '<img>', plantedAt: 1, updatedAt: 1, growth: 3 }, { kind: 'mint', plantedAt: 1, updatedAt: 1, growth: 9 }, 'x'], vase: Array.from({ length: 50 }, () => 'sunflower') },
+      letters: ['living', 'living', 'BAD ID', 42],
+      diary: Array.from({ length: 99 }, (_, i) => ({ at: i, kind: 'note', detail: 'x'.repeat(500) })),
+      records: { bestRally: 12, 'bad key!': 3, huge: 1e9 },
+      attic: { unlocked: 'yes', hats: ['beret', 'beret', '??'] },
+    });
+    expect(w.garden.plots).toHaveLength(6);
+    expect(w.garden.plots[0]).toBeNull();
+    expect(w.garden.plots[1]?.growth).toBe(1);
+    expect(w.garden.vase.length).toBeLessThanOrEqual(12);
+    expect(w.letters).toEqual(['living']);
+    expect(w.diary).toHaveLength(40);
+    expect(w.diary[0]!.detail.length).toBeLessThanOrEqual(120);
+    expect(w.records).toEqual({ bestRally: 12 });
+    expect(w.attic).toEqual({ unlocked: false, hats: ['beret'] });
+    expect(cleanWorld('nonsense').letters).toEqual([]);
+    expect(validateV3({ ...emptyMemory(NOW), world: 'junk' })?.world.garden.plots).toHaveLength(6);
   });
 });

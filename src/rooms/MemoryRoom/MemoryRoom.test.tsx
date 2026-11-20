@@ -37,6 +37,6 @@ describe('<MemoryRoom />', () => {
   it('can reveal exactly what is stored', () => {
     renderRoom();
     fireEvent.click(screen.getByRole('button', { name: 'Show raw data' }));
-    expect(document.querySelector('pre')?.textContent).toMatch(/"version": 2/);
+    expect(document.querySelector('pre')?.textContent).toMatch(/"version": 3/);
   });
 });

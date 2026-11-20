@@ -1,11 +1,13 @@
-import { MemoryManager, emptyMemory, isNewSession, persistableTotals, type MemoryV2 } from '../engine/memory';
+import { secretById } from '../content/secrets';
+import { MemoryManager, emptyMemory, isNewSession, persistableTotals, type MemoryV3 } from '../engine/memory';
+import { keepsakesSnapshot, useKeepsakes } from '../state/keepsakes';
 import { mergeCounts, type World } from '../engine/world';
 import { useSettings } from '../state/settings';
 import { useObjects } from '../state/world';
 import { getWorldState, initialWorldState, setWorldState, useWorldStore } from '../state/worldStore';
 
 let manager: MemoryManager | null = null;
-let base: MemoryV2 | null = null;
+let base: MemoryV3 | null = null;
 /** After "Forget me", nothing is written until something new is discovered. */
 let forgotten = false;
 
@@ -15,7 +17,7 @@ export function getMemoryManager(): MemoryManager {
 }
 
 /** Compose what gets saved: previous visits + this session. Minimal by design. */
-export function composeMemory(now: number): MemoryV2 {
+export function composeMemory(now: number): MemoryV3 {
   const s = getWorldState();
   const prev = base ?? emptyMemory(now);
   const sessionCounts = Object.fromEntries(Object.entries(s.counts).filter(([k]) => !k.startsWith('hover:')));
@@ -23,7 +25,7 @@ export function composeMemory(now: number): MemoryV2 {
   for (const [room, n] of Object.entries(s.roomVisits)) roomVisits[room as keyof typeof roomVisits] = (prev.roomVisits[room as keyof typeof roomVisits] ?? 0) + (n ?? 0);
   const settings = useSettings.getState();
   return {
-    version: 2,
+    version: 3,
     visits: s.visits,
     firstVisit: prev.firstVisit,
     lastVisit: now,
@@ -34,6 +36,7 @@ export function composeMemory(now: number): MemoryV2 {
     lastRoom: s.room,
     trust: s.vars.trust,
     settings: { sound: settings.sound, motion: settings.motion, motionExplicit: settings.motionExplicit, afterHours: settings.afterHours },
+    world: keepsakesSnapshot(),
   };
 }
 
@@ -56,6 +59,8 @@ export function startMemory(world: World): () => void {
   const returning = visits > 1 && (status === 'restored' || status === 'migrated');
 
   if (status === 'disabled') useSettings.getState().hydrate({ memoryEnabled: false });
+  useKeepsakes.getState().hydrate(data.world);
+  if (data.visits === 0) useKeepsakes.getState().note('first-visit', 'You came in for the first time.', { once: true, at: now });
   const st = data.settings;
   // sound is never restored: every visit starts silent until the visitor opts in
   useSettings.getState().hydrate({
@@ -85,10 +90,18 @@ export function startMemory(world: World): () => void {
   forgotten = false;
   const unsub = useWorldStore.subscribe((s, prev) => {
     if (s.discoveries === prev.discoveries) return;
+    // every first-time discovery gets a line in the house diary
+    for (const id of Object.keys(s.discoveries)) {
+      if (id in prev.discoveries) continue;
+      const def = secretById(id);
+      if (def) useKeepsakes.getState().note(`found:${id}`, def.found, { once: true });
+    }
     // a new discovery after Forget me is the visitor choosing to be remembered again
     if (forgotten && Object.keys(s.discoveries).length > 0) forgotten = false;
     saveNow();
   });
+  // keepsakes change rarely (a bloom, a letter, a new record): save right away
+  const unsubKeep = useKeepsakes.subscribe(() => saveNow());
   const interval = window.setInterval(() => document.visibilityState === 'visible' && saveNow(), 15_000);
   const onHide = () => document.visibilityState === 'hidden' && saveNow();
   document.addEventListener('visibilitychange', onHide);
@@ -100,6 +113,7 @@ export function startMemory(world: World): () => void {
     window.clearTimeout(greet);
     window.clearInterval(interval);
     unsub();
+    unsubKeep();
     document.removeEventListener('visibilitychange', onHide);
     window.removeEventListener('pagehide', saveNow);
   };
@@ -115,6 +129,7 @@ export function resetSession(world: World) {
 /** Reset World: rooms back to their tidy state. Keeps memory and the session mood. */
 export function resetWorld(world: World) {
   useObjects.getState().resetObjects();
+  useKeepsakes.getState().tidy();
   useSettings.getState().setAfterHours(false);
   world.calm();
   world.emit('WORLD_RESET', { scope: 'world' });
@@ -128,6 +143,7 @@ export function clearMemory(world: World) {
   const keepRoom = getWorldState().room;
   setWorldState({ ...initialWorldState(), room: keepRoom, roomVisits: { [keepRoom]: 1 }, memoryStatus: 'fresh' });
   useObjects.getState().resetObjects();
+  useKeepsakes.getState().reset();
   useSettings.getState().hydrate({ sound: false, afterHours: false });
   world.calm();
   world.emit('WORLD_RESET', { scope: 'memory' });

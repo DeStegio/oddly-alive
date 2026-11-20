@@ -7,6 +7,7 @@ import { onFrame } from '../../engine/frameLoop';
 import { useSettings } from '../../state/settings';
 import { getFlag, setFlag } from '../../state/world';
 import { useObjects } from '../../state/world';
+import { useKeepsakes } from '../../state/keepsakes';
 import { FieldNotes } from './FieldNotes';
 import { isResting, lob, predictHit, stepBall, throwToYard, type Ball, type Box, type World as FlightWorld } from './flight';
 import { goalsDone, type GoalId, type PileStats } from './goals';
@@ -90,9 +91,10 @@ export default function Playground() {
   const flightId = useRef(1);
   const [flightViews, setFlightViews] = useState<Array<{ id: number; kind: ShapeKind }>>([]);
   const [rally, setRally] = useState(0);
-  const [bestRally, setBestRally] = useState(0);
+  // best rally is a personal best kept between visits
+  const [bestRally, setBestRally] = useState(() => useKeepsakes.getState().records.bestRally ?? 0);
   const rallyRef = useRef(0);
-  const bestRallyRef = useRef(0);
+  const bestRallyRef = useRef(bestRally);
   /** The shape in the tray that is "in play" (came back from Bip), and when it stopped moving. */
   const rallyBall = useRef<{ id: number; rally: number; still: number } | null>(null);
   /** Bip is holding this because the floor was full. */
@@ -252,6 +254,9 @@ export default function Playground() {
       towerFound.current = false;
     }
     if (h >= 5) completeGoal('tower');
+    if (h >= 3 && useKeepsakes.getState().record('tallestTower', h) && h >= 5) {
+      useKeepsakes.getState().note('record:tower', `Stacked ${h} things into a tower in the Playground. The tallest yet.`);
+    }
     if (sim.count >= MAX_BODIES) completeGoal('full');
 
     const floorTop = sim.layout.height - 20;
@@ -325,6 +330,9 @@ export default function Playground() {
     if (n > bestRallyRef.current) {
       bestRallyRef.current = n;
       setBestRally(n);
+    }
+    if (useKeepsakes.getState().record('bestRally', n) && n >= 3) {
+      useKeepsakes.getState().note('record:rally', `Kept a rally of ${n} going with Bip next door. A new best.`);
     }
   }
 
