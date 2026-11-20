@@ -206,7 +206,8 @@ test('garden by hand: pull a ripe sunflower up and throw it to the house', async
   await page.mouse.down();
   for (let i = 1; i <= 5; i++) await page.mouse.move(b.x + b.width / 2, b.y + b.height * 0.4 - i * 20);
   await expect(page.getByRole('button', { name: 'Plot 2: empty' })).toBeVisible();
-  for (let i = 1; i <= 3; i++) await page.mouse.move(b.x - i * 150, b.y - 60 - i * 20);
+  // a hard throw left, with margin for a busy machine
+  for (let i = 1; i <= 4; i++) await page.mouse.move(b.x - i * 260, b.y - 60 - i * 30);
   await page.mouse.up();
   await expect
     .poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('oddly-alive:memory') || '{}').world?.garden?.vase ?? []), { timeout: 6000 })
@@ -229,5 +230,6 @@ test('attic by hand: shake a box until it bursts open', async ({ page }) => {
     await page.waitForTimeout(30);
   }
   await page.mouse.up();
-  await expect(boxes).toHaveCount(5);
+  // at least the shaken one (a hard shake can knock another open too)
+  await expect.poll(() => boxes.count(), { timeout: 5000 }).toBeLessThan(6);
 });

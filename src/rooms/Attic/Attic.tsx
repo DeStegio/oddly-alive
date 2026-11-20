@@ -124,10 +124,15 @@ export default function Attic() {
     );
     // hats already found and not being worn lie about on the floor
     const onHer = useObjects.getState().attic.wearing;
+    // every hat exists once: on her, on the floor, or still in its box
+    const present = new Set<string>(onHer ? [onHer] : []);
     useKeepsakes
       .getState()
       .attic.hats.filter((h) => h !== onHer && isHat(h))
-      .forEach((h, i) => sim.add(`hat:${h as HatId}`, 280 + i * 70, PILE_H - 60));
+      .forEach((h, i) => {
+        present.add(h);
+        sim.add(`hat:${h as HatId}`, 280 + i * 70, PILE_H - 60);
+      });
 
     let lastBump = 0;
     sim.onBump = (force) => {
@@ -146,7 +151,8 @@ export default function Attic() {
       world.effects.sound('shake');
       const last = all.length === BOXES.length;
       setFound({ title: def.title, story: last ? `${def.story} And under everything, an envelope.` : def.story });
-      if (def.hat) {
+      if (def.hat && !present.has(def.hat)) {
+        present.add(def.hat);
         useKeepsakes.getState().addHat(def.hat);
         const p = sim.add(`hat:${def.hat}`, x, y - 10);
         sim.fling(p.id, (Math.random() - 0.5) * 6, -9, 0.2);

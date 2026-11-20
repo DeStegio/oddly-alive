@@ -76,3 +76,15 @@ describe('<PullCord />', () => {
     expect(screen.getByRole('link', { name: 'Up to the attic' })).toHaveAttribute('href', '/attic');
   });
 });
+
+describe('<Attic /> keeps one of each hat', () => {
+  it('a hat already found does not come out of its box a second time', () => {
+    setWorldState(initialWorldState());
+    useObjects.getState().resetObjects();
+    useKeepsakes.getState().reset();
+    useKeepsakes.getState().addHat('topper');
+    const { container } = wrap(<Attic />);
+    for (let i = 0; i < 6; i++) fireEvent.click(screen.getByRole('button', { name: 'Open the next box' }));
+    expect(container.querySelectorAll('[data-kind="hat:topper"]')).toHaveLength(1);
+  });
+});
