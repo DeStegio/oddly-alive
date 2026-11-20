@@ -96,7 +96,7 @@ export const nightBehaviors = [
     rooms: NIGHT,
     priority: Priority.RARE,
     when: (c) => (c.event.payload as { event: string }).event === 'shooting-star',
-    react: (c) => act('pim', 2400, (ctl) => ctl.after(400, () => say(c, 'pim', ['a shooting star! make a wish!', 'did you see that?!'], 2200))),
+    react: (c) => act('pim', 2400, (ctl) => ctl.after(400, () => say(c, 'pim', ['a shooting star! make a wish!', 'did you see that? over the chimney.'], 2200))),
   }),
   defineBehavior({
     id: 'night.welcome',
