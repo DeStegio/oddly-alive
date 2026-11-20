@@ -215,4 +215,11 @@ Added in Phase 2 (`PHASE_2_PLAN.md`). Same legend as above.
 | INT-133 | Patient / Gentle Hands | verified | `character.ts` `idle.long`, `living.ts` `pim.gentle` | T: `world.test.ts`, `SecretSpace.test.tsx` |
 | INT-134 | Layered hints, cabinet by room | verified | `content/secrets.ts` `after`, `SecretSpace.tsx` | T: `SecretSpace.test.tsx` |
 | INT-135 | Rooms notice each other (vase, radish, Dot on weather) | verified | `behaviors/combos.ts` | T: `combos.test.ts` |
+| INT-137 | Throw seeds; they grow where they land | verified | `Garden/gardenSim.ts`, `Garden.tsx` | T: `gardenSim.test.ts` |
+| INT-138 | Watering can pours a droplet stream | verified | `gardenSim.ts` `droplet` | T: `gardenSim.test.ts` |
+| INT-139 | Pull a ripe plant against its roots, then throw it | verified | `Garden.tsx`, `pullTension` | T: `gardenSim.test.ts`, E2E garden by hand |
+| INT-140 | Plants lean when brushed; sunflowers watch the pointer | implemented | `Garden.tsx` frame loop | |
+| INT-141 | Attic pile: drop or shake a box to burst it | verified | `Attic/pile.ts` | T: `pile.test.ts`, E2E attic by hand |
+| INT-142 | Throw a hat onto Marguerite | implemented | `Attic.tsx`, `HEAD` sensor | Checked in Chromium |
+| INT-143 | Record plays only while turned by hand; backwards works | verified | `Attic/spin.ts`, `Gramophone.tsx` | T: `spin.test.ts` |
 | INT-136 | Copy lint keeps the voice human | verified | `content/__tests__/copy.test.ts`, `VOICE.md` | T: `copy.test.ts` |
