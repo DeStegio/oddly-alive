@@ -47,10 +47,59 @@
   margin: 0 var(--sp-2);
 }
 
+/* tray · Field Notes · Bip's yard (see the layout note in Playground.tsx) */
+.playArea {
+  margin-top: var(--sp-4);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas: 'tray' 'yard' 'notes';
+  gap: var(--sp-6);
+  align-items: start;
+}
+.trayCol {
+  grid-area: tray;
+  min-width: 0;
+}
+.notesCol {
+  grid-area: notes;
+  min-width: 0;
+}
+.yardCol {
+  grid-area: yard;
+  min-width: 0;
+}
+@media (min-width: 1100px) {
+  .playArea {
+    grid-template-columns: max-content minmax(300px, 420px);
+    grid-template-areas: 'tray notes' 'yard notes';
+    gap: 28px; /* GAP in Playground.tsx */
+  }
+}
+@media (min-width: 1400px) {
+  .playArea {
+    grid-template-columns: max-content minmax(280px, 1fr) max-content;
+    grid-template-areas: 'tray notes yard';
+  }
+}
+
+/* shapes in the air between the trays (positioned by the frame loop) */
+.sky {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+}
+.flying {
+  position: absolute;
+  left: 0;
+  top: 0;
+  visibility: hidden;
+  will-change: transform;
+}
+
 /* the paper tray */
 .tray {
   position: relative;
-  margin-top: var(--sp-4);
   width: 100%;
   max-width: 1200px;
   border: var(--stroke) solid var(--ink);

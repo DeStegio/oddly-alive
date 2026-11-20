@@ -99,4 +99,39 @@ describe('playground sim API', () => {
     expect(sim.inBin(key.id)).toBe(true);
     sim.destroy();
   });
+
+  it('launch adds a shape that arrives already moving', () => {
+    const sim = new PlaygroundSim({ ...defaultLayout(false), arrangement: [] });
+    const ball = sim.launch('ball', 900, 200, -1.2, -0.4)!;
+    expect(ball.body.velocity.x).toBeLessThan(0);
+    run(sim, 3000);
+    expect(ball.body.position.x).toBeLessThan(900);
+    expect(ball.body.position.y).toBeLessThan(sim.layout.height);
+    for (let i = 0; i < 30; i++) sim.spawn('pebble', 500, 100);
+    expect(sim.launch('ball', 500, 100, 0, 0)).toBeNull(); // full floor
+    sim.destroy();
+  });
+
+  it('a floaty shape (a ball in play) falls more slowly', () => {
+    const sim = new PlaygroundSim({ ...defaultLayout(false), arrangement: [] });
+    const a = sim.spawn('ball', 300, 60)!;
+    const b = sim.spawn('ball', 700, 60)!;
+    sim.setFloaty(b.id, 0.55);
+    run(sim, 400);
+    expect(b.body.position.y - 60).toBeLessThan((a.body.position.y - 60) * 0.6);
+    sim.setFloaty(b.id, 0);
+    sim.destroy();
+  });
+
+  it('a released drag reports its direction', () => {
+    const sim = new PlaygroundSim({ ...defaultLayout(false), arrangement: [] });
+    const ball = sim.spawn('ball', 500, 300)!;
+    sim.startDrag(ball.id, 500, 300, 0);
+    for (let t = 1; t <= 5; t++) sim.moveDrag(500 + t * 30, 300 - t * 10, t * 10);
+    const stats = sim.endDrag()!;
+    expect(stats.direction.x).toBeGreaterThan(0.9);
+    expect(stats.direction.y).toBeLessThan(0);
+    sim.destroy();
+  });
+
 });

@@ -217,3 +217,30 @@ li {
 [data-motion='reduced'] .prop-btn:hover > svg {
   transform: none;
 }
+
+/* ---- what's clickable, at a glance ----
+   Rapid clicking should never paint a text selection over the scene. */
+.prop-btn,
+.paper-btn,
+main button {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* With a real mouse, anything you can press grows a soft outline that follows
+   its own silhouette (not its bounding box), so the hand cursor always has an
+   obvious "this one" to go with it. */
+@media (hover: hover) and (pointer: fine) {
+  .prop-btn > svg,
+  .prop-btn > *,
+  main button:not(.paper-btn) > * {
+    transition:
+      transform var(--dur-ui) var(--ease-spring),
+      filter var(--dur-ui) var(--ease-out);
+  }
+  .prop-btn:hover > *,
+  main button:not(.paper-btn):not(:disabled):hover > * {
+    filter: drop-shadow(0 0 1px var(--blue-ink))
+      drop-shadow(0 0 7px color-mix(in srgb, var(--blue) 60%, transparent));
+  }
+}

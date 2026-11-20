@@ -64,6 +64,59 @@ export const playgroundBehaviors = [
       }),
   }),
   defineBehavior({
+    id: 'pg.goal',
+    on: ['OBJECT_STATE_CHANGED'],
+    rooms: PG,
+    priority: Priority.CHARACTER,
+    // the tower already gets its own (DIRECT) celebration
+    when: (c) => c.event.payload.target === 'playground' && c.event.payload.key === 'goal' && c.event.payload.value !== 'tower',
+    react: (c) =>
+      act('dot', 2000, () => {
+        anim(c, 'dot', 'bounce');
+        face(c, 'dot', 'excited', 1600);
+        say(c, 'dot', ['writing that down.', 'goal! ✓', 'another one for the notes.', 'officially impressive.'], 1800);
+      }),
+  }),
+  defineBehavior({
+    id: 'pg.ejected',
+    on: ['OBJECT_STATE_CHANGED'],
+    rooms: PG,
+    priority: Priority.CHARACTER,
+    cooldownMs: 2500,
+    when: (c) => c.event.payload.target === 'playground' && c.event.payload.key === 'ejected',
+    react: (c) =>
+      act('dot', 1800, () => {
+        face(c, 'dot', 'surprised', 1400);
+        say(c, 'dot', ['bye bye!', 'and it’s… gone.', 'that one’s not coming back.', 'into the void!'], 1600);
+      }),
+  }),
+  defineBehavior({
+    id: 'pg.over-the-fence',
+    on: ['OBJECT_STATE_CHANGED'],
+    rooms: PG,
+    priority: Priority.CHARACTER,
+    cooldownMs: 4000,
+    when: (c) => c.event.payload.target === 'playground' && c.event.payload.key === 'overTheFence',
+    react: (c) =>
+      act('dot', 1800, () => {
+        anim(c, 'dot', 'jump');
+        say(c, 'dot', ['over the net!', 'Bip, heads up!', 'serve!'], 1400);
+      }),
+  }),
+  defineBehavior({
+    id: 'pg.rally-over',
+    on: ['OBJECT_STATE_CHANGED'],
+    rooms: PG,
+    priority: Priority.CHARACTER,
+    cooldownMs: 3000,
+    when: (c) => c.event.payload.target === 'playground' && c.event.payload.key === 'rallyOver' && Number(c.event.payload.value) >= 3,
+    react: (c) =>
+      act('dot', 2200, () => {
+        anim(c, 'dot', 'bounce');
+        say(c, 'dot', [`a rally of ${String(c.event.payload.value)}! *tiny applause*`, 'what a match.', 'the crowd (me) goes wild.'], 2000);
+      }),
+  }),
+  defineBehavior({
     id: 'pg.shake',
     implements: ['INT-063'],
     on: ['OBJECT_STATE_CHANGED'],
