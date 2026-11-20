@@ -315,3 +315,48 @@ cross-room, Marguerite's 4th hat, Tourist/Homebody discoveries.
 | 10 | done | Six discoveries: Patient (Living Room nods off), Gentle Hands (10 hovers, no pokes → Pim tells a secret), Night Owl (00–04 local), Tourist (every known room in 90 s), Homebody (5 min in one room), Puddle Jumper (volley in rain). `app/watchers.ts`. Layered hints (`after`) on 11 deeper secrets; cabinet grouped into one shelf per room with counts. Living letter now needs the key found (it was stepping on the keyhole moment). Found and fixed via e2e: Bip could miss on slow frames (hit check now per 16 ms slice) and could never reach a ball resting by the net. 43 secrets total. |
 | 11 | done | Glue: garden flowers noticed in the Living Room (Ferdinand + Pim, via `living.vaseNew`), radishes greeted by Dot in the Playground, Dot’s weather opinions (Playground, Mood Room); existing gossip already covers discoveries in the new rooms. Reduced motion: global rule + per-component rules cover every new animation. Follow-up noted: Playground.tsx is ~840 lines; extracting the volleyball loop into a hook is a safe next refactor (not done here to avoid churn before release). |
 | 12 | done | Docs: README (eight rooms, new screenshots for Playground, Mood Room, Garden, Attic; things to try; privacy lists keepsakes), ARCHITECTURE (Phase 2 modules), ROADMAP (Phase 2 table), DECISIONS 17–23, INTERACTION_CATALOG INT-111…136, PRODUCT_VISION room count. Final: 208 unit tests, 43 e2e (desktop + mobile, a11y, perf) green; production build OK. Not pushed: `phase-2` is ready for the owner to review and merge. |
+
+---
+
+# Phase 2.1 — "Hands-on" (refinement)
+
+Owner feedback after release: the Garden and the Attic feel like menus of
+buttons ("press it, see what it does"). The Playground works because you *do*
+something with your hand (throw, aim, catch) and physics answers in a way that
+isn't scripted. Both rooms get that treatment. Keyboard / screen-reader paths
+stay complete (visually-hidden controls), but pointer play is physical.
+
+## Garden: hands in the dirt
+
+| Then | Now |
+| --- | --- |
+| click a packet, click a plot | pick a seed out of the tin and **throw** it; it arcs and grows where it lands. Grass: Inch eats it. Over the fence: Bip gets it. |
+| click to water | **hold the watering can**: a stream of droplets with gravity; only drops that land on soil water a plant; moving fast sprays sideways |
+| click a bloom to harvest | **pull** a ripe plant up against springy tension (let go early and it snaps back); then **throw** it: towards the house → vase; over the fence → Bip (radishes join his game, flowers he keeps) |
+| static plants | plants lean as the pointer brushes past, sunflowers turn to follow it, snapdragons snap when you get close |
+
+## Attic: the pile
+
+| Then | Now |
+| --- | --- |
+| six "open box" buttons | a **physics pile** of boxes (Matter.js, lazy chunk shared with the Playground); drag them, pull one from the bottom and the pile topples |
+| — | boxes **burst open** on a hard landing or a good shake; contents spill out as draggable objects (hats, the shoe, a dust puff, the letter fluttering down) |
+| hat buttons | **drop or throw** hats onto Marguerite's head; a thrown hat that lands is a discovery ("Nice Shot") |
+| play button | the record only plays while you **spin it by hand**: circular drag speed sets the tempo, spinning backwards plays the tune backwards; Marguerite sways in time |
+| pager buttons | drag the diary page corner to turn it |
+
+## Steps
+
+| # | Branch | Scope |
+| --- | --- | --- |
+| R1 | `feat/p21-garden-hands` | Garden rewrite: seed throwing, pouring, pull + throw harvest, plants react; keyboard fallback; tests |
+| R2 | `feat/p21-attic-pile` | Attic rewrite: physics pile, bursting boxes, physical items, hats on Marguerite (drop / throw), spin-to-play gramophone, page drag; tests |
+| R3 | `chore/p21-release` | QA (unit, e2e desktop + mobile, a11y), docs, screenshots, merge to main, deploy |
+
+## Progress log (2.1)
+
+| Step | Status | Notes |
+| --- | --- | --- |
+| R1 | in progress | |
+| R2 | todo | |
+| R3 | todo | |
