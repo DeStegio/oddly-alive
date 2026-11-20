@@ -47,10 +47,10 @@ export const comboBehaviors = [
         'argue',
         5200,
         (ctl) => {
-          say(c, 'tick', ['it is exactly now o’clock.', 'technically it’s later than you think.'], 1800);
+          say(c, 'tick', ['it is precisely now. I checked twice.', 'later than you think. it always is.'], 1800);
           anim(c, 'tick', 'shake');
           ctl.after(tempo(c, 1700), () => {
-            say(c, 'lumen', ['it’s LAMP o’clock.', 'wrong. it’s bedtime for clocks.'], 1800);
+            say(c, 'lumen', ['wrong. it is curtain-up o’clock.', 'nobody asked the clock.'], 1800);
             anim(c, 'lumen', 'wiggle');
           });
           ctl.after(tempo(c, 3500), () => say(c, 'pim', ['please don’t make me pick a side.', 'they do this every day.'], 1700));
@@ -132,7 +132,7 @@ export const comboBehaviors = [
     rooms: ['mood'],
     priority: Priority.AMBIENT,
     when: (c) => c.view.flag('living.lampOn') === false,
-    react: (c) => act('nimbus:cross', 3600, (ctl) => ctl.after(3200, () => say(c, 'nimbus', ['someone turned the lamp off downstairs. very moody of you.'], 2600)), { ambient: true }),
+    react: (c) => act('nimbus:cross', 3600, (ctl) => ctl.after(3200, () => say(c, 'nimbus', ['lamp’s off downstairs. outlook: dim, spreading east.'], 2600)), { ambient: true }),
   }),
   defineBehavior({
     id: 'cross.key.chest',

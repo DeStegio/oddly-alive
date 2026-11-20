@@ -46,7 +46,7 @@ export default function MoodRoom() {
         <p className={styles.note}>
           {moodsSeen >= 6
             ? `You’ve seen ${moodsSeen} kinds of weather today. That’s a lot of weather.`
-            : 'Try the things on the windowsill. Moods take a few seconds to turn — like real weather, only sillier.'}
+            : 'The things on the sill change the weather. Slowly, the way weather does.'}
         </p>
         <p className={styles.back}>
           <Link to="/">← back to the Living Room</Link>, where Pim is feeling the same way.

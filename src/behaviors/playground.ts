@@ -20,7 +20,7 @@ export const playgroundBehaviors = [
       act('dot', 1800, () => {
         anim(c, 'dot', 'jump');
         face(c, 'dot', 'excited', 1500);
-        say(c, 'dot', ['WHEEE', 'yeet!', 'that one’s going to feel it tomorrow.', 'airborne!'], 1600);
+        say(c, 'dot', ['WHEEE', 'that one’s going to feel it tomorrow.', 'AIRBORNE.', 'ten points. I just decided.'], 1600);
       }),
   }),
   defineBehavior({
@@ -33,7 +33,7 @@ export const playgroundBehaviors = [
     chance: 0.5,
     cooldownMs: 6000,
     when: (c) => c.event.payload.phase === 'end' && c.event.payload.speed <= 0.8 && c.event.payload.distance > 30,
-    react: (c) => act('dot', 1600, () => void say(c, 'dot', ['gently does it.', 'very careful. very nice.', 'a delicate placement.'], 1600)),
+    react: (c) => act('dot', 1600, () => void say(c, 'dot', ['gently does it.', 'like a surgeon.', 'shh. it’s balancing.'], 1600)),
   }),
   defineBehavior({
     id: 'pg.collide.big',
@@ -60,7 +60,7 @@ export const playgroundBehaviors = [
     react: (c) =>
       act('dot', 2600, () => {
         anim(c, 'dot', 'bounce');
-        say(c, 'dot', ['a TOWER. architectural.', 'look how tall. don’t breathe.'], 2400);
+        say(c, 'dot', ['a TOWER.', 'don’t breathe. nobody breathe.'], 2400);
       }),
   }),
   defineBehavior({
@@ -74,7 +74,7 @@ export const playgroundBehaviors = [
       act('dot', 2000, () => {
         anim(c, 'dot', 'bounce');
         face(c, 'dot', 'excited', 1600);
-        say(c, 'dot', ['writing that down.', 'goal! ✓', 'another one for the notes.', 'officially impressive.'], 1800);
+        say(c, 'dot', ['writing that down.', 'that’s going in the book.', 'one more for the notes.', 'tick. big tick.'], 1800);
       }),
   }),
   defineBehavior({
@@ -87,7 +87,7 @@ export const playgroundBehaviors = [
     react: (c) =>
       act('dot', 1800, () => {
         face(c, 'dot', 'surprised', 1400);
-        say(c, 'dot', ['bye bye!', 'and it’s… gone.', 'that one’s not coming back.', 'into the void!'], 1600);
+        say(c, 'dot', ['bye bye.', 'and it’s gone.', 'that one’s not coming back.', 'we had a good run, that one and me.'], 1600);
       }),
   }),
   defineBehavior({
@@ -113,7 +113,7 @@ export const playgroundBehaviors = [
     react: (c) =>
       act('dot', 2200, () => {
         anim(c, 'dot', 'bounce');
-        say(c, 'dot', [`a rally of ${String(c.event.payload.value)}! *tiny applause*`, 'what a match.', 'the crowd (me) goes wild.'], 2000);
+        say(c, 'dot', [`a rally of ${String(c.event.payload.value)}. *small applause*`, 'what a match.', 'crowd of one, on its feet.'], 2000);
       }),
   }),
   defineBehavior({
@@ -127,7 +127,7 @@ export const playgroundBehaviors = [
     react: (c) =>
       act('dot', 1800, () => {
         anim(c, 'dot', 'dizzy');
-        say(c, 'dot', ['earthquake!', 'everybody jump!'], 1500);
+        say(c, 'dot', ['EARTHQUAKE.', 'everybody hold onto something.'], 1500);
       }),
   }),
   defineBehavior({
@@ -137,7 +137,7 @@ export const playgroundBehaviors = [
     rooms: PG,
     priority: Priority.CHARACTER,
     when: (c) => c.event.payload.target === 'playground' && c.event.payload.key === 'reset',
-    react: (c) => act('dot', 1600, () => void say(c, 'dot', ['good as new.', 'nobody saw anything.', 'tidy!'], 1500)),
+    react: (c) => act('dot', 1600, () => void say(c, 'dot', ['good as new.', 'nobody saw anything.', 'tidy. suspiciously tidy.'], 1500)),
   }),
   defineBehavior({
     id: 'pg.full',
@@ -146,7 +146,7 @@ export const playgroundBehaviors = [
     priority: Priority.CHARACTER,
     cooldownMs: 8000,
     when: (c) => c.event.payload.target === 'playground' && c.event.payload.key === 'full',
-    react: (c) => act('dot', 2200, () => void say(c, 'dot', ['no more room! physics has limits.', 'the floor is full. like, full full.'], 2200)),
+    react: (c) => act('dot', 2200, () => void say(c, 'dot', ['no more room.', 'the floor is full. like FULL full.'], 2200)),
   }),
   defineBehavior({
     id: 'pg.key',
@@ -169,7 +169,7 @@ export const playgroundBehaviors = [
     chance: 0.25,
     cooldownMs: 9000,
     when: (c) => c.event.payload.target === 'playground:floor',
-    react: (c) => act('dot', 1400, () => void say(c, 'dot', ['boop the pile.', 'scatter!'], 1300)),
+    react: (c) => act('dot', 1400, () => void say(c, 'dot', ['boop.', 'scatter. SCATTER.'], 1300)),
   }),
   defineBehavior({
     id: 'pg.welcome',

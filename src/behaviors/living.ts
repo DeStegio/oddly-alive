@@ -592,7 +592,7 @@ export const livingBehaviors = [
     priority: Priority.CHARACTER,
     cooldownMs: 15_000,
     when: (c) => c.event.payload.target === 'wall' && c.event.payload.key === 'sticker',
-    react: (c) => act('pim', 2000, () => void say(c, 'pim', ['ooh, decor.', 'very avant-garde.', 'the wall is wearing a sticker now.'], 2000)),
+    react: (c) => act('pim', 2000, () => void say(c, 'pim', ['ooh. a sticker.', 'Great-Aunt Pim would’ve had words about that.', 'the wall’s wearing a sticker now.'], 2000)),
   }),
 
   // ---------------------------------------------------------------- Title

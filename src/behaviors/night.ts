@@ -72,7 +72,7 @@ export const nightBehaviors = [
     chance: 0.3,
     cooldownMs: 8000,
     when: (c) => changed(c, 'sky', 'link'),
-    react: (c) => act('pim', 1800, () => void say(c, 'pim', ['ooh, a line.', 'connect the dots! literally.'], 1600), { ambient: true }),
+    react: (c) => act('pim', 1800, () => void say(c, 'pim', ['ooh. a line.', 'keep going. it looks like a saucepan so far.'], 1600), { ambient: true }),
   }),
   defineBehavior({
     id: 'night.constellation',
