@@ -31,6 +31,10 @@ export const SHAPE_GLYPH: Record<PlantKind, string> = {
   snapdragon: 'M12 12 m 0 -1 a 1.5 1.5 0 1 1 -1 2 a 4 4 0 1 1 5 -3 a 7 7 0 1 1 -9 6',
 };
 
+/** The last line on the card: the sky takes drawings too. */
+export const CARD_SKY = 'A curl in the sky for rain';
+export const CLOUD_GLYPH = 'M6 17 a 4 4 0 0 1 0 -8 a 5 5 0 0 1 9.5 -1.5 a 4 4 0 0 1 3 9.5 Z';
+
 /** The card's heading, in Pim's hand. */
 export const CARD_TITLE = 'Draw it in the soil';
 
@@ -52,5 +56,9 @@ export const GARDEN_LINES = {
   moonWaiting: ['the moonflower is waiting for dark.', 'not yet. it wants the night.'],
   dusk: ['getting late.', 'the shadows are long. you did that.'],
   bipNight: ['it’s dark. good thing my eyes are lights.', 'night already? I’d only just got here.'],
+  thirsty: ['that one’s parched. draw it a cloud.', 'the soil’s cracking. a bit of rain, maybe?'],
+  rain: ['oh, proper rain. lovely.', 'there. that’ll soak in.'],
+  bipRainbow: ['a rainbow! I’ve only ever read about those.', 'look over here. no, higher. a rainbow.'],
+  snap: ['the snapdragon’s after the fireflies again.', 'leave them be, you.'],
   bipMorning: ['morning again. that was quick.', 'you put the sun back. thank you.'],
 } as const;

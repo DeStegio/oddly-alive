@@ -231,6 +231,15 @@ test('garden: draw to plant, swipe to pick, and you are the sun', async ({ page 
   await expect(room).toHaveAttribute('data-phase', 'night', { timeout: 4000 });
   await page.mouse.move(fence.x + fence.width * 0.5, fence.y - 120, { steps: 4 });
   await expect(room).toHaveAttribute('data-phase', 'day', { timeout: 4000 });
+
+  // a curl drawn in the sky becomes a raincloud
+  const cx = fence.x + fence.width * 0.3;
+  const cy = fence.y - 110;
+  await page.mouse.move(cx + 40, cy);
+  await page.mouse.down();
+  for (let i = 1; i <= 24; i++) await page.mouse.move(cx + Math.cos((i / 24) * Math.PI * 2) * 40, cy + Math.sin((i / 24) * Math.PI * 2) * 22);
+  await page.mouse.up();
+  await expect(page.locator('[class*="_cloud_"]')).toHaveCount(1);
 });
 
 test('attic by hand: shake a box until it bursts open', async ({ page }) => {
