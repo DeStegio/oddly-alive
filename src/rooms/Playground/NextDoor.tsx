@@ -1,5 +1,6 @@
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { ThoughtBubble } from '../../characters/ThoughtBubble';
+import { WeatherLayer } from '../../components/WeatherLayer';
 import { onFrame } from '../../engine/frameLoop';
 import { SHAPES, type ShapeKind } from './physics';
 import { ShapeView } from './ShapeView';
@@ -158,6 +159,7 @@ export const NextDoor = forwardRef<NextDoorHandle, Props>(function NextDoor({ ra
         <span aria-hidden="true"> · </span>
         best <strong>{best}</strong>
       </p>
+      <WeatherLayer variant="ambient" />
       <span className={styles.fence} aria-hidden="true" />
 
       <div ref={bipRef} className={styles.bip} data-mood={mood} data-anim={anim} data-holding={held !== null} data-dir="left">

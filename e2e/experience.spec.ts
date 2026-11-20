@@ -127,7 +127,7 @@ test('playground: a really hard throw leaves the tray; Bip volleys back what com
   await fling('a light lavender pebble', 120, -50);
   await expect.poll(count, { timeout: 3000 }).toBe(start - 1);
   await expect.poll(count, { timeout: 8000 }).toBe(start);
-  await expect(page.locator('section[aria-labelledby="pg-nextdoor-title"] p')).toContainText(/best\s*1/);
+  await expect(page.locator('section[aria-labelledby="pg-nextdoor-title"] p[aria-live]')).toContainText(/best\s*1/);
   // to the left: gone for good
   await fling('a bouncy coral ball', -120, -60);
   await expect.poll(count, { timeout: 3000 }).toBe(start - 1);

@@ -1,7 +1,14 @@
 import { defineBehavior } from '../engine/behaviorEngine';
 import { Priority } from '../engine/scheduler';
 import type { Mood } from '../engine/types';
+import { NIMBUS_PIN, NIMBUS_REFUSE, NIMBUS_VISIT, WEATHER_REMARKS } from '../content/weather';
+import { isWeather } from '../engine/weather';
 import { act, anim, face, isTarget, say } from './helpers';
+
+const baro = (c: { event: { payload: unknown } }, key: string) => {
+  const p = c.event.payload as { target?: string; key?: string };
+  return p.target === 'barometer' && p.key === key;
+};
 
 const MOOD = ['mood'] as const;
 const used = (c: { event: { payload: unknown } }, id: string) => {
@@ -208,5 +215,60 @@ export const moodBehaviors = [
       act('nimbus', 2800, (ctl) =>
         ctl.after(700, () => say(c, 'nimbus', c.event.payload.visits > 1 ? ['back to check the weather?', 'still me. still weather.'] : ['today’s weather: me.', 'hello! I’m the forecast.'], 2400)),
       ),
+  }),
+
+  // ---- the barometer (Phase 2): Nimbus reports the weather you pinned
+  defineBehavior({
+    id: 'mood.baro.pin',
+    on: ['OBJECT_STATE_CHANGED'],
+    rooms: MOOD,
+    priority: Priority.DIRECT,
+    when: (c) => baro(c, 'pin') && isWeather(c.event.payload.value),
+    react: (c) => {
+      const w = c.event.payload.value;
+      return act('nimbus', 2400, () => {
+        face(c, 'nimbus', w === 'storm' ? 'annoyed' : w === 'snow' || w === 'rainbow' ? 'excited' : 'happy', 2000);
+        if (isWeather(w)) say(c, 'nimbus', NIMBUS_PIN[w], 2400);
+      });
+    },
+  }),
+  defineBehavior({
+    id: 'mood.baro.refuse',
+    on: ['OBJECT_STATE_CHANGED'],
+    rooms: MOOD,
+    priority: Priority.DIRECT,
+    when: (c) => baro(c, 'refused'),
+    react: (c) =>
+      act('nimbus', 2200, () => {
+        face(c, 'nimbus', 'annoyed', 2000);
+        anim(c, 'nimbus', 'shake');
+        say(c, 'nimbus', NIMBUS_REFUSE, 2200);
+      }),
+  }),
+  // ---- Nimbus out on a visit (any room)
+  defineBehavior({
+    id: 'nimbus.visit',
+    on: ['OBJECT_STATE_CHANGED'],
+    priority: Priority.CHARACTER,
+    when: (c) => isTarget(c, 'nimbus') && c.event.payload.key === 'visit',
+    react: (c) =>
+      act('nimbus', 2600, (ctl) => {
+        face(c, 'nimbus', 'happy', 2200);
+        say(c, 'nimbus', NIMBUS_VISIT, 2400);
+        if (c.view.room === 'living') ctl.after(1800, () => say(c, 'pim', ['Nimbus? indoors?', 'oh. it’s raining on the rug.'], 2200));
+      }),
+  }),
+  // ---- the Living Room notices the weather turn
+  defineBehavior({
+    id: 'living.weather.remark',
+    on: ['WEATHER_CHANGED'],
+    rooms: ['living'],
+    priority: Priority.AMBIENT,
+    cooldownMs: 20_000,
+    when: (c) => WEATHER_REMARKS[c.event.payload.to] !== undefined,
+    react: (c) => {
+      const r = WEATHER_REMARKS[c.event.payload.to]!;
+      return act(r.who, 2600, () => void say(c, r.who, r.lines, 2600), { ambient: true });
+    },
   }),
 ];
