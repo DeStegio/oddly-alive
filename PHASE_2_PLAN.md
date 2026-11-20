@@ -360,3 +360,21 @@ stay complete (visually-hidden controls), but pointer play is physical.
 | R1 | done | Garden rewritten by hand: `gardenSim.ts` (pure: seeds, drops, crops; soil / lawn / house / fence landings), seed throwing from the tin (Inch eats misses; over the fence to Bip), watering can stream (only soil drops water; stale hand speed decays), pull-with-tension harvest then throw (house → vase/Playground, fence → Bip), plants lean, sunflowers watch the pointer, snapdragons snap. Keyboard tools hidden until focused. New discoveries: Long Shot, A Bouquet for Bip. |
 | R2 | done | Attic rewritten by hand: `pile.ts` (Matter.js stage with Marguerite on the left; boxes burst on a hard landing of their own or a good shake; settle period; no chain bursts), contents spill as draggable bodies (hats, shoe, dust puff, the letter from the last box), hats go on Marguerite when dropped on her head or thrown there (“Nice Shot”), `Gramophone.tsx` + `spin.ts` (record plays only while turned by hand; speed = tempo, backwards = backwards (“Scratch”); winds down), diary pages drag. Keyboard path: open next box, put hat on, give the record a spin. |
 | R3 | todo | |
+
+## Phase 2.1, revision 2 — three rooms, three languages
+
+Owner feedback on the drag-based version: it is the Playground again
+(grab, drag, throw), and the Garden and Attic feel like each other. Each room
+now gets its own input language, and none is shared:
+
+| Room | Language |
+| --- | --- |
+| Playground | grab, throw, catch (unchanged) |
+| Garden | **you are the sun** (hover = light, height = time of day) and **drawing** (stroke shapes plant species; a quick slash cuts) |
+| Attic | **scrub** away dust, **look** (hold still to replay a memory), **wheel** (Marguerite's hat carousel), **circle** (the record) |
+
+| # | Branch | Scope |
+| --- | --- | --- |
+| R4 | `feat/p21-garden-sun` | Garden: light model, sun/sky/shadows/night from pointer, stroke recognizer (|, ○, 〰, ☾, @), slash to harvest, keyboard path |
+| R5 | `feat/p21-attic-dust` | Attic: dust canvas + coverage, clean objects come alive, dwell memories on photos, wheel hats, record spin, letter under the dust, keyboard path |
+| R6 | `chore/p21-release-2` | QA, docs, screenshots, deploy |
