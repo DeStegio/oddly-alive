@@ -94,6 +94,15 @@ export const EJECT_SPEED = 2.0;
 /** Matter's default gravity, expressed in logical px/ms² (used for flights outside the sim). */
 export const GRAVITY = 0.001;
 
+/** Weather in the tray: sideways wind (fraction of gravity), floor grip, gravity strength. */
+export interface Environment {
+  wind: number;
+  slip: number;
+  gravity: number;
+}
+
+export const CALM: Environment = { wind: 0, slip: 1, gravity: 1 };
+
 export interface CollisionInfo {
   a: SimBody;
   b: SimBody | null;
@@ -117,6 +126,7 @@ export class PlaygroundSim {
   onCollision: ((c: CollisionInfo) => void) | null = null;
   /** Shapes that fall slower than gravity says (0..1 of gravity cancelled). */
   private floaty = new Map<number, number>();
+  private env: Environment = { ...CALM };
 
   constructor(layout: Layout) {
     this.layout = layout;
@@ -166,7 +176,7 @@ export class PlaygroundSim {
   spawn(kind: ShapeKind, x: number, y: number, angle = 0): SimBody | null {
     if (this.shapes.size >= MAX_BODIES) return null;
     const s = SHAPES[kind];
-    const common = { density: s.density, restitution: s.restitution, friction: s.friction, frictionAir: s.buoyant ? 0.04 : 0.01, angle, label: kind, sleepThreshold: 90 };
+    const common = { density: s.density, restitution: s.restitution, friction: s.friction * this.env.slip, frictionAir: s.buoyant ? 0.04 : 0.01, angle, label: kind, sleepThreshold: 90 };
     const body = s.circle
       ? Bodies.circle(x, y, s.w / 2, common)
       : Bodies.rectangle(x, y, s.w, s.h, s.chamfer ? { ...common, chamfer: { radius: s.chamfer } } : common);
@@ -193,6 +203,10 @@ export class PlaygroundSim {
     let steps = 0;
     while (this.acc >= PlaygroundSim.STEP && steps < 4) {
       for (const s of this.shapes.values()) {
+        if (this.env.wind && !s.body.isSleeping) {
+          const g = this.engine.gravity;
+          Body.applyForce(s.body, s.body.position, { x: s.body.mass * g.scale * this.env.wind, y: 0 });
+        }
         const lift = SHAPES[s.kind].buoyant ? 1.08 : (this.floaty.get(s.id) ?? 0);
         if (lift && !s.body.isSleeping) {
           const g = this.engine.gravity;
@@ -281,6 +295,20 @@ export class PlaygroundSim {
       this.floaty.delete(id);
       s.body.frictionAir = SHAPES[s.kind].buoyant ? 0.04 : 0.01;
     }
+  }
+
+  /** Change the weather in the tray (Phase 2). Wakes everything so the change shows. */
+  setEnvironment(e: Partial<Environment>) {
+    this.env = { ...this.env, ...e };
+    this.engine.gravity.y = this.env.gravity;
+    for (const s of this.shapes.values()) {
+      s.body.friction = SHAPES[s.kind].friction * this.env.slip;
+      Sleeping.set(s.body, false);
+    }
+  }
+
+  get environment(): Environment {
+    return this.env;
   }
 
   // ------------------------------------------------------------- impulses

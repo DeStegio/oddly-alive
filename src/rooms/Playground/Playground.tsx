@@ -3,6 +3,10 @@ import { useWorld } from '../../app/worldInstance';
 import { Dot, type DotMotion } from '../../characters/Dot';
 import { useActor } from '../../characters/useActor';
 import { LivingTitle } from '../../components/LivingTitle';
+import { WeatherLayer } from '../../components/WeatherLayer';
+import { useWeather } from '../../components/useWeather';
+import { BIP_WEATHER } from '../../content/weather';
+import type { Weather } from '../../engine/weather';
 import { onFrame } from '../../engine/frameLoop';
 import { useSettings } from '../../state/settings';
 import { getFlag, setFlag } from '../../state/world';
@@ -12,7 +16,7 @@ import { FieldNotes } from './FieldNotes';
 import { isResting, lob, predictHit, stepBall, throwToYard, type Ball, type Box, type World as FlightWorld } from './flight';
 import { goalsDone, type GoalId, type PileStats } from './goals';
 import { NextDoor, type NextDoorHandle } from './NextDoor';
-import { EJECT_SPEED, GRAVITY, MAX_BODIES, PlaygroundSim, SHAPES, defaultLayout, type ShapeKind } from './physics';
+import { CALM, EJECT_SPEED, GRAVITY, MAX_BODIES, PlaygroundSim, SHAPES, defaultLayout, type Environment, type ShapeKind } from './physics';
 import { ShapeView } from './ShapeView';
 import { encodeArrangement, readSharedArrangement } from './share';
 import { setArrangementProvider } from '../../app/share';
@@ -61,6 +65,16 @@ const GONE_MS = 650;
 
 const pick = (lines: string[]) => lines[Math.floor(Math.random() * lines.length)]!;
 
+/** How the house weather feels in the tray. */
+const ENVIRONMENT: Partial<Record<Weather, Partial<Environment>>> = {
+  windy: { wind: 0.12 },
+  rain: { slip: 0.3 },
+  snow: { slip: 0.6 },
+  rainbow: { gravity: 0.6 },
+};
+/** Sideways push on things in the air when it's windy, as a fraction of gravity. */
+const AIR_WIND = 0.16;
+
 export default function Playground() {
   const world = useWorld();
   const motion = useSettings((s) => s.motion);
@@ -86,6 +100,9 @@ export default function Playground() {
 
   // ---- volleyball with Bip
   const yardRef = useRef<NextDoorHandle>(null);
+  const weather = useWeather();
+  const weatherRef = useRef(weather);
+  weatherRef.current = weather;
   const flights = useRef(new Map<number, Flight>());
   const flightEls = useRef(new Map<number, HTMLDivElement>());
   const flightId = useRef(1);
@@ -160,6 +177,25 @@ export default function Playground() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [portrait]);
+
+  // the house weather reaches the tray: wind, a slippery floor, snow, odd gravity, thunder
+  useEffect(() => {
+    simRef.current?.setEnvironment({ ...CALM, ...ENVIRONMENT[weather] });
+    const line = BIP_WEATHER[weather];
+    if (line) yardRef.current?.say(pick(line), 2200);
+    if (weather !== 'storm') return;
+    let t = 0;
+    const roll = () => {
+      t = window.setTimeout(() => {
+        simRef.current?.shake(() => 0.35);
+        world.effects.sound('thud');
+        world.emit('OBJECT_STATE_CHANGED', { target: 'playground', key: 'thunder', value: true });
+        roll();
+      }, 9000 + Math.random() * 6000);
+    };
+    roll();
+    return () => window.clearTimeout(t);
+  }, [weather, portrait, world]);
 
   // responsive scale of the logical world into the tray (and Bip's yard, the same size)
   useLayoutEffect(() => {
@@ -299,7 +335,7 @@ export default function Playground() {
     };
     const yardEl = yardRef.current?.root() ?? null;
     const s = scale.current;
-    const air: FlightWorld = { g: AIR_GRAVITY * s, yard: yardEl ? inner(yardEl) : null, floor: 20 * s, roomRight: r.width };
+    const air: FlightWorld = { g: AIR_GRAVITY * s, yard: yardEl ? inner(yardEl) : null, floor: 20 * s, roomRight: r.width, wind: weatherRef.current === 'windy' ? AIR_GRAVITY * s * AIR_WIND : 0 };
     return { room: r, tray: inner(tray), air, s };
   }
 
@@ -716,7 +752,8 @@ export default function Playground() {
 
       <div ref={areaRef} className={styles.playArea}>
         <div className={styles.trayCol}>
-      <div ref={trayRef} className={styles.tray} onPointerDown={onTrayDown} data-tray="true">
+      <div ref={trayRef} className={styles.tray} onPointerDown={onTrayDown} data-tray="true" data-weather={weather}>
+        <WeatherLayer variant="ambient" className={styles.trayWeather} />
         <div ref={worldRef} className={styles.world} style={{ width: layout.width, height: layout.height }} data-tray="true">
           <div
             className={styles.ramp}

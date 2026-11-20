@@ -330,3 +330,23 @@
     padding: 6px 0;
   }
 }
+
+/* ---------- send Nimbus ---------- */
+.send {
+  margin-top: var(--sp-4);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-2);
+}
+.sendLabel {
+  font-size: var(--fs-sm);
+  color: var(--ink-soft);
+  margin-right: var(--sp-1);
+}
+.send :disabled {
+  opacity: 0.5;
+  cursor: default;
+  transform: none;
+  box-shadow: var(--shadow-sm);
+}

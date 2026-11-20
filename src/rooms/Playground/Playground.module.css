@@ -276,3 +276,22 @@
     font-size: var(--fs-sm);
   }
 }
+
+/* ---------- house weather in the tray ---------- */
+.trayWeather {
+  z-index: 0;
+}
+/* snow settles on top of things */
+.tray[data-weather='snow'] .shape::before {
+  content: '';
+  position: absolute;
+  left: 10%;
+  right: 10%;
+  top: -5px;
+  height: 9px;
+  background: var(--cut-paper);
+  border: 2px solid var(--char-ink);
+  border-radius: 9px 9px 4px 4px;
+  z-index: 1;
+  pointer-events: none;
+}

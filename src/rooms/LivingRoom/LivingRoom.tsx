@@ -19,6 +19,7 @@ import { useWorldStore } from '../../state/worldStore';
 import { Link } from 'react-router-dom';
 import { ROOMS } from '../../app/rooms';
 import { Basement } from './Basement';
+import { HouseWindow } from './HouseWindow';
 import { DoNotPress, Door, Picture, Rug, Sofa } from './Scenery';
 import styles from './LivingRoom.module.css';
 
@@ -194,6 +195,9 @@ export default function LivingRoom() {
               spins={living.clockSpins}
               onActivate={click('tick')}
             />
+          </div>
+          <div className={`${styles.prop} ${styles.window}`}>
+            <HouseWindow />
           </div>
           <div className={`${styles.prop} ${styles.door}`}>
             <Door to="/playground" label="Door to the Playground" sign="Play →" />

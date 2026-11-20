@@ -1,5 +1,5 @@
 import type { World } from '../engine/world';
-import { makePin, resolveWeather, type Weather } from '../engine/weather';
+import { WEATHERS, makePin, resolveWeather, type Weather } from '../engine/weather';
 import { useKeepsakes } from '../state/keepsakes';
 import { getWorldState, setWorldState, useWorldStore } from '../state/worldStore';
 
@@ -26,7 +26,8 @@ export function startWeather(world: World): () => void {
     const next = resolveWeather(s.mood, pin, now);
     if (s.weatherPin && !pin) setWorldState({ weatherPin: null });
     document.documentElement.dataset.weather = next;
-    useKeepsakes.getState().seeWeather(next);
+    // a full almanac is a discovery
+    if (useKeepsakes.getState().seeWeather(next) && WEATHERS.every((w) => w in useKeepsakes.getState().almanac)) world.discover('almanac');
     if (next === s.weather) return;
     setWorldState({ weather: next });
     world.emit('WEATHER_CHANGED', { from: s.weather, to: next, pinned: pin !== null });

@@ -31,6 +31,8 @@ export interface World {
   floor: number;
   /** The room's right edge acts as a wall. */
   roomRight: number;
+  /** Sideways wind, px/ms² (windy weather). */
+  wind?: number;
 }
 
 const BOUNCE = 0.45;
@@ -46,6 +48,7 @@ export function stepBall(b: Ball, dt: number, w: World): boolean {
   }
   const prevX = b.x;
   b.vy += w.g * dt;
+  if (w.wind) b.vx += w.wind * dt;
   b.x += b.vx * dt;
   b.y += b.vy * dt;
   b.angle += b.spin * dt;

@@ -135,3 +135,24 @@ describe('playground sim API', () => {
   });
 
 });
+
+describe('playground weather', () => {
+  it('wind pushes things sideways and rain makes the floor slippery', () => {
+    const calm = new PlaygroundSim({ ...defaultLayout(false), arrangement: [] });
+    const windy = new PlaygroundSim({ ...defaultLayout(false), arrangement: [] });
+    windy.setEnvironment({ wind: 0.12 });
+    const a = calm.spawn('ball', 500, 100)!;
+    const b = windy.spawn('ball', 500, 100)!;
+    run(calm, 1500);
+    run(windy, 1500);
+    expect(b.body.position.x - a.body.position.x).toBeGreaterThan(40);
+
+    windy.setEnvironment({ wind: 0, slip: 0.3 });
+    expect(b.body.friction).toBeCloseTo(0.01 * 0.3, 5);
+    expect(windy.spawn('block', 300, 100)!.body.friction).toBeCloseTo(0.6 * 0.3, 5);
+    windy.setEnvironment({ gravity: 0.6 });
+    expect(windy.engine.gravity.y).toBe(0.6);
+    calm.destroy();
+    windy.destroy();
+  });
+});

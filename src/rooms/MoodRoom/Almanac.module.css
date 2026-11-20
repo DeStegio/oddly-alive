@@ -1,0 +1,76 @@
+.almanac {
+  grid-column: 1 / -1;
+  margin-top: var(--sp-5);
+  position: relative;
+  z-index: 2;
+}
+.head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-4);
+  flex-wrap: wrap;
+}
+.title {
+  font-size: var(--fs-xl);
+}
+.count {
+  font-size: var(--fs-sm);
+  color: var(--ink-soft);
+}
+.cards {
+  list-style: none;
+  margin: var(--sp-4) 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: var(--sp-3);
+}
+.card {
+  padding: var(--sp-3);
+  border: 2px solid var(--ink);
+  border-radius: var(--radius-md);
+  background: var(--paper);
+  box-shadow: var(--shadow-sm);
+  min-height: 96px;
+}
+.card[data-seen='false'] {
+  border-style: dashed;
+  background: transparent;
+  box-shadow: none;
+  color: var(--ink-soft);
+}
+.card:nth-child(odd) {
+  rotate: -0.6deg;
+}
+.card:nth-child(even) {
+  rotate: 0.5deg;
+}
+.icon {
+  width: 40px;
+  height: 38px;
+  display: block;
+}
+.unknown {
+  font-family: var(--font-display);
+  font-size: 26px;
+  fill: var(--ink-soft);
+}
+.cardTitle {
+  margin-top: 4px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-md);
+}
+.note {
+  margin-top: 4px;
+  font-size: var(--fs-xs);
+  line-height: 1.35;
+}
+.when {
+  margin-top: 6px;
+  font-size: 0.72rem;
+  color: var(--ink-soft);
+}
+[data-motion='reduced'] .card {
+  rotate: none;
+}
