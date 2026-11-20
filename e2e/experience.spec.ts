@@ -212,3 +212,22 @@ test('garden by hand: pull a ripe sunflower up and throw it to the house', async
     .poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('oddly-alive:memory') || '{}').world?.garden?.vase ?? []), { timeout: 6000 })
     .toContain('sunflower');
 });
+
+test('attic by hand: shake a box until it bursts open', async ({ page }) => {
+  await page.goto('./#/attic');
+  await page.waitForTimeout(2000);
+  const boxes = page.locator('[data-kind="hatbox"], [data-kind="box"], [data-kind="crate"], [data-kind="suitcase"], [data-kind="shoebox"], [data-kind="dustbox"]');
+  await expect(boxes).toHaveCount(6);
+  const top = boxes.last();
+  await top.evaluate((el) => el.scrollIntoView({ block: 'center' }));
+  await page.waitForTimeout(300);
+  const b = (await top.boundingBox())!;
+  await page.mouse.move(b.x + b.width / 2, b.y + b.height / 2);
+  await page.mouse.down();
+  for (let i = 0; i < 12; i++) {
+    await page.mouse.move(b.x + b.width / 2 + (i % 2 ? 80 : -80), b.y - 40);
+    await page.waitForTimeout(30);
+  }
+  await page.mouse.up();
+  await expect(boxes).toHaveCount(5);
+});

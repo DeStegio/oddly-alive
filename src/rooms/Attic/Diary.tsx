@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { DIARY_EMPTY, DIARY_NOTE, diaryDate } from '../../content/attic';
 import { useKeepsakes } from '../../state/keepsakes';
 import styles from './Attic.module.css';
@@ -9,6 +9,7 @@ const PER_PAGE = 4;
 export function Diary({ onOpen }: { onOpen: (entries: number) => void }) {
   const diary = useKeepsakes((s) => s.diary);
   const [open, setOpen] = useState(false);
+  const dragX = useRef<number | null>(null);
   const pages = Math.max(1, Math.ceil(diary.length / PER_PAGE));
   const [page, setPage] = useState(pages - 1);
   const shown = diary.slice(page * PER_PAGE, page * PER_PAGE + PER_PAGE);
@@ -34,7 +35,17 @@ export function Diary({ onOpen }: { onOpen: (entries: number) => void }) {
           </span>
         </button>
       ) : (
-        <div className={styles.pageWrap}>
+        <div
+          className={styles.pageWrap}
+          // drag the page sideways to turn it
+          onPointerDown={(e) => (dragX.current = e.clientX)}
+          onPointerUp={(e) => {
+            const dx = e.clientX - (dragX.current ?? e.clientX);
+            dragX.current = null;
+            if (dx > 70) setPage((p) => Math.max(0, p - 1));
+            else if (dx < -70) setPage((p) => Math.min(pages - 1, p + 1));
+          }}
+        >
           <p className={styles.small}>{DIARY_NOTE}</p>
           {diary.length === 0 ? (
             <p className={styles.entry}>{DIARY_EMPTY}</p>

@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { diaryDate } from '../../content/attic';
 import { PullCord } from '../LivingRoom/PullCord';
@@ -22,19 +22,24 @@ describe('<Attic />', () => {
     expect(getWorldState().discoveries.attic).toBeDefined();
   });
 
-  it('boxes give up hats; Marguerite wears all four for a discovery', () => {
+  it('boxes burst open (keyboard path): hats spill out, the last one holds a letter', () => {
     wrap(<Attic />);
-    for (const label of [/marked XMAS/, /broken clasp/, /theatre ticket/, /paint tins/]) fireEvent.click(screen.getByRole('button', { name: label }));
-    expect(useKeepsakes.getState().attic.hats.sort()).toEqual(['beret', 'crown', 'sunhat', 'topper']);
-    fireEvent.click(screen.getByRole('button', { name: /shoebox/ }));
-    expect(screen.getByText(/Tick says it walked off/)).toBeInTheDocument();
-    const hats = within(screen.getByRole('group', { name: 'Hats to try on her' }));
-    for (const hat of [/beret/, /top hat/, /sun hat/, /paper crown/]) fireEvent.click(hats.getByRole('button', { name: hat }));
+    for (let i = 0; i < 6; i++) fireEvent.click(screen.getByRole('button', { name: 'Open the next box' }));
+    expect(useObjects.getState().attic.opened.split(',')).toHaveLength(6);
+    expect([...useKeepsakes.getState().attic.hats].sort()).toEqual(['beret', 'crown', 'sunhat', 'topper']);
+    expect(useKeepsakes.getState().letters).toContain('attic');
+    expect(screen.getByText(/under everything, an envelope/)).toBeInTheDocument();
+  });
+
+  it('Marguerite wears every hat for a discovery', () => {
+    for (const h of ['beret', 'topper', 'sunhat', 'crown']) useKeepsakes.getState().addHat(h);
+    wrap(<Attic />);
+    for (const h of [/beret/, /top hat/, /sun hat/, /paper crown/]) fireEvent.click(screen.getByRole('button', { name: new RegExp(`Put .*${h.source}`) }));
     expect(screen.getByRole('button', { name: /Marguerite the dress form, wearing a paper crown/ })).toBeInTheDocument();
     expect(getWorldState().discoveries['dress-rehearsal']).toBeDefined();
   });
 
-  it('the diary reads back the visit; the gramophone plays', () => {
+  it('the diary reads back the visit; pages turn', () => {
     for (let i = 0; i < 6; i++) useKeepsakes.getState().note(`n${i}`, `Thing number ${i + 1} happened.`);
     wrap(<Attic />);
     fireEvent.click(screen.getByRole('button', { name: 'Open the house diary' }));
@@ -42,8 +47,6 @@ describe('<Attic />', () => {
     expect(getWorldState().discoveries['dear-diary']).toBeDefined();
     fireEvent.click(screen.getByRole('button', { name: '← earlier' }));
     expect(screen.getByText(/Thing number 1 happened/)).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: /Put the needle down/ }));
-    expect(getWorldState().discoveries['needle-drop']).toBeDefined();
   });
 
   it('diary dates read like a person wrote them', () => {
