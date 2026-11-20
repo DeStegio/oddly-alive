@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import type { RoomId } from '../app/rooms';
 import { BASELINE } from '../engine/personality';
 import type { Mood, PersonalityVars } from '../engine/types';
+import type { Weather, WeatherPin } from '../engine/weather';
 
 export interface Caption {
   id: number;
@@ -20,6 +21,9 @@ export interface WorldStoreState {
   counts: Record<string, number>;
   /** Moods witnessed this session, in order of first appearance. */
   moodsSeen: Mood[];
+  /** The house weather (follows mood unless pinned in the Mood Room). */
+  weather: Weather;
+  weatherPin: WeatherPin | null;
   /** Secret id → first discovery timestamp. */
   discoveries: Record<string, number>;
   /** Most recently discovered secret (for the discovery toast). */
@@ -46,6 +50,8 @@ export const initialWorldState = (): WorldStoreState => ({
   vars: { ...BASELINE },
   counts: {},
   moodsSeen: ['neutral'],
+  weather: 'clear',
+  weatherPin: null,
   discoveries: {},
   lastDiscovery: null,
   visits: 1,

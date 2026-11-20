@@ -1,0 +1,120 @@
+/* House weather, CSS only. The layer fills its (positioned) parent. */
+.layer {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  border-radius: inherit;
+  transition:
+    background-color var(--dur-scene) var(--ease-in-out),
+    opacity var(--dur-scene) var(--ease-in-out);
+}
+.layer[data-variant='ambient'] {
+  opacity: 0.45;
+}
+
+.p {
+  position: absolute;
+  left: var(--x);
+  top: -10%;
+  will-change: transform;
+}
+
+/* ---- rain & storm: thin slanted streaks */
+.layer[data-weather='rain'] .p,
+.layer[data-weather='storm'] .p {
+  width: 2px;
+  height: calc(22px * var(--s));
+  border-radius: 2px;
+  background: linear-gradient(transparent, color-mix(in srgb, var(--blue) 70%, transparent));
+  animation: fall-rain calc(0.9s / var(--s)) linear var(--d) infinite;
+}
+.layer[data-weather='storm'] {
+  background-color: color-mix(in srgb, #24232b 12%, transparent);
+  animation: storm-dim 7s var(--ease-in-out) infinite;
+}
+@keyframes fall-rain {
+  to {
+    transform: translate(-30px, 120vh) rotate(12deg);
+  }
+}
+/* a slow dimming, never a flash (DESIGN_DIRECTION: no strobe) */
+@keyframes storm-dim {
+  0%,
+  80%,
+  100% {
+    background-color: color-mix(in srgb, #24232b 12%, transparent);
+  }
+  88% {
+    background-color: color-mix(in srgb, #24232b 2%, transparent);
+  }
+}
+
+/* ---- snow: soft dots that drift */
+.layer[data-weather='snow'] .p {
+  width: calc(7px * var(--s));
+  height: calc(7px * var(--s));
+  border-radius: 50%;
+  background: var(--cut-paper);
+  box-shadow: 0 0 0 1.5px color-mix(in srgb, var(--char-ink) 25%, transparent);
+  animation: fall-snow calc(6s / var(--s)) linear var(--d) infinite;
+}
+@keyframes fall-snow {
+  50% {
+    transform: translate(14px, 60vh);
+  }
+  to {
+    transform: translate(-6px, 120vh);
+  }
+}
+
+/* ---- windy: a few leaves blown across */
+.layer[data-weather='windy'] .p {
+  top: calc(var(--x) * 0.8);
+  left: -5%;
+  width: calc(14px * var(--s));
+  height: calc(8px * var(--s));
+  border-radius: 0 100% 0 100%;
+  background: var(--mint);
+  border: 1.5px solid var(--char-ink);
+  animation: blow calc(3.2s / var(--s)) var(--ease-in-out) var(--d) infinite;
+}
+@keyframes blow {
+  to {
+    transform: translate(110vw, -40px) rotate(540deg);
+  }
+}
+
+/* ---- fog: a low, soft band */
+.layer[data-weather='fog'] {
+  background: linear-gradient(to top, color-mix(in srgb, var(--paper) 75%, transparent), color-mix(in srgb, var(--paper) 30%, transparent) 60%, transparent);
+}
+
+/* ---- rainbow: a faint arc */
+.layer[data-weather='rainbow'] {
+  background: radial-gradient(
+    circle at 50% 110%,
+    transparent 46%,
+    rgba(245, 121, 99, 0.35) 47%,
+    rgba(245, 216, 115, 0.35) 51%,
+    rgba(166, 215, 179, 0.35) 55%,
+    rgba(101, 123, 232, 0.3) 59%,
+    transparent 62%
+  );
+}
+
+/* ---- sunny: warm light from the top corner */
+.layer[data-weather='sunny'] {
+  background: radial-gradient(circle at 85% 0%, rgba(245, 216, 115, 0.45), transparent 55%);
+}
+
+/* ---- night: the sky darkens a little */
+.layer[data-weather='night'] {
+  background-color: color-mix(in srgb, #1d1b26 22%, transparent);
+}
+
+/* reduced motion: weather stays visible but stops moving */
+[data-motion='reduced'] .p {
+  animation: none !important;
+  top: calc(var(--x) * 0.9);
+}

@@ -253,6 +253,7 @@ export class World {
     return {
       room: s.room,
       mood: this.personality.mood,
+      weather: s.weather,
       vars: this.personality.vars,
       afterHours: useSettings.getState().afterHours,
       reducedMotion: isReducedMotion(),

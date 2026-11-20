@@ -4,11 +4,14 @@ import type { EventOf, EventPayloads, EventType, WorldEvent } from './events';
 import { weightedPick, type Rng } from './rng';
 import type { PriorityLevel, ReactionScheduler, ReactionSpec, ScheduleResult } from './scheduler';
 import type { Mood, PersonalityVars } from './types';
+import type { Weather } from './weather';
 
 /** Read-only view of the world that behaviors may consult. */
 export interface WorldView {
   room: RoomId;
   mood: Mood;
+  /** The house weather (see engine/weather.ts). */
+  weather: Weather;
   vars: PersonalityVars;
   afterHours: boolean;
   reducedMotion: boolean;
