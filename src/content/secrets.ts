@@ -9,7 +9,7 @@ export interface SecretDef {
   /** What happened, shown after discovery. */
   found: string;
   /** A small glyph for the cabinet shelf. */
-  glyph: 'key' | 'eye' | 'spiral' | 'button' | 'clock' | 'wave' | 'letter' | 'music' | 'board' | 'tower' | 'moon' | 'mirror' | 'rainbow' | 'chest' | 'aunt' | 'candle' | 'worm' | 'glitch' | 'star' | 'moth' | 'heart' | 'ball' | 'cloud' | 'flower';
+  glyph: 'key' | 'eye' | 'spiral' | 'button' | 'clock' | 'wave' | 'letter' | 'music' | 'board' | 'tower' | 'moon' | 'mirror' | 'rainbow' | 'chest' | 'aunt' | 'candle' | 'worm' | 'glitch' | 'star' | 'moth' | 'heart' | 'ball' | 'cloud' | 'flower' | 'ladder' | 'hat' | 'book';
 }
 
 /**
@@ -36,6 +36,10 @@ export const SECRETS: SecretDef[] = [
   { id: 'night-shift', name: 'Night Shift', room: 'garden', glyph: 'moon', hint: 'One packet in the tin only works after dark.', found: 'Got a moonflower to open.' },
   { id: 'full-bed', name: 'Full Bloom', room: 'garden', glyph: 'flower', hint: 'Six plots. All at once.', found: 'Had every plot in the garden in flower at the same time.' },
   { id: 'radish-volley', name: 'Root Vegetable Sports', room: 'playground', glyph: 'ball', hint: 'Bip will hit back anything. Anything.', found: 'Played volleyball with a radish.' },
+  { id: 'attic', name: 'Up the Ladder', room: 'attic', glyph: 'ladder', hint: 'Look up in the Living Room. There’s always been a cord.', found: 'Found the attic.' },
+  { id: 'dress-rehearsal', name: 'Dress Rehearsal', room: 'attic', glyph: 'hat', hint: 'Marguerite would wear anything, given the chance. Four things, in fact.', found: 'Tried every hat from the boxes on Marguerite.' },
+  { id: 'needle-drop', name: 'Needle Drop', room: 'attic', glyph: 'music', hint: 'There’s a record still on the gramophone.', found: 'Played Great-Aunt Pim’s record.' },
+  { id: 'dear-diary', name: 'Dear Diary', room: 'attic', glyph: 'book', hint: 'The house keeps a diary. It needs a few things to write about first.', found: 'Read a diary the house wrote about your visits.' },
   { id: 'nap', name: 'Nap O’Clock', room: 'mood', glyph: 'moon', hint: 'A warm drink, then something soft.', found: 'Tea and a blanket put Nimbus to sleep.' },
   { id: 'mirror', name: 'The Other Cloud', room: 'mood', glyph: 'mirror', hint: 'Look long enough and something looks back.', found: 'Caught Nimbus’s reflection winking.' },
   { id: 'moodswing', name: 'Changeable Weather', room: 'anywhere', glyph: 'rainbow', hint: 'See the house in many moods in one visit.', found: 'Witnessed six kinds of weather in one visit.' },

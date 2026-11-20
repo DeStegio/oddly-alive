@@ -52,12 +52,22 @@ export interface PlaygroundObjects {
   radishes: number;
 }
 
+export interface AtticObjects {
+  /** Comma-separated ids of the boxes opened. */
+  opened: string;
+  /** The hat Marguerite has on ('' for none). */
+  wearing: string;
+  /** Comma-separated hats she has worn this visit. */
+  worn: string;
+}
+
 export interface ObjectsState {
   living: LivingObjects;
   mood: MoodObjects;
   secret: SecretObjects;
   after: AfterHoursObjects;
   playground: PlaygroundObjects;
+  attic: AtticObjects;
 }
 
 export const OBJECT_DEFAULTS: ObjectsState = {
@@ -78,6 +88,7 @@ export const OBJECT_DEFAULTS: ObjectsState = {
   secret: { slots: '', chestOpen: false, candleLit: false, keyFound: false },
   after: { radioOn: false, lightOn: false, constellations: 0 },
   playground: { goals: '', radishes: 0 },
+  attic: { opened: '', wearing: '', worn: '' },
 };
 
 type SliceKey = keyof ObjectsState;
@@ -138,5 +149,5 @@ export function setFlag(path: string, value: boolean | number | string) {
 /** Serializable snapshot (for memory persistence). */
 export function snapshotObjects(): ObjectsState {
   const s = useObjects.getState();
-  return { living: s.living, mood: s.mood, secret: s.secret, after: s.after, playground: s.playground };
+  return { living: s.living, mood: s.mood, secret: s.secret, after: s.after, playground: s.playground, attic: s.attic };
 }

@@ -1,12 +1,302 @@
+/* The attic: warm and dim, under the roof beams. Local night palette. */
 .room {
+  --ink: #f3ede2;
+  --ink-soft: #cfc6d6;
+  --paper: #3a3242;
+  --canvas: #241f2b;
+  --shadow-ink: #0f0d14;
   position: relative;
   min-height: 100vh;
   min-height: 100svh;
-  padding: calc(var(--nav-h) + 2vh) var(--gutter) var(--sp-7);
+  padding: calc(var(--nav-h) + 2vh) var(--gutter) var(--sp-8);
+  overflow: hidden;
+  isolation: isolate;
+  color: var(--ink);
+  background: #241f2b;
+}
+/* the slope of the roof */
+.roof {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background:
+    linear-gradient(160deg, #3b2f2a 0 22%, transparent 22.2%),
+    linear-gradient(200deg, #3b2f2a 0 22%, transparent 22.2%),
+    repeating-linear-gradient(90deg, transparent 0 180px, rgba(0, 0, 0, 0.18) 180px 194px),
+    #241f2b;
+}
+.roundWindow {
+  position: absolute;
+  top: calc(var(--nav-h) + 10px);
+  left: 50%;
+  width: 120px;
+  height: 120px;
+  translate: -50% 0;
+  border-radius: 50%;
+  border: 6px solid #8a5a3c;
+  background: #9fb4d8;
+  overflow: hidden;
+  z-index: -1;
+  box-shadow: inset 0 0 0 3px var(--char-ink);
+}
+.roundWindow::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(#8a5a3c, #8a5a3c) 50% 0 / 5px 100% no-repeat,
+    linear-gradient(#8a5a3c, #8a5a3c) 0 50% / 100% 5px no-repeat;
+}
+.light {
+  position: absolute;
+  left: 50%;
+  top: 30%;
+  width: 90vw;
+  height: 70vh;
+  translate: -50% 0;
+  z-index: -1;
+  background: radial-gradient(ellipse at 50% 40%, rgba(245, 216, 115, 0.18), transparent 60%);
+  pointer-events: none;
+}
+.head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--sp-3) var(--sp-6);
 }
 .blurb {
-  margin-top: var(--sp-4);
-  max-width: 34ch;
+  max-width: 36ch;
   color: var(--ink-soft);
+  font-size: var(--fs-md);
+  padding-bottom: 0.6em;
+}
+
+.layout {
+  margin-top: var(--sp-6);
+  display: grid;
+  grid-template-columns: minmax(220px, 0.9fr) minmax(260px, 1fr) minmax(280px, 1.1fr);
+  gap: var(--sp-6);
+  align-items: start;
+}
+.thingTitle {
   font-size: var(--fs-lg);
+  margin-bottom: var(--sp-3);
+}
+.small {
+  font-size: var(--fs-xs);
+  color: var(--ink-soft);
+}
+
+/* ---- Marguerite ---- */
+.marguerite {
+  position: relative;
+  width: min(100%, 200px);
+  margin: var(--sp-6) auto 0;
+}
+.mHit {
+  width: 100%;
+}
+.margueriteSvg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+.hat {
+  animation: oa-pop-in 500ms var(--ease-spring) both;
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+}
+.hats {
+  margin-top: var(--sp-4);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+}
+.hatBtn,
+.box {
+  appearance: none;
+  font: inherit;
+  color: var(--ink);
+  background: var(--paper);
+  border: 2px solid var(--ink);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  touch-action: manipulation;
+  transition:
+    transform var(--dur-tap) var(--ease-out),
+    background-color var(--dur-ui);
+}
+.hatBtn {
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+}
+.hatBtn[aria-pressed='true'] {
+  background: var(--yellow);
+  color: #24232b;
+}
+
+/* ---- boxes ---- */
+.boxes {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--sp-2);
+}
+.box {
+  width: 100%;
+  min-height: 74px;
+  padding: 10px 12px;
+  text-align: left;
+  font-size: var(--fs-sm);
+  background: #6b4f3a;
+  box-shadow: 3px 4px 0 var(--shadow-ink);
+}
+.box:hover:not(:disabled) {
+  transform: translateY(-2px) rotate(-0.6deg);
+}
+.box[data-open='true'] {
+  background: transparent;
+  border-style: dashed;
+  box-shadow: none;
+  color: var(--ink-soft);
+  cursor: default;
+}
+.found {
+  margin-top: var(--sp-4);
+  font-size: var(--fs-sm);
+  min-height: 3em;
+}
+
+/* ---- trunk, diary, gramophone ---- */
+.sideCol {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+}
+.trunk,
+.diary,
+.gramophone {
+  padding: var(--sp-4);
+  border: 2px solid var(--ink);
+  border-radius: var(--radius-lg);
+  background: var(--paper);
+  box-shadow: 4px 5px 0 var(--shadow-ink);
+}
+.book {
+  appearance: none;
+  border: 0;
+  padding: 0;
+  background: none;
+  cursor: pointer;
+}
+.bookCover {
+  display: grid;
+  place-items: center;
+  width: 110px;
+  height: 140px;
+  border: 2.5px solid var(--char-ink);
+  border-radius: 4px 10px 10px 4px;
+  background: linear-gradient(90deg, #5a2f2f 0 14%, #7a3b3b 14%);
+  color: var(--yellow);
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: var(--fs-lg);
+  box-shadow: 4px 5px 0 var(--shadow-ink);
+  transition: transform var(--dur-ui) var(--ease-spring);
+}
+.book:hover .bookCover {
+  transform: rotate(-3deg) translateY(-2px);
+}
+.pageWrap {
+  background: #f3ead8;
+  color: #24232b;
+  border-radius: var(--radius-md);
+  padding: var(--sp-3) var(--sp-4);
+  --ink: #24232b;
+  --ink-soft: #5b5866;
+}
+.entries {
+  list-style: none;
+  margin: var(--sp-3) 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+.entry {
+  font-family: var(--font-display);
+  font-size: var(--fs-md);
+  line-height: 1.35;
+}
+.when {
+  font-style: italic;
+  color: #7a3b3b;
+}
+.pager {
+  margin-top: var(--sp-3);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-2);
+}
+/* paper-btn is a global class: give it the page colours inside the diary */
+.pager :global(.paper-btn) {
+  --paper: #fffaf1;
+  --ink: #24232b;
+  --shadow-ink: #24232b;
+  color: #24232b;
+}
+.pager :global(.paper-btn):disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.gramBtn {
+  width: 150px;
+}
+.gramBtn svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.record {
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+}
+.gramBtn[data-playing='true'] .record {
+  animation: spin 1.2s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 1080px) {
+  .layout {
+    grid-template-columns: 1fr 1fr;
+  }
+  .sideCol {
+    grid-column: 1 / -1;
+  }
+}
+@media (max-width: 720px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+  .roundWindow {
+    width: 80px;
+    height: 80px;
+    left: auto;
+    right: var(--gutter);
+    translate: none;
+  }
+}
+[data-motion='reduced'] .gramBtn[data-playing='true'] .record {
+  animation: none;
 }

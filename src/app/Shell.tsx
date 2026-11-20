@@ -50,7 +50,7 @@ export function Shell({ children, controls }: { children: ReactNode; controls?: 
       <a className="skip-link" href="#scene">
         Skip to the room
       </a>
-      <Nav hiddenLabels={hidden} hiddenRooms={unlisted} controls={controls} dark={room === 'secret' || room === 'after-hours'} />
+      <Nav hiddenLabels={hidden} hiddenRooms={unlisted} controls={controls} dark={room === 'secret' || room === 'after-hours' || room === 'attic'} />
       <main id="scene" className={styles.main} data-room={room} tabIndex={-1}>
         <ErrorBoundary resetKey={room} label={ROOMS[room].label}>
           <Suspense fallback={<SceneFallback />}>
