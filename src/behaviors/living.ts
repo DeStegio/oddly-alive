@@ -761,4 +761,18 @@ export const livingBehaviors = [
         say(c, 'pim', LADDER_LINES, 2600);
       }),
   }),
+  // ---- Phase 2: keeping Pim company without poking her
+  defineBehavior({
+    id: 'pim.gentle',
+    on: ['POINTER_ENTERED'],
+    rooms: ['living'],
+    priority: Priority.DIRECT,
+    when: (c) => isTarget(c, 'pim') && c.view.count('hover:pim') >= 10 && c.view.count('pim') === 0 && !c.view.discovered('gentle-hands'),
+    react: (c) =>
+      act('pim', 3600, () => {
+        face(c, 'pim', 'affectionate', 3200);
+        say(c, 'pim', ['you haven’t poked me once. okay. there’s a cord in the ceiling.', 'you’re gentle. I’ll tell you something. Great-Aunt Pim wrote letters.'], 3600);
+        c.effects.discover('gentle-hands');
+      }),
+  }),
 ];

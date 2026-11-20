@@ -20,7 +20,7 @@ export const LETTERS: Letter[] = [
   {
     id: 'living',
     place: 'behind the portrait',
-    hint: 'Once you know what’s behind the portrait, look again.',
+    hint: 'Once the key behind the portrait has been found, look behind it again.',
     body: [
       'If you are reading this, you have been poking at my picture, which I will allow because nobody else has dusted it since the spring.',
       'This was my house for forty-one years. The sofa was mine, the lamp was mine, the clock was a wedding present I never wanted. I talked to all of them. Eventually, I am sorry to say, they started talking back.',

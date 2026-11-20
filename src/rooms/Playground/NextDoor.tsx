@@ -125,7 +125,7 @@ export const NextDoor = forwardRef<NextDoorHandle, Props>(function NextDoor({ ra
         }
         const y = yard.getBoundingClientRect();
         const f = (clientX - y.left - yard.clientLeft) / yard.clientWidth;
-        target.current = Math.min(0.92, Math.max(0.08, f));
+        target.current = Math.min(0.95, Math.max(0.05, f));
       },
       volley(n) {
         setMood('happy');

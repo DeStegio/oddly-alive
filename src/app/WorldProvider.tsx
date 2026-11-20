@@ -9,6 +9,7 @@ import { startAudio } from './audioSync';
 import { parseShareHash } from './share';
 import { startMemory } from './memorySync';
 import { startWeather } from './weatherSync';
+import { startWatchers } from './watchers';
 import { getWorld } from './worldInstance';
 
 /** Applies mood + settings to the document as attributes and CSS variables. */
@@ -47,10 +48,12 @@ export function WorldProvider({ children }: { children: ReactNode }) {
     if (parseShareHash(window.location.hash).night) useSettings.getState().setAfterHours(true);
     world.start();
     const stopWeather = startWeather(world);
+    const stopWatchers = startWatchers(world);
     const removeSensors = installSensors(world);
     return () => {
       removeSensors();
       stopWeather();
+      stopWatchers();
       stopAudio();
       stopMemory();
       world.stop();

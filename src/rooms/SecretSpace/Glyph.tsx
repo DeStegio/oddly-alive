@@ -29,6 +29,8 @@ const GLYPHS: Record<SecretDef['glyph'], React.ReactNode> = {
   ladder: <path {...P} d="M16 6 V 42 M32 6 V 42 M16 14 H 32 M16 24 H 32 M16 34 H 32" />,
   hat: <path {...P} d="M8 34 H 40 M14 34 V 18 C 14 10 34 10 34 18 V 34 M14 26 H 34" />,
   book: <path {...P} d="M24 12 C 18 8 10 8 6 10 V 38 C 10 36 18 36 24 40 C 30 36 38 36 42 38 V 10 C 38 8 30 8 24 12 Z M24 12 V 40" />,
+  map: <path {...P} d="M6 12 L 18 8 L 30 12 L 42 8 V 36 L 30 40 L 18 36 L 6 40 Z M18 8 V 36 M30 12 V 40" />,
+  chair: <path {...P} d="M14 8 V 30 H 34 V 8 M14 20 H 34 M14 30 V 42 M34 30 V 42" />,
   heart: <path {...P} d="M24 38 C 6 26 8 12 17 12 C 21 12 23 15 24 17 C 25 15 27 12 31 12 C 40 12 42 26 24 38 Z" />,
 };
 

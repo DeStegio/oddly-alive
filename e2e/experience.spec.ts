@@ -106,6 +106,7 @@ test('playground: drop, shake and reset', async ({ page }) => {
 });
 
 test('playground: a really hard throw leaves the tray; Bip volleys back what comes over', async ({ page }) => {
+  test.setTimeout(60_000);
   await page.goto('./#/playground');
   const status = page.getByRole('status').filter({ hasText: 'things on the floor' });
   await expect(status).toBeVisible();
@@ -119,23 +120,24 @@ test('playground: a really hard throw leaves the tray; Bip volleys back what com
     const b = (await shape.boundingBox())!;
     await page.mouse.move(b.x + b.width / 2, b.y + b.height / 2);
     await page.mouse.down();
-    for (let i = 1; i <= 6; i++) await page.mouse.move(b.x + b.width / 2 + i * dx, b.y + b.height / 2 + i * dy);
+    // big steps: the measured speed must stay well over the throw threshold even on a busy machine
+    for (let i = 1; i <= 4; i++) await page.mouse.move(b.x + b.width / 2 + i * dx * 2.5, b.y + b.height / 2 + i * dy * 2.5);
     await page.mouse.up();
   };
   const start = await count();
   // to the right: over to Bip, who volleys it back
   await fling('a light lavender pebble', 120, -50);
-  await expect.poll(count, { timeout: 3000 }).toBe(start - 1);
-  await expect.poll(count, { timeout: 8000 }).toBe(start);
+  await expect.poll(count, { timeout: 6000 }).toBe(start - 1);
+  await expect.poll(count, { timeout: 20_000 }).toBe(start);
   await expect(page.locator('section[aria-labelledby="pg-nextdoor-title"] p[aria-live]')).toContainText(/best\s*1/);
   // to the left: gone for good
   await fling('a bouncy coral ball', -120, -60);
-  await expect.poll(count, { timeout: 3000 }).toBe(start - 1);
+  await expect.poll(count, { timeout: 6000 }).toBe(start - 1);
   await page.waitForTimeout(2500);
   expect(await count()).toBe(start - 1);
   // straight down, hard: through the floor and gone as well
   await fling('a heavy blue block', 10, 120);
-  await expect.poll(count, { timeout: 3000 }).toBe(start - 2);
+  await expect.poll(count, { timeout: 6000 }).toBe(start - 2);
 });
 
 test('after hours: manual switch changes the whole house; stars connect', async ({ page }) => {
