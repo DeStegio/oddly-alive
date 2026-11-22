@@ -1,0 +1,357 @@
+/* Infinite Rooms: a full-window mode under the navigation (which stays usable). */
+.root {
+  position: fixed;
+  inset: 0;
+  z-index: calc(var(--z-nav) - 1);
+  display: flex;
+  flex-direction: column;
+  padding: calc(var(--nav-h) + 12px) var(--gutter) 16px;
+  outline: none;
+  touch-action: none;
+  overscroll-behavior: contain;
+}
+.veil {
+  position: absolute;
+  inset: 0;
+  background: var(--canvas);
+  opacity: var(--veil, 1);
+  z-index: -1;
+}
+.viewport {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  place-items: center;
+}
+.stage {
+  position: relative;
+  width: min(100%, calc((100svh - var(--nav-h) - 150px) * 1.6));
+  overflow: hidden;
+  border: var(--stroke) solid var(--char-ink);
+  border-radius: 6px;
+  box-shadow: var(--shadow-lg);
+  background: var(--canvas);
+  transform-origin: 0 0;
+  --arrive: 0;
+}
+.animating {
+  transition: transform 850ms var(--ease-in-out);
+}
+.fadeIn {
+  position: absolute;
+  inset: 0;
+  animation: fade-in 420ms var(--ease-out);
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+.world {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-origin: 0 0;
+}
+.scene {
+  position: relative;
+  overflow: hidden;
+}
+.art {
+  position: absolute;
+  left: 0;
+  top: 0;
+  pointer-events: none;
+  overflow: visible;
+}
+.portal {
+  position: absolute;
+  transform-origin: 0 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.frameFade {
+  opacity: calc(1 - var(--arrive));
+}
+.portalHit {
+  position: absolute;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: zoom-in;
+  border-radius: 10px;
+}
+.portalHit:focus-visible {
+  outline: 8px solid var(--focus, var(--blue));
+  outline-offset: 6px;
+}
+/* Dot, already here: he zips across once and is gone */
+.zip {
+  position: absolute;
+  left: -80px;
+  top: 430px;
+  width: 60px;
+  height: 70px;
+  pointer-events: none;
+  opacity: 0;
+  animation: zip 2.6s var(--ease-in-out) 5.2s 1 forwards;
+}
+@keyframes zip {
+  0% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  40% {
+    transform: translate(520px, -60px);
+  }
+  60% {
+    transform: translate(620px, 0);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(1200px);
+  }
+}
+.caption {
+  margin: 10px auto 0;
+  max-width: 60ch;
+  text-align: center;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: var(--fs-md);
+  color: var(--ink-soft);
+}
+.depth {
+  font-style: normal;
+  font-family: var(--font-body, inherit);
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-left: 0.6em;
+}
+.controls {
+  margin: 10px auto 0;
+  display: flex;
+  gap: 10px;
+}
+.controls :global(.paper-btn) {
+  min-width: 48px;
+  font-size: var(--fs-md);
+}
+.root[data-phase='closing'] .veil {
+  transition: opacity 800ms var(--ease-in-out);
+}
+@media (max-width: 720px) {
+  .root {
+    padding-bottom: calc(var(--nav-h) + 16px);
+  }
+  .stage {
+    width: 100%;
+  }
+}
+
+/* ---- room life (paused for the room two portals away: too small to see) ---- */
+.scene[data-level='2'] * {
+  animation-play-state: paused !important;
+}
+.rise {
+  animation: rise 4.2s linear infinite;
+}
+@keyframes rise {
+  from {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  to {
+    transform: translateY(-560px);
+    opacity: 0;
+  }
+}
+.flap {
+  animation: flap 1.4s var(--ease-in-out) infinite alternate;
+  transform-box: fill-box;
+  transform-origin: 30% 60%;
+}
+@keyframes flap {
+  to {
+    transform: translateY(-14px) scaleY(0.7);
+  }
+}
+.glide {
+  animation: glide 9s linear infinite;
+}
+@keyframes glide {
+  to {
+    transform: translate(1150px, 60px);
+  }
+}
+.breathe {
+  animation: breathe 3s var(--ease-in-out) infinite alternate;
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+}
+@keyframes breathe {
+  to {
+    transform: scaleY(1.06);
+  }
+}
+.sway {
+  animation: sway 3.4s var(--ease-in-out) infinite alternate;
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+}
+@keyframes sway {
+  from {
+    transform: skewX(-6deg);
+  }
+  to {
+    transform: skewX(6deg);
+  }
+}
+.bob {
+  animation: bob 3s var(--ease-in-out) infinite alternate;
+}
+@keyframes bob {
+  to {
+    transform: translateY(-14px);
+  }
+}
+.pulse {
+  animation: pulse 2.4s var(--ease-in-out) infinite alternate;
+}
+@keyframes pulse {
+  to {
+    transform: translateY(-30px) scale(1.08, 0.92);
+  }
+}
+.bubble {
+  animation: bubble 5s linear infinite;
+}
+@keyframes bubble {
+  from {
+    transform: translateY(0);
+    opacity: 0.9;
+  }
+  to {
+    transform: translateY(-620px);
+    opacity: 0;
+  }
+}
+.climb {
+  animation: climb 6s linear infinite;
+}
+@keyframes climb {
+  25% {
+    transform: translate(60px, -30px);
+  }
+  50% {
+    transform: translate(120px, -60px);
+  }
+  75% {
+    transform: translate(120px, 0);
+  }
+  100% {
+    transform: translate(0, 0);
+  }
+}
+.steam {
+  animation: steam 3s var(--ease-in-out) infinite alternate;
+}
+@keyframes steam {
+  to {
+    transform: translateY(-16px);
+    opacity: 0.1;
+  }
+}
+.blink {
+  animation: blink 5s steps(1) infinite;
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+}
+@keyframes blink {
+  94% {
+    transform: scaleY(1);
+  }
+  96% {
+    transform: scaleY(0.08);
+  }
+}
+.drift {
+  animation: drift 7s var(--ease-in-out) infinite alternate;
+}
+@keyframes drift {
+  to {
+    transform: translate(-20px, -40px) rotate(-6deg);
+  }
+}
+.spin {
+  animation: spin 12s linear infinite;
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.tick {
+  animation: tick 6s steps(12) infinite;
+}
+.tickBack {
+  animation: tick 6s steps(12) infinite reverse;
+}
+@keyframes tick {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.pendulum {
+  animation: pendulum 2s var(--ease-in-out) infinite alternate;
+  transform-origin: 0 0;
+}
+@keyframes pendulum {
+  from {
+    transform: rotate(-14deg);
+  }
+  to {
+    transform: rotate(14deg);
+  }
+}
+.peek {
+  animation: peek 6s var(--ease-in-out) infinite;
+}
+@keyframes peek {
+  0%,
+  60%,
+  100% {
+    transform: translateY(40px);
+  }
+  70%,
+  90% {
+    transform: translateY(0);
+  }
+}
+.inch {
+  animation: inch 8s linear infinite alternate;
+}
+@keyframes inch {
+  to {
+    transform: translateX(80px);
+  }
+}
+/* Dot in the not-quite-home room: watching the little frame, until you come close */
+.cameo[data-watching='true'] .pupil {
+  transform: translate(6px, -4px);
+  transition: transform 400ms var(--ease-out);
+}
+.stage[style*='--arrive: 0.'] .cameo[data-watching='true'] .pupil {
+  transform: translate(-4px, 2px);
+}
+[data-motion='reduced'] .root * {
+  animation: none !important;
+  transition: none !important;
+}
