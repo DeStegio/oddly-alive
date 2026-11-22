@@ -15,6 +15,7 @@ import { pointer } from '../../engine/pointer';
 import { useSettings } from '../../state/settings';
 import { useObjects } from '../../state/world';
 import { CONSTELLATION_SIZE, MAX_LINKS, STARS, constellationName, largestGroup, linkKey, type Link } from './sky';
+import { drone, phrase, pitchOf } from './instrument';
 import { WeatherLayer } from '../../components/WeatherLayer';
 import { useWeather } from '../../components/useWeather';
 import type { Weather } from '../../engine/weather';
@@ -66,6 +67,30 @@ export default function AfterHours() {
   const linksRef = useRef<Link[]>([]);
   const namedRef = useRef<string | null>(null);
   const lastTap = useRef({ i: -1, t: 0 });
+  // the instrument: which star is sounding (for the eye as much as the ear)
+  const [sounding, setSounding] = useState<number | null>(null);
+  const [singing, setSinging] = useState(false);
+  const phraseTimers = useRef<number[]>([]);
+  useEffect(() => () => phraseTimers.current.forEach((t) => window.clearTimeout(t)), []);
+  const ring = (star: number, ms = 260) => {
+    world.effects.sound(`note:${Math.round(pitchOf(star))}`);
+    setSounding(star);
+    phraseTimers.current.push(window.setTimeout(() => setSounding((cur) => (cur === star ? null : cur)), ms));
+  };
+  /** Play the constellation as a tune (and show it: each star lights as it sounds). */
+  const playPhrase = (links: Link[]) => {
+    phraseTimers.current.forEach((t) => window.clearTimeout(t));
+    phraseTimers.current = [];
+    const notes = phrase(links);
+    setSinging(true);
+    if (useObjects.getState().after.radioOn) world.effects.sound(`note:${Math.round(drone(notes))}`);
+    for (const n of notes) phraseTimers.current.push(window.setTimeout(() => ring(n.star, n.ms), n.at + 400));
+    const end = (notes.at(-1)?.at ?? 0) + (notes.at(-1)?.ms ?? 0) + 600;
+    phraseTimers.current.push(window.setTimeout(() => setSinging(false), end));
+    world.actors.send('moth', { type: 'anim', name: 'wiggle', durationMs: end });
+    world.emit('OBJECT_STATE_CHANGED', { target: 'sky', key: 'tune', value: notes.length });
+    world.effects.discover('night-music');
+  };
   const tapStar = (i: number) => {
     // one physical tap can arrive as more than one event; ignore the echo
     const now = performance.now();
@@ -86,7 +111,7 @@ export default function AfterHours() {
     linksRef.current = next;
     setLinks(next);
     world.emit('OBJECT_STATE_CHANGED', { target: 'sky', key: 'link', value: next.length });
-    world.effects.sound('star');
+    ring(i);
     if (largestGroup(next) >= CONSTELLATION_SIZE && !namedRef.current) {
       const name = constellationName(next);
       namedRef.current = name;
@@ -94,6 +119,7 @@ export default function AfterHours() {
       setSlice('after', { constellations: after.constellations + 1 });
       world.emit('OBJECT_STATE_CHANGED', { target: 'sky', key: 'constellation', value: name });
       if (after.radioOn) findLetter(world, 'after-hours');
+      playPhrase(next);
     }
   };
 
@@ -107,7 +133,7 @@ export default function AfterHours() {
   };
 
   return (
-    <section className={styles.room} data-light={after.lightOn} data-radio={after.radioOn} aria-labelledby="ah-title">
+    <section className={styles.room} data-light={after.lightOn} data-radio={after.radioOn} data-singing={singing} aria-labelledby="ah-title">
       <StarTrail />
       <div ref={skyRef} className={styles.sky}>
         {/* the house weather, where it makes sense at night */}
@@ -124,6 +150,7 @@ export default function AfterHours() {
             type="button"
             className={styles.star}
             data-selected={selected === i}
+            data-sounding={sounding === i}
             style={{ left: `${s.x}%`, top: `${s.y}%`, width: s.r * 4 + 18, height: s.r * 4 + 18 }}
             aria-label={`Star ${i + 1}${selected === i ? ' (selected — pick another star to connect)' : ''}`}
             onPointerDown={() => tapStar(i)}
@@ -149,9 +176,14 @@ export default function AfterHours() {
         <LivingTitle id="ah-title" lines={['After', 'Hours']} label="After Hours" size="room" />
         <p className={styles.blurb}>The house after everyone pretends to sleep. Connect the stars. Mind the moon; it’s closer than it looks.</p>
         <p className={styles.constellation} aria-live="polite">
-          {named ? `You drew “${named}.”` : links.length ? `${links.length} line${links.length > 1 ? 's' : ''} so far. Five stars make a constellation.` : 'Tap a star, then another, to draw a line.'}
+          {named ? `You drew “${named}.” Every star has a note; listen, or watch them light up.` : links.length ? `${links.length} line${links.length > 1 ? 's' : ''} so far. Five stars make a constellation.` : 'Tap a star, then another, to draw a line.'}
         </p>
         <div className={styles.headActions}>
+          {named ? (
+            <button type="button" className="paper-btn" onClick={() => playPhrase(linksRef.current)}>
+              Play it again
+            </button>
+          ) : null}
           {links.length ? (
             <button type="button" className="paper-btn" onClick={clearSky}>
               Clear the sky
