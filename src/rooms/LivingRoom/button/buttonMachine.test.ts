@@ -107,10 +107,25 @@ describe('the button that fights back', () => {
   });
 
   it('the same impatience gets a faster defence once it is suspicious', () => {
-    const trusting = run(initialButton(0, 0.6), press(1000), press(1300), press(1600)).outcomes;
+    const trusting = run(initialButton(0, 0.75), press(1000), press(1300), press(1600)).outcomes;
     const wary = { ...initialButton(0, 0.2), suspicion: 1 };
     const suspicious = run(wary, press(1000), press(1300)).outcomes;
     expect(trusting.at(-1)).toBe('pressed');
     expect(suspicious.at(-1)).toBe('bracing');
+  });
+});
+
+describe('the button store', () => {
+  it('a world reset makes peace with the button', async () => {
+    const { useButton } = await import('./buttonStore');
+    const { getWorld } = await import('../../../app/worldInstance');
+    const world = getWorld();
+    useButton.getState().dispatch({ type: 'press', now: 1000, rng: 0.9 });
+    useButton.getState().dispatch({ type: 'press', now: 1200, rng: 0.9 });
+    useButton.getState().dispatch({ type: 'press', now: 1400, rng: 0.9 });
+    expect(useButton.getState().s.mode).not.toBe('calm');
+    world.emit('WORLD_RESET', { scope: 'session' });
+    expect(useButton.getState().s.mode).toBe('calm');
+    expect(useButton.getState().s.presses).toBe(0);
   });
 });

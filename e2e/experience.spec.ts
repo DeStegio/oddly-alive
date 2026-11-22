@@ -320,3 +320,55 @@ test('characters act on their own: Dot walks over and presses the button', async
     .poll(() => page.evaluate(() => (window as unknown as { __oddly: Hook }).__oddly.agentLog().find((l) => l.goal === 'dot.press-button' && l.event === 'end')?.outcome), { timeout: 12_000 })
     .toBe('pressed');
 });
+
+test.describe('the button that fights back', () => {
+  const shieldUp = async (page: Page) => {
+    await page.goto('./');
+    const btn = page.getByRole('button', { name: /pressed \d+ times/ });
+    await btn.scrollIntoViewIfNeeded();
+    const glass = page.getByRole('slider', { name: /Protective glass/ });
+    // a wary button sometimes ducks: keep at it until the glass is up
+    for (let i = 0; i < 8 && !(await glass.count()); i++) {
+      await btn.click({ force: true });
+      if (/behind glass/.test((await btn.getAttribute('aria-label')) ?? '')) break;
+    }
+    await expect(glass).toBeVisible({ timeout: 4000 });
+    return { btn, glass };
+  };
+
+  test('impatience brings up the glass; the glass takes the presses', async ({ page }) => {
+    const { btn } = await shieldUp(page);
+    const b = (await btn.boundingBox())!;
+    const hit = await page.evaluate(([x, y]) => document.elementFromPoint(x, y)?.getAttribute('role'), [b.x + b.width / 2, b.y + b.height / 2]);
+    expect(hit).toBe('slider');
+    const before = (await btn.getAttribute('aria-label'))!.match(/pressed (\d+) times/)![1];
+    await page.mouse.click(b.x + b.width / 2, b.y + b.height / 2);
+    await expect(btn).toHaveAccessibleName(new RegExp(`pressed ${before} times`));
+  });
+
+  test('keyboard: loosen both bolts, the glass falls, and a press while it hides gets through', async ({ page }) => {
+    const { btn } = await shieldUp(page);
+    for (const side of ['left', 'right']) {
+      const bolt = page.getByRole('button', { name: new RegExp(`Bolt on the ${side}`) });
+      await bolt.focus();
+      for (let i = 0; i < 3 && (await bolt.count()); i++) await page.keyboard.press('Enter');
+    }
+    await expect(page.getByRole('slider', { name: /Protective glass/ })).toHaveCount(0);
+    const before = Number((await btn.getAttribute('aria-label'))!.match(/pressed (\d+) times/)![1]);
+    await btn.focus();
+    await page.keyboard.press('Enter');
+    await expect(btn).toHaveAccessibleName(new RegExp(`pressed ${before + 1} times`));
+  });
+
+  test('ask Dot: Dot pries the glass off', async ({ page }) => {
+    await shieldUp(page);
+    const dot = page.getByRole('button', { name: /Dot, a small blue sphere/ });
+    await dot.focus();
+    await page.keyboard.press('Enter');
+    type Hook = { agentLog: () => Array<{ goal: string; event: string }> };
+    await expect
+      .poll(() => page.evaluate(() => (window as unknown as { __oddly: Hook }).__oddly.agentLog().some((l) => l.goal === 'dot.pry-glass')), { timeout: 8000 })
+      .toBe(true);
+    await expect(page.getByRole('button', { name: /okay fine|i said no/ })).toBeVisible();
+  });
+});

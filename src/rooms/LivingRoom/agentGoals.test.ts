@@ -25,6 +25,7 @@ function setup() {
     rect: () => new DOMRect(10, 10, 40, 40),
     dotTo: (_t, onArrive) => (arrive = onArrive),
     dotFree: () => (arrive = undefined),
+    button: () => 'pressed',
   };
   director.setStage('living', stage);
   return { clock, world, director, actors, arrive: () => arrive?.() };
@@ -42,8 +43,8 @@ describe('Living Room goals', () => {
     expect(director.candidates(clock.now(), world).some((c) => c.goal.id === 'tick.straighten')).toBe(false);
   });
 
-  it('Dot walks to the button and presses it; the button hears about it', () => {
-    const { clock, world, director, arrive, actors } = setup();
+  it('Dot walks to the button and presses it; through the button machine', () => {
+    const { clock, world, director, arrive } = setup();
     clock.advance(6000); // the visitor has been quiet a while
     expect(director.start(director.goal('dot.press-button')!, world)).toBe(true);
     expect(director.owner('button')).toBe('goal:dot.press-button');
@@ -51,7 +52,6 @@ describe('Living Room goals', () => {
     clock.advance(3000);
     expect(director.log.at(-1)).toMatchObject({ goal: 'dot.press-button', outcome: 'pressed' });
     expect(director.owner('button')).toBeNull();
-    expect(actors.history.some((h) => h.id === 'button' && h.cmd.type === 'anim')).toBe(true);
   });
 
   it('a dozing Pim wakes when the visitor clicks her (direct input wins)', () => {
