@@ -95,7 +95,7 @@ export function decay(s: ButtonState, now: number): ButtonState {
 }
 
 /** How cross it has to be before the brackets come out (trust raises it, suspicion lowers it). */
-export const braceAt = (s: ButtonState) => 0.55 + 0.3 * s.trust - 0.25 * s.suspicion;
+export const braceAt = (s: ButtonState) => 0.55 + 0.35 * s.trust - 0.25 * s.suspicion;
 export const waryAt = (s: ButtonState) => 0.3 + 0.1 * s.trust - 0.15 * s.suspicion;
 /** The glass comes up gently only if it's calmed down enough (or trusts you). */
 export const liftOkAt = (s: ButtonState) => 0.45 + 0.2 * s.trust - 0.2 * s.suspicion;
@@ -117,9 +117,10 @@ export function step(prev: ButtonState, input: ButtonInput): { state: ButtonStat
         s = to({ ...s, presses: s.presses + 1, suspicion: 1, trust: clamp(s.trust - 0.15), irritation: 0.2, lift: 0, bolts: [TURNS, TURNS] }, 'calm', now);
         return { state: s, outcome: 'caught' };
       }
-      const gentle = now - s.lastPress > 3000;
+      // a press long after the last one is gentle (the very first one is just a press)
+      const gentle = s.lastPress > 0 && now - s.lastPress > 3000;
       const intensity = clamp(s.intensity + 0.3);
-      s = { ...s, intensity, lastPress: now, irritation: clamp(s.irritation + 0.1 + 0.25 * intensity), trust: clamp(s.trust + (gentle ? 0.05 : -0.02)) };
+      s = { ...s, intensity, lastPress: now, irritation: clamp(s.irritation + (gentle ? 0.05 : 0.12 + 0.25 * intensity)), trust: clamp(s.trust + (gentle ? 0.05 : -0.02)) };
       // a wary button sometimes ducks
       if (s.mode === 'wary' && input.rng < 0.3 + 0.3 * s.suspicion) return { state: s, outcome: 'dodged' };
       s = { ...s, presses: s.presses + 1 };
