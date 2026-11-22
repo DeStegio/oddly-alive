@@ -25,39 +25,6 @@
     repeating-linear-gradient(90deg, transparent 0 180px, rgba(0, 0, 0, 0.18) 180px 194px),
     #241f2b;
 }
-.roundWindow {
-  position: absolute;
-  top: calc(var(--nav-h) + 10px);
-  left: 50%;
-  width: 120px;
-  height: 120px;
-  translate: -50% 0;
-  border-radius: 50%;
-  border: 6px solid #8a5a3c;
-  background: #9fb4d8;
-  overflow: hidden;
-  z-index: -1;
-  box-shadow: inset 0 0 0 3px var(--char-ink);
-}
-.roundWindow::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(#8a5a3c, #8a5a3c) 50% 0 / 5px 100% no-repeat,
-    linear-gradient(#8a5a3c, #8a5a3c) 0 50% / 100% 5px no-repeat;
-}
-.light {
-  position: absolute;
-  left: 50%;
-  top: 30%;
-  width: 90vw;
-  height: 70vh;
-  translate: -50% 0;
-  z-index: -1;
-  background: radial-gradient(ellipse at 50% 40%, rgba(245, 216, 115, 0.18), transparent 60%);
-  pointer-events: none;
-}
 .head {
   display: flex;
   flex-wrap: wrap;
@@ -65,18 +32,10 @@
   gap: var(--sp-3) var(--sp-6);
 }
 .blurb {
-  max-width: 36ch;
+  max-width: 40ch;
   color: var(--ink-soft);
   font-size: var(--fs-md);
   padding-bottom: 0.6em;
-}
-
-.layout {
-  margin-top: var(--sp-6);
-  display: grid;
-  grid-template-columns: minmax(220px, 0.9fr) minmax(260px, 1fr) minmax(280px, 1.1fr);
-  gap: var(--sp-6);
-  align-items: start;
 }
 .thingTitle {
   font-size: var(--fs-lg);
@@ -87,19 +46,267 @@
   color: var(--ink-soft);
 }
 
-/* ---- Marguerite ---- */
-.marguerite {
-  position: relative;
-  width: min(100%, 200px);
-  margin: var(--sp-6) auto 0;
+/* keyboard / screen reader helpers, out of sight until focused */
+.keys,
+.keyOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
 }
-.mHit {
+.keys:focus-within,
+.keyOnly:focus {
+  position: static;
+  width: auto;
+  height: auto;
+  clip: auto;
+  margin-top: var(--sp-3);
+}
+.keys:focus-within {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.keys button,
+.keyOnly {
+  font: inherit;
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  padding: 4px 10px;
+  border: 2px solid var(--ink);
+  border-radius: var(--radius-pill);
+  background: var(--paper);
+  color: var(--ink);
+}
+
+/* ---------- the stage: one attic, scaled to fit ---------- */
+.stage {
+  --dust: 1;
+  position: relative;
+  margin-top: var(--sp-5);
   width: 100%;
+  border: var(--stroke) solid #0f0d14;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: 6px 8px 0 var(--shadow-ink);
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+  cursor: grab;
+}
+.stage:active {
+  cursor: grabbing;
+}
+.stageWorld {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-origin: 0 0;
+}
+.stageWorld > * {
+  position: absolute;
+}
+/* it gets lighter up here as the dust comes off */
+.stageWorld::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse at 50% 30%, rgba(255, 220, 140, calc(0.2 - var(--dust) * 0.16)), rgba(10, 8, 14, calc(var(--dust) * 0.3)) 80%);
+  z-index: 9;
+}
+.wall {
+  left: 0;
+  right: 0;
+  top: 0;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 118px, rgba(0, 0, 0, 0.22) 118px 130px),
+    linear-gradient(#4a3a33, #3b2f2a);
+}
+.floorboards {
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 96px, rgba(0, 0, 0, 0.25) 96px 99px),
+    linear-gradient(#7a5a42, #5e4433);
+  border-top: 3px solid #2a201b;
+}
+.roundWindow {
+  border-radius: 50%;
+  border: 6px solid #8a5a3c;
+  background: #9fb4d8;
+  overflow: hidden;
+  box-shadow:
+    inset 0 0 0 3px var(--char-ink),
+    0 0 60px 10px rgba(180, 200, 240, 0.12);
+}
+.roundWindow::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(#8a5a3c, #8a5a3c) 50% 0 / 5px 100% no-repeat,
+    linear-gradient(#8a5a3c, #8a5a3c) 0 50% / 100% 5px no-repeat;
+}
+.shelf {
+  background: #8a5a3c;
+  border: 2.5px solid var(--char-ink);
+  border-radius: 3px;
+}
+.stool,
+.crate {
+  background: repeating-linear-gradient(0deg, #9a6a44 0 12px, #855a39 12px 14px);
+  border: 2.5px solid var(--char-ink);
+  border-radius: 4px;
+}
+.stool {
+  border-radius: 8px 8px 2px 2px;
+}
+
+/* photographs: develop while you keep still */
+.photo {
+  --develop: 0;
+  padding: 7px;
+  background: #e8dcc4;
+  border: 2.5px solid var(--char-ink);
+  border-radius: 3px;
+  box-shadow: 3px 4px 0 rgba(0, 0, 0, 0.35);
+  outline-offset: 4px;
+}
+.photo:nth-of-type(odd) {
+  rotate: -2deg;
+}
+.photo:nth-of-type(even) {
+  rotate: 1.5deg;
+}
+.photoSvg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.picture {
+  opacity: calc(0.08 + var(--develop) * 0.92);
+  filter: sepia(calc(1 - var(--develop) * 0.75)) contrast(calc(0.7 + var(--develop) * 0.3));
+}
+.photo[data-playing='true'] {
+  box-shadow:
+    3px 4px 0 rgba(0, 0, 0, 0.35),
+    0 0 26px 6px rgba(245, 216, 115, 0.35);
+}
+.photo[data-playing='true'] .picture {
+  filter: none;
+}
+.pencil {
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  bottom: -20px;
+  text-align: center;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 13px;
+  color: #e8dcc4;
+  white-space: nowrap;
+}
+.waves,
+.bob,
+.sway,
+.flicker,
+.noteFloat,
+.turnHead,
+.photoSun {
+  transform-box: fill-box;
+  animation-play-state: paused;
+}
+.photo[data-playing='true'] :is(.waves, .bob, .sway, .flicker, .noteFloat, .turnHead, .photoSun) {
+  animation-play-state: running;
+}
+.waves {
+  animation: waves 3s linear infinite;
+}
+@keyframes waves {
+  to {
+    transform: translateX(20px);
+  }
+}
+.bob {
+  transform-origin: 50% 100%;
+  animation: bob 1.4s var(--ease-in-out) infinite alternate;
+}
+@keyframes bob {
+  to {
+    transform: translateY(-2px) rotate(4deg);
+  }
+}
+.sway {
+  transform-origin: 50% 100%;
+  animation: photo-sway 1.8s var(--ease-in-out) infinite alternate;
+}
+@keyframes photo-sway {
+  from {
+    transform: rotate(-4deg);
+  }
+  to {
+    transform: rotate(4deg);
+  }
+}
+.flicker {
+  animation: flicker 2.3s steps(1) infinite;
+}
+@keyframes flicker {
+  50% {
+    opacity: 0.2;
+  }
+  56% {
+    opacity: 1;
+  }
+}
+.noteFloat {
+  animation: note-float 2.4s linear infinite;
+}
+@keyframes note-float {
+  from {
+    transform: translateY(6px);
+    opacity: 0;
+  }
+  40% {
+    opacity: 1;
+  }
+  to {
+    transform: translateY(-14px);
+    opacity: 0;
+  }
+}
+.turnHead {
+  transform-origin: 50% 50%;
+  animation: turn-head 4s var(--ease-in-out) infinite alternate;
+}
+@keyframes turn-head {
+  to {
+    transform: rotate(40deg) translateX(3px);
+  }
+}
+.photoSun {
+  animation: sun-pulse 2s var(--ease-in-out) infinite alternate;
+}
+@keyframes sun-pulse {
+  to {
+    transform: scale(1.15);
+  }
+}
+
+/* Marguerite */
+.margueriteOnStage .mHit {
+  width: 100%;
+  height: 100%;
 }
 .margueriteSvg {
   display: block;
   width: 100%;
-  height: auto;
+  height: 100%;
   overflow: visible;
 }
 .hat {
@@ -107,81 +314,295 @@
   transform-box: fill-box;
   transform-origin: 50% 100%;
 }
-.hats {
-  margin-top: var(--sp-4);
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  justify-content: center;
+.margueriteOnStage[data-tempo='true'] svg {
+  transform-origin: 50% 100%;
+  animation: sway calc(1.4s / max(0.4, var(--sway, 1))) var(--ease-in-out) infinite alternate;
 }
-.hatBtn,
-.box {
-  appearance: none;
-  font: inherit;
-  color: var(--ink);
-  background: var(--paper);
-  border: 2px solid var(--ink);
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  touch-action: manipulation;
-  transition:
-    transform var(--dur-tap) var(--ease-out),
-    background-color var(--dur-ui);
+@keyframes sway {
+  from {
+    transform: rotate(-3deg);
+  }
+  to {
+    transform: rotate(3deg);
+  }
 }
-.hatBtn {
-  padding: 4px 10px;
-  border-radius: var(--radius-pill);
-  font-size: var(--fs-xs);
-  font-weight: 600;
-}
-.hatBtn[aria-pressed='true'] {
-  background: var(--yellow);
-  color: #24232b;
-}
-
-/* ---- boxes ---- */
-.boxes {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--sp-2);
-}
-.box {
+.hatSpot .hatSvg,
+.hatSvg {
+  display: block;
   width: 100%;
-  min-height: 74px;
-  padding: 10px 12px;
-  text-align: left;
-  font-size: var(--fs-sm);
-  background: #6b4f3a;
-  box-shadow: 3px 4px 0 var(--shadow-ink);
-}
-.box:hover:not(:disabled) {
-  transform: translateY(-2px) rotate(-0.6deg);
-}
-.box[data-open='true'] {
-  background: transparent;
-  border-style: dashed;
-  box-shadow: none;
-  color: var(--ink-soft);
-  cursor: default;
-}
-.found {
-  margin-top: var(--sp-4);
-  font-size: var(--fs-sm);
-  min-height: 3em;
+  height: 100%;
+  overflow: visible;
 }
 
-/* ---- trunk, diary, gramophone ---- */
-.sideCol {
-  display: flex;
-  flex-direction: column;
+/* the gramophone, on its crate */
+.gramophone {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+.gramStage {
+  position: relative;
+  height: 150px;
+}
+.gramBody {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 200px;
+  height: auto;
+}
+.record {
+  position: absolute;
+  left: 18px;
+  bottom: 50px;
+  width: 128px;
+  height: 128px;
+  border-radius: 50%;
+  border: 2.5px solid var(--char-ink);
+  background: repeating-radial-gradient(circle, #24232b 0 3px, #33313d 3px 5px);
+  transform-origin: 50% 50%;
+  cursor: grab;
+  touch-action: none;
+  /* seen a little from above */
+  scale: 1 0.42;
+}
+.gramophone[data-dusty='true'] .record {
+  pointer-events: none;
+}
+.record:active {
+  cursor: grabbing;
+}
+.recordLabel {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 40px;
+  height: 40px;
+  margin: -20px 0 0 -20px;
+  border-radius: 50%;
+  background: var(--coral);
+  border: 2px solid var(--char-ink);
+}
+.recordLabel::after {
+  content: '';
+  position: absolute;
+  left: 6px;
+  top: 16px;
+  width: 26px;
+  height: 4px;
+  background: #f3ede2;
+  border-radius: 2px;
+}
+.floatNote {
+  position: absolute;
+  left: 140px;
+  top: 30px;
+  font-size: 22px;
+  color: var(--yellow);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 11;
+}
+.noteUp {
+  animation: note-up 1.4s var(--ease-out);
+}
+@keyframes note-up {
+  0% {
+    opacity: 1;
+    transform: translate(0, 10px);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(26px, -50px) rotate(18deg);
+  }
+}
+
+/* the trunk and its lock */
+.trunkSvg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.lid {
+  transform-box: fill-box;
+  transform-origin: 0% 100%;
+  transition: transform 700ms var(--ease-spring);
+}
+.trunkSpot[data-open='true'] .lid {
+  transform: rotate(-24deg) translate(-4px, -6px);
+}
+.lock {
+  position: absolute;
+  inset: 0;
+}
+.dial {
+  position: absolute;
+  top: 63.5%;
+  width: 11%;
+  height: 21%;
+  translate: -50% -50%;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-display);
+  font-weight: 700;
+  line-height: 1;
+  color: #24232b;
+  background: #f3ead8;
+  border: 1.5px solid var(--char-ink);
+  border-radius: 3px;
+  cursor: ns-resize;
+  outline-offset: 2px;
+}
+.trunkSpot[data-open='true'] .dial {
+  background: var(--yellow);
+}
+.diaryBook {
+  border: 2.5px solid var(--char-ink);
+  border-radius: 3px 8px 8px 3px;
+  background: linear-gradient(90deg, #5a2f2f 0 14%, #7a3b3b 14%);
+}
+.envelopeOnFloor {
+  background:
+    linear-gradient(to bottom right, transparent 49%, var(--char-ink) 49% 51%, transparent 51%) 0 0 / 50% 60% no-repeat,
+    linear-gradient(to bottom left, transparent 49%, var(--char-ink) 49% 51%, transparent 51%) 100% 0 / 50% 60% no-repeat,
+    #f6efe0;
+  border: 2.5px solid var(--char-ink);
+  border-radius: 3px;
+  rotate: -8deg;
+  box-shadow: 0 0 22px 4px rgba(245, 216, 115, 0.45);
+  animation: oa-pop-in 600ms var(--ease-spring) both;
+}
+
+/* the dust itself: a coarse grid, smoothed out by the browser */
+.dust {
+  left: 0;
+  top: 0;
+  pointer-events: none;
+  z-index: 8;
+}
+
+/* dust bunnies: grey fluff with eyes */
+.bunny {
+  left: -11px;
+  top: -9px;
+  width: 22px;
+  height: 18px;
+  border-radius: 50% 50% 45% 45%;
+  background: radial-gradient(circle at 40% 35%, #d8cdbd, #a99c8a 70%);
+  box-shadow:
+    0 0 0 2px rgba(169, 156, 138, 0.6),
+    0 0 6px 3px rgba(200, 190, 175, 0.5);
+  z-index: 10;
+  pointer-events: none;
+  will-change: transform;
+}
+.bunny i {
+  position: absolute;
+  left: 5px;
+  top: 6px;
+  width: 3px;
+  height: 4px;
+  border-radius: 2px;
+  background: #24232b;
+  box-shadow: 8px 0 0 #24232b;
+  animation: blink 4s steps(1) infinite;
+}
+.bunny[data-running='true'] {
+  animation: scurry 160ms linear infinite alternate;
+}
+@keyframes scurry {
+  to {
+    border-radius: 45% 55% 40% 50%;
+    scale: 1.1 0.9;
+  }
+}
+@keyframes blink {
+  94% {
+    height: 4px;
+  }
+  95% {
+    height: 1px;
+  }
+}
+
+/* dust motes, puffed up by rubbing */
+.mote {
+  left: 0;
+  top: 0;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(225, 212, 192, 0.9);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 10;
+}
+.moteUp {
+  animation: mote 1.2s var(--ease-out) forwards;
+}
+@keyframes mote {
+  0% {
+    opacity: 0.9;
+    transform: translate(0, 0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--dx), var(--dy)) scale(2.4);
+  }
+}
+
+/* what a photograph remembers, told under the stage */
+.memory {
+  margin-top: var(--sp-3);
+  min-height: 1.5em;
+  max-width: 60ch;
+  font-family: var(--font-display);
+  font-size: var(--fs-md);
+  line-height: 1.45;
+}
+.memoryTitle {
+  font-size: var(--fs-sm);
+  font-family: var(--font-body, inherit);
+  font-weight: 700;
+  color: var(--ink-soft);
+  margin-bottom: 4px;
+}
+.caption {
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  bottom: 14px;
+  max-width: 62ch;
+  margin: 0 auto;
+  padding: 10px 16px 12px;
+  background: rgba(20, 16, 26, 0.86);
+  border: 2px solid #e8dcc4;
+  border-radius: var(--radius-md);
+  font-family: var(--font-display);
+  font-size: var(--fs-md);
+  line-height: 1.4;
+  z-index: 12;
+  pointer-events: none;
+}
+.caption p {
+  animation: oa-fade-in 600ms var(--ease-out) both;
+}
+.back {
+  font-style: italic;
+  color: var(--yellow);
+}
+
+/* ---------- the trunk's letters and the diary, below ---------- */
+.lower {
+  margin-top: var(--sp-6);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: var(--sp-5);
+  align-items: start;
 }
 .trunk,
-.diary,
-.gramophone {
+.diary {
   padding: var(--sp-4);
   border: 2px solid var(--ink);
   border-radius: var(--radius-lg);
@@ -245,7 +666,6 @@
   align-items: center;
   gap: var(--sp-2);
 }
-/* paper-btn is a global class: give it the page colours inside the diary */
 .pager :global(.paper-btn) {
   --paper: #fffaf1;
   --ink: #24232b;
@@ -256,52 +676,6 @@
   opacity: 0.45;
   cursor: default;
 }
-.gramBtn {
-  width: 150px;
-}
-.gramBtn svg {
-  display: block;
-  width: 100%;
-  height: auto;
-}
-.record {
-  transform-box: fill-box;
-  transform-origin: 50% 50%;
-}
-.gramBtn[data-playing='true'] .record {
-  animation: spin 1.2s linear infinite;
-}
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@media (max-width: 1080px) {
-  .layout {
-    grid-template-columns: 1fr 1fr;
-  }
-  .sideCol {
-    grid-column: 1 / -1;
-  }
-}
-@media (max-width: 720px) {
-  .layout {
-    grid-template-columns: 1fr;
-  }
-  .roundWindow {
-    width: 80px;
-    height: 80px;
-    left: auto;
-    right: var(--gutter);
-    translate: none;
-  }
-}
-[data-motion='reduced'] .gramBtn[data-playing='true'] .record {
-  animation: none;
-}
-
-/* ---- the letters in the trunk ---- */
 .letters {
   list-style: none;
   margin: var(--sp-3) 0 0;
@@ -376,219 +750,12 @@
   color: #24232b;
   --shadow-ink: #24232b;
 }
+
 [data-motion='reduced'] .letterPage {
   rotate: none;
 }
-
-/* ===================== Phase 2.1: the pile, by hand ===================== */
-.keys,
-.keyOnly {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  white-space: nowrap;
-}
-.keys:focus-within,
-.keyOnly:focus {
-  position: static;
-  width: auto;
-  height: auto;
-  clip: auto;
-  margin-top: var(--sp-3);
-}
-.keys:focus-within {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-.keys button,
-.keyOnly {
-  font: inherit;
-  font-size: var(--fs-xs);
-  font-weight: 600;
-  padding: 4px 10px;
-  border: 2px solid var(--ink);
-  border-radius: var(--radius-pill);
-  background: var(--paper);
-  color: var(--ink);
-}
-
-/* the stage: a floor of planks under the roof */
-.stage {
-  position: relative;
-  margin-top: var(--sp-5);
-  width: 100%;
-  border-bottom: 4px solid #8a5a3c;
-  touch-action: none;
-  -webkit-user-select: none;
-  user-select: none;
-  background: linear-gradient(to top, #5a4232 0 16px, transparent 16px);
-}
-.stageWorld {
-  position: absolute;
-  left: 0;
-  top: 0;
-  transform-origin: 0 0;
-}
-.margueriteOnStage {
-  position: absolute;
-  left: 35px;
-  top: 125px;
-  width: 170px;
-}
-.margueriteOnStage .mHit {
-  width: 100%;
-}
-.margueriteOnStage[data-tempo='true'] svg {
-  transform-origin: 50% 100%;
-  animation: sway calc(1.4s / max(0.4, var(--sway, 1))) var(--ease-in-out) infinite alternate;
-}
-@keyframes sway {
-  from {
-    transform: rotate(-3deg);
-  }
-  to {
-    transform: rotate(3deg);
-  }
-}
-.thing {
-  position: absolute;
-  left: 0;
-  top: 0;
-  cursor: grab;
-  will-change: transform;
-}
-.thing:active {
-  cursor: grabbing;
-}
-.thingSvg,
-.hatSvg {
-  display: block;
-  width: 100%;
-  height: 100%;
-  overflow: visible;
-}
-.boxLabel {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 18px;
-  fill: #24232b;
-  opacity: 0.75;
-}
-.dustPuff {
-  position: absolute;
-  width: 160px;
-  height: 160px;
-  margin: -80px 0 0 -80px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(220, 205, 185, 0.85), rgba(220, 205, 185, 0) 65%);
-  animation: puff 1.4s var(--ease-out) forwards;
-  pointer-events: none;
-}
-@keyframes puff {
-  from {
-    transform: scale(0.3);
-    opacity: 1;
-  }
-  to {
-    transform: scale(1.6);
-    opacity: 0;
-  }
-}
-
-/* trunk, diary and gramophone along the bottom */
-.lower {
-  margin-top: var(--sp-6);
-  display: grid;
-  grid-template-columns: minmax(240px, 1fr) minmax(280px, 1.2fr) minmax(260px, 1fr);
-  gap: var(--sp-5);
-  align-items: start;
-}
-.gramStage {
-  position: relative;
-  height: 150px;
-}
-.gramBody {
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  width: 200px;
-  height: auto;
-}
-.record {
-  position: absolute;
-  left: 18px;
-  bottom: 50px;
-  width: 128px;
-  height: 128px;
-  border-radius: 50%;
-  border: 2.5px solid var(--char-ink);
-  background: repeating-radial-gradient(circle, #24232b 0 3px, #33313d 3px 5px);
-  transform-origin: 50% 50%;
-  cursor: grab;
-  touch-action: none;
-  /* seen a little from above */
-  scale: 1 0.42;
-}
-.record:active {
-  cursor: grabbing;
-}
-.recordLabel {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 40px;
-  height: 40px;
-  margin: -20px 0 0 -20px;
-  border-radius: 50%;
-  background: var(--coral);
-  border: 2px solid var(--char-ink);
-}
-.recordLabel::after {
-  content: '';
-  position: absolute;
-  left: 6px;
-  top: 16px;
-  width: 26px;
-  height: 4px;
-  background: #f3ede2;
-  border-radius: 2px;
-}
-.floatNote {
-  position: absolute;
-  left: 140px;
-  top: 30px;
-  font-size: 22px;
-  color: var(--yellow);
-  opacity: 0;
-  pointer-events: none;
-}
-.noteUp {
-  animation: note-up 1.4s var(--ease-out);
-}
-@keyframes note-up {
-  0% {
-    opacity: 1;
-    transform: translate(0, 10px);
-  }
-  100% {
-    opacity: 0;
-    transform: translate(26px, -50px) rotate(18deg);
-  }
-}
-
-@media (max-width: 1080px) {
-  .lower {
-    grid-template-columns: 1fr 1fr;
-  }
-}
-@media (max-width: 720px) {
-  .lower {
-    grid-template-columns: 1fr;
-  }
-}
-[data-motion='reduced'] .margueriteOnStage svg {
+[data-motion='reduced'] .margueriteOnStage svg,
+[data-motion='reduced'] .bunny,
+[data-motion='reduced'] .photo :is(.waves, .bob, .sway, .flicker, .noteFloat, .turnHead, .photoSun) {
   animation: none !important;
 }

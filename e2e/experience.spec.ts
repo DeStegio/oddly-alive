@@ -242,22 +242,69 @@ test('garden: draw to plant, swipe to pick, and you are the sun', async ({ page 
   await expect(page.locator('[class*="_cloud_"]')).toHaveCount(1);
 });
 
-test('attic by hand: shake a box until it bursts open', async ({ page }) => {
+test('attic: rub the dust off, keep still to remember, wheel the lock open', async ({ page }) => {
+  test.setTimeout(60_000);
   await page.goto('./#/attic');
-  await page.waitForTimeout(2000);
-  const boxes = page.locator('[data-kind="hatbox"], [data-kind="box"], [data-kind="crate"], [data-kind="suitcase"], [data-kind="shoebox"], [data-kind="dustbox"]');
-  await expect(boxes).toHaveCount(6);
-  const top = boxes.last();
-  await top.evaluate((el) => el.scrollIntoView({ block: 'center' }));
-  await page.waitForTimeout(300);
-  const b = (await top.boundingBox())!;
-  await page.mouse.move(b.x + b.width / 2, b.y + b.height / 2);
+  const stage = page.locator('[class*="_stage_"]').first();
+  await stage.evaluate((el) => el.scrollIntoView({ block: 'center' }));
+  await page.waitForTimeout(500);
+
+  // rub the first photograph clean
+  const p = (await page.getByRole('img', { name: /photograph frame/ }).first().boundingBox())!;
+  await page.mouse.move(p.x + 4, p.y + 4);
   await page.mouse.down();
-  for (let i = 0; i < 12; i++) {
-    await page.mouse.move(b.x + b.width / 2 + (i % 2 ? 80 : -80), b.y - 40);
-    await page.waitForTimeout(30);
-  }
+  for (let k = 0; k < 8; k++) for (let j = 0; j <= 6; j++) await page.mouse.move(p.x + (k % 2 ? p.width - (j * p.width) / 6 : (j * p.width) / 6), p.y + (k * p.height) / 7, { steps: 2 });
   await page.mouse.up();
-  // at least the shaken one (a hard shake can knock another open too)
-  await expect.poll(() => boxes.count(), { timeout: 5000 }).toBeLessThan(6);
+  await expect(page.getByRole('img', { name: /Photograph: The seaside/ })).toBeVisible({ timeout: 3000 });
+
+  // keep still over it and it remembers, down to the pencil on the back
+  await page.mouse.move(p.x + p.width / 2, p.y + p.height / 2, { steps: 3 });
+  await expect(page.getByText('We took the early train because I insisted.')).toBeVisible({ timeout: 5000 });
+  await expect(page.getByText(/On the back, in pencil/)).toBeVisible({ timeout: 12000 });
+
+  // the rest by keyboard, then the lock by wheel: 4, 7, 2
+  const dustNext = page.getByRole('button', { name: 'Dust the next thing' });
+  await dustNext.focus();
+  for (let i = 0; i < 12; i++) await page.keyboard.press('Enter');
+  // done with the keyboard: let the helper buttons fold away again
+  await dustNext.evaluate((el) => (el as HTMLElement).blur());
+  const dials = page.getByRole('spinbutton');
+  await dials.first().evaluate((el) => el.scrollIntoView({ block: 'center' }));
+  await page.waitForTimeout(200);
+  const touch = test.info().project.name === 'mobile';
+  for (const [i, n] of [4, 7, 2].entries()) {
+    const d = (await dials.nth(i).boundingBox())!;
+    const x = d.x + d.width / 2;
+    const y = d.y + d.height / 2;
+    await page.mouse.move(x, y);
+    if (touch) {
+      // no wheel on a phone: swipe up on the dial, a notch at a time
+      for (let tries = 0; tries < 20 && (await dials.nth(i).getAttribute('aria-valuenow')) !== String(n); tries++) {
+        await page.mouse.move(x, y);
+        await page.mouse.down();
+        await page.mouse.move(x, y - 34, { steps: 3 });
+        await page.mouse.up();
+      }
+    } else {
+      for (let k = 0; k < n; k++) {
+        await page.mouse.wheel(0, -60);
+        await page.waitForTimeout(30);
+      }
+    }
+  }
+  await expect(page.getByRole('heading', { name: /trunk/ })).toBeVisible();
+
+  // the wheel over Marguerite changes her hat
+  const her = page.getByRole('button', { name: /Marguerite the dress form/ });
+  await her.evaluate((el) => el.scrollIntoView({ block: 'center' }));
+  await page.waitForTimeout(200);
+  const m = (await her.boundingBox())!;
+  await page.mouse.move(m.x + m.width / 2, m.y + m.height / 2);
+  if (touch) {
+    await page.mouse.down();
+    await page.mouse.move(m.x + m.width / 2, m.y + m.height / 2 - 60, { steps: 4 });
+    await page.mouse.up();
+  } else await page.mouse.wheel(0, -120);
+  await expect(page.getByRole('button', { name: /Marguerite the dress form, wearing/ })).toBeVisible();
 });
+

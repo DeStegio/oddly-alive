@@ -10,9 +10,9 @@ const PROPER = (2 * Math.PI) / 1800;
 /**
  * The gramophone only plays while the record turns, and you turn it: drag
  * round in a circle. Speed sets the tempo, backwards plays it backwards, and
- * a record left alone winds down. `onTempo` lets the room sway in time.
+ * a record left alone winds down. Dust it first. `onTempo` lets the room sway in time.
  */
-export function Gramophone({ onTempo }: { onTempo: (speed: number) => void }) {
+export function Gramophone({ onTempo, dusty }: { onTempo: (speed: number) => void; dusty: boolean }) {
   const world = useWorld();
   const recordRef = useRef<HTMLDivElement>(null);
   const noteEls = useRef<Array<HTMLSpanElement | null>>([]);
@@ -63,7 +63,8 @@ export function Gramophone({ onTempo }: { onTempo: (speed: number) => void }) {
   };
 
   const onDown = (e: React.PointerEvent) => {
-    if (e.button !== 0) return;
+    if (e.button !== 0 || dusty) return;
+    e.stopPropagation();
     e.currentTarget.setPointerCapture?.(e.pointerId);
     const s = spin.current;
     s.held = true;
@@ -86,10 +87,7 @@ export function Gramophone({ onTempo }: { onTempo: (speed: number) => void }) {
   };
 
   return (
-    <section className={styles.gramophone} aria-labelledby="gram-title">
-      <h2 id="gram-title" className={styles.thingTitle}>
-        Gramophone
-      </h2>
+    <div className={styles.gramophone} data-dusty={dusty}>
       <div className={styles.gramStage}>
         <svg viewBox="0 0 160 90" className={styles.gramBody} aria-hidden="true">
           <rect x="16" y="52" width="104" height="34" rx="5" fill="#8a5a3c" stroke="var(--char-ink)" strokeWidth="2.5" />
@@ -101,7 +99,7 @@ export function Gramophone({ onTempo }: { onTempo: (speed: number) => void }) {
           className={styles.record}
           data-playing={playing}
           role="img"
-          aria-label={playing ? 'The record, turning' : 'A record on the gramophone. Turn it by hand.'}
+          aria-label={dusty ? 'A gramophone under a sheet of dust' : playing ? 'The record, turning' : 'A record on the gramophone. Turn it round by hand.'}
           onPointerDown={onDown}
           onPointerMove={onMove}
           onPointerUp={onUp}
@@ -120,10 +118,9 @@ export function Gramophone({ onTempo }: { onTempo: (speed: number) => void }) {
           />
         ))}
       </div>
-      <p className={styles.small}>Turn the record round with your hand. Faster is faster. The other way is the other way. (Sound is off until you switch it on, top right.)</p>
-      <button type="button" className={styles.keyOnly} onClick={() => (spin.current.vel = PROPER)}>
+      <button type="button" className={styles.keyOnly} disabled={dusty} onClick={() => (spin.current.vel = PROPER)}>
         Give the record a spin
       </button>
-    </section>
+    </div>
   );
 }

@@ -22,25 +22,39 @@ describe('<Attic />', () => {
     expect(getWorldState().discoveries.attic).toBeDefined();
   });
 
-  it('boxes burst open (keyboard path): hats spill out, the last one holds a letter', () => {
+  it('keyboard: dusting uncovers the hats, the letter, and the trunk; the lock takes the numbers from the photos', () => {
     wrap(<Attic />);
-    for (let i = 0; i < 6; i++) fireEvent.click(screen.getByRole('button', { name: 'Open the next box' }));
-    expect(useObjects.getState().attic.opened.split(',')).toHaveLength(6);
+    const dustNext = screen.getByRole('button', { name: 'Dust the next thing' });
+    for (let i = 0; i < 12; i++) fireEvent.click(dustNext);
+    expect(useObjects.getState().attic.dust.split(',')).toHaveLength(12);
     expect([...useKeepsakes.getState().attic.hats].sort()).toEqual(['beret', 'crown', 'sunhat', 'topper']);
     expect(useKeepsakes.getState().letters).toContain('attic');
-    expect(screen.getByText(/under everything, an envelope/)).toBeInTheDocument();
+
+    // 4, 7, 2: one number from each photograph
+    const dials = screen.getAllByRole('spinbutton');
+    [4, 7, 2].forEach((n, i) => {
+      for (let k = 0; k < n; k++) fireEvent.keyDown(dials[i]!, { key: 'ArrowUp' });
+    });
+    expect(useObjects.getState().attic.opened.split(',')).toContain('trunk');
+    expect(getWorldState().discoveries.combination).toBeDefined();
+    expect(screen.getByRole('heading', { name: /trunk/ })).toBeInTheDocument();
   });
 
-  it('Marguerite wears every hat for a discovery', () => {
+  it('Marguerite changes hats with the arrow keys, and wears every hat for a discovery', () => {
     for (const h of ['beret', 'topper', 'sunhat', 'crown']) useKeepsakes.getState().addHat(h);
+    useObjects.getState().setSlice('attic', { dust: 'marguerite' });
     wrap(<Attic />);
-    for (const h of [/beret/, /top hat/, /sun hat/, /paper crown/]) fireEvent.click(screen.getByRole('button', { name: new RegExp(`Put .*${h.source}`) }));
-    expect(screen.getByRole('button', { name: /Marguerite the dress form, wearing a paper crown/ })).toBeInTheDocument();
+    const m = screen.getByRole('button', { name: /Marguerite the dress form/ });
+    for (let i = 0; i < 4; i++) fireEvent.keyDown(m, { key: 'ArrowUp' });
+    expect(screen.getByRole('button', { name: /wearing a paper crown/ })).toBeInTheDocument();
     expect(getWorldState().discoveries['dress-rehearsal']).toBeDefined();
+    fireEvent.keyDown(m, { key: 'ArrowUp' });
+    expect(useObjects.getState().attic.wearing).toBe('');
   });
 
   it('the diary reads back the visit; pages turn', () => {
     for (let i = 0; i < 6; i++) useKeepsakes.getState().note(`n${i}`, `Thing number ${i + 1} happened.`);
+    useObjects.getState().setSlice('attic', { dust: 'diary' });
     wrap(<Attic />);
     fireEvent.click(screen.getByRole('button', { name: 'Open the house diary' }));
     expect(screen.getByText(/Thing number 6 happened/)).toBeInTheDocument();
@@ -74,17 +88,5 @@ describe('<PullCord />', () => {
     fireEvent.click(screen.getByRole('button', { name: /cord hanging from the ceiling/ }));
     expect(useKeepsakes.getState().attic.unlocked).toBe(true);
     expect(screen.getByRole('link', { name: 'Up to the attic' })).toHaveAttribute('href', '/attic');
-  });
-});
-
-describe('<Attic /> keeps one of each hat', () => {
-  it('a hat already found does not come out of its box a second time', () => {
-    setWorldState(initialWorldState());
-    useObjects.getState().resetObjects();
-    useKeepsakes.getState().reset();
-    useKeepsakes.getState().addHat('topper');
-    const { container } = wrap(<Attic />);
-    for (let i = 0; i < 6; i++) fireEvent.click(screen.getByRole('button', { name: 'Open the next box' }));
-    expect(container.querySelectorAll('[data-kind="hat:topper"]')).toHaveLength(1);
   });
 });

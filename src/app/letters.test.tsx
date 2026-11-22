@@ -60,11 +60,10 @@ describe('Great-Aunt Pim’s letters', () => {
     expect(screen.getByRole('article')).toHaveTextContent('Muddy knees, P.');
   });
 
-  it('the attic’s last box holds one', () => {
+  it('the attic has one under the dust on the floor', () => {
     wrap(<Attic />);
-    for (let i = 0; i < 6; i++) fireEvent.click(screen.getByRole('button', { name: 'Open the next box' }));
+    for (let i = 0; i < 12; i++) fireEvent.click(screen.getByRole('button', { name: 'Dust the next thing' }));
     expect(useKeepsakes.getState().letters).toContain('attic');
-    expect(screen.getByText(/under everything, an envelope/)).toBeInTheDocument();
   });
 
   it('the mirror hands one over while the rainbow is out', () => {
