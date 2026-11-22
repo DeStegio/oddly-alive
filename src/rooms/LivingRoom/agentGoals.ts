@@ -3,19 +3,32 @@ import { Priority } from '../../engine/scheduler';
 import type { GoalControl, GoalDef } from '../../engine/agents/types';
 import type { ActorId, Expression } from '../../engine/types';
 import { DOT_PRIES, TICK_PUTS_BACK } from '../../content/button';
+import type { Place, PropId, PropPos, SpotTarget } from './incidents/stageProps';
 
-/** What the Living Room offers its agents: where things are, and Dot's legs. */
+/** What the Living Room offers its agents: where things are, Dot's legs, and the movable props. */
 export interface LivingStage {
   /** Where a named thing is on screen (client coordinates), if it's there. */
   rect(name: StageThing): DOMRect | null;
-  /** Send Dot somewhere; onArrive fires once on arrival. */
-  dotTo(target: StageThing, onArrive?: () => void): void;
+  /** Send Dot somewhere (a thing, or a point as stage fractions); onArrive fires once on arrival. */
+  dotTo(target: StageThing | { x: number; y: number }, onArrive?: () => void): void;
+  /** Dot stays where he is (no chasing the pointer) until sent somewhere or freed. */
+  dotHold(): void;
   /** Let Dot go back to following the visitor. */
   dotFree(): void;
-  /** Act on the button (Dot prying the glass, Tick putting it back). */
+  /** Where Dot is now, as stage fractions (clamped to the floor). */
+  dotPoint(): { x: number; y: number };
+  /** Act on the button (Dot prying the glass, Tick putting it back, Dot pressing it). */
   button(type: 'pry' | 'putBack' | 'press'): string;
+  /** The movable things: cushion, teacup, spotlight. */
+  props: {
+    get(id: PropId): PropPos;
+    move(id: PropId, place: Place, at?: { x: number; y: number }): void;
+    spot(on: boolean, target?: SpotTarget): void;
+    /** How long a prop has been out of place (ms; 0 if home). */
+    outFor(id: PropId): number;
+  };
 }
-export type StageThing = 'button' | 'picture' | 'pim' | 'lamp' | 'tick' | 'sofa' | 'cushion' | 'cup' | 'plant';
+export type StageThing = 'button' | 'picture' | 'pim' | 'dot' | 'lamp' | 'tick' | 'sofa' | 'cushion' | 'cup' | 'cushion-home' | 'cup-home' | 'plant';
 
 const LIVING = ['living'] as const;
 const centre = (r: DOMRect | null) => (r ? { x: r.left + r.width / 2, y: r.top + r.height / 2 } : null);
