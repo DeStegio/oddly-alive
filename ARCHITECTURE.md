@@ -76,6 +76,16 @@ No backend, accounts, analytics or 3D.
 13. **world.ts** — wires everything together once (`createWorld()`), owns the
     500 ms world tick, idle detection and page-visibility suspension.
 
+## Phase 3 additions
+
+- `engine/agents`: `types.ts` (needs, goals, perception, goal control), `model.ts` (need growth, scoring with novelty, `PropLocks`, session `AgentMemory`), `director.ts` (the `AgentDirector` world plugin), `cast.ts`. Rooms register goals and a *stage* (where things are, Dot's legs, the props).
+- `rooms/LivingRoom/button`: pure `buttonMachine.ts`, `buttonStore.ts` (session, restored from keepsakes), `ButtonActor.tsx`.
+- `rooms/LivingRoom/incidents`: `stageProps.ts` (cushion, cup, spotlight), `PropLayer.tsx` (positions from anchors every frame), `incidents.ts`.
+- `rooms/LivingRoom/InfiniteRooms`: `zoomController.ts` (maths, rebase), `sceneGenerator.ts` (seed + depth to room), `scenes.tsx` (eight rooms), `SceneView.tsx` (three levels drawn), `InfiniteRooms.tsx` (overlay, input), `LittleFrame.tsx`.
+- `rooms/Playground/volley`, `rooms/Garden/pollinators.ts` and `seedThief.ts`, `rooms/Attic/shadows`, `rooms/MoodRoom/WindowWeather.tsx` and `moodGoals.ts`, `rooms/AfterHours/instrument.ts`.
+- `app/continuity.ts`: bus events to diary lines and `story` keys (memory v3, additive).
+- Scheduler priority `INCIDENT` (35) for character-initiated scenes.
+
 ## React layer (`src`)
 
 - `app/` — router, shell, error boundary, scene transitions.

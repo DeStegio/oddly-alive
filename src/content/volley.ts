@@ -6,6 +6,7 @@ export const VOLLEY = {
   courtLabel: 'Back-Fence Volley: you are Dot. Left and right arrows move, Space or Enter swings (and serves). With a mouse, move and click; on a phone, touch where to go and tap to swing.',
   start: 'You’re Dot. Click (or tap, or press Space) to serve.',
   tapToServe: 'click to serve',
+  tapToServeTouch: 'tap to serve',
   served: 'served.',
   yourServe: 'your serve.',
   bipServes: 'Bip to serve.',
