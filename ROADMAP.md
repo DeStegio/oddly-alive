@@ -39,6 +39,24 @@ Planned and tracked in `PHASE_2_PLAN.md` (steps, branches, progress log).
 | 11 | Glue between rooms | done |
 | 12 | QA and docs | done |
 
+## Phase 3 — "The House Has a Mind of Its Own" (+ Infinite Rooms)
+
+Planned and tracked in `PHASE_3_REFINED_PLAN.md`.
+
+| Step | Scope | Status |
+| --- | --- | --- |
+| 3.0 | Baseline + refined plan | done |
+| 3.1 | Agent autonomy engine | done |
+| 3.2 | The button that fights back | done |
+| 3.3 | Living Room social incidents | done |
+| 3.4 | Infinite Rooms | done |
+| 3.5 | Back-Fence Volley | done |
+| 3.6 | Garden ecosystem | done |
+| 3.7 | Attic shadow theatre | done |
+| 3.8 | Reactive atmospheres | done |
+| 3.9 | Cross-room continuity | done |
+| 3.10–3.11 | Polish, QA, release | done |
+
 ## Phase 1 implementation plan
 
 1. `npm create vite` equivalent by hand (React + TS), strict `tsconfig`.

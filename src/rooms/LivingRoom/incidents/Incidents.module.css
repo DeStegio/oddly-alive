@@ -1,0 +1,91 @@
+/* The Living Room's movable things. The layer itself doesn't stack, so each
+   prop sits between the scenery pieces by its own z-index. */
+.layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.prop {
+  position: absolute;
+  left: 0;
+  top: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  pointer-events: auto;
+  cursor: grab;
+  touch-action: none;
+  will-change: transform;
+  z-index: 9;
+}
+.prop[data-prop='cup'] {
+  z-index: 8;
+}
+.prop[data-place='floor'] {
+  z-index: 10;
+}
+.prop[data-place='hidden'] {
+  z-index: 10;
+}
+.prop[data-place='dot'] {
+  z-index: 14;
+}
+.prop[data-dragging='true'] {
+  z-index: 20;
+  cursor: grabbing;
+  filter: drop-shadow(4px 6px 0 rgba(36, 35, 43, 0.25));
+}
+.prop:focus-visible {
+  outline: 3px solid var(--focus, var(--blue));
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+.svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+/* Lumen's spotlight: a soft cone and a pool you can drag */
+.cone {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 12;
+  animation: spot-in 500ms var(--ease-out) both;
+}
+.cone polygon {
+  fill: rgba(255, 228, 140, 0.32);
+}
+.pool {
+  position: absolute;
+  left: 0;
+  top: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(255, 238, 170, 0.6), rgba(255, 228, 140, 0.25) 70%, transparent);
+  pointer-events: auto;
+  cursor: grab;
+  touch-action: none;
+  z-index: 13;
+  animation: spot-in 500ms var(--ease-out) both;
+}
+.pool[data-dragging='true'] {
+  cursor: grabbing;
+}
+.pool:focus-visible {
+  outline: 3px dashed var(--focus, var(--blue));
+}
+@keyframes spot-in {
+  from {
+    opacity: 0;
+  }
+}
+[data-motion='reduced'] .cone,
+[data-motion='reduced'] .pool {
+  animation: none;
+}

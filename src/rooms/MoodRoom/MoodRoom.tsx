@@ -1,10 +1,10 @@
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { findLetter } from '../../app/letters';
 import { Link } from 'react-router-dom';
 import { sendNimbus } from '../../app/nimbusVisit';
 import { ROOMS, type RoomId } from '../../app/rooms';
 import { pinWeather, unpinWeather } from '../../app/weatherSync';
-import { useWorld } from '../../app/worldInstance';
+import { getAgents, useWorld } from '../../app/worldInstance';
 import { Dot, type DotMotion } from '../../characters/Dot';
 import { Nimbus } from '../../characters/Nimbus';
 import { useActor } from '../../characters/useActor';
@@ -21,6 +21,8 @@ import { Almanac } from './Almanac';
 import { Barometer } from './Barometer';
 import { MOOD_OBJECTS } from './MoodObjects';
 import { Weather } from './Weather';
+import { WindowWeather } from './WindowWeather';
+import { MOOD_GOALS } from './moodGoals';
 import styles from './MoodRoom.module.css';
 
 /** The window's scenery for a pinned weather (unpinned, the mood's own scenery is richer). */
@@ -56,6 +58,8 @@ export default function MoodRoom() {
   const dotMotion = useRef<DotMotion>({ follow: motion === 'full', home: { x: 0.12, y: 0.82 } });
   dotMotion.current.follow = motion === 'full';
   useSense('nimbus', nimbus.rootRef, 170, { stare: true });
+  // Nimbus has ideas of his own (breathing on the glass, the odd gust)
+  useEffect(() => getAgents().addGoals(...MOOD_GOALS), []);
 
   const use = (id: string) => (e: React.MouseEvent) => {
     useObjects.getState().setSlice('mood', { lastUsed: id, ...(id === 'tea' ? { teaPoured: moodState.teaPoured + 1 } : {}) });
@@ -126,6 +130,7 @@ export default function MoodRoom() {
         <div className={styles.window} data-weather={weather}>
           <Weather mood={scenery} starry={false} />
           {PARTICLES.has(weather) ? <WeatherLayer weather={weather} /> : null}
+          <WindowWeather world={world} weather={weather} roomRef={roomRef} />
           <div className={styles.mullion} aria-hidden="true" />
           {away ? null : (
             <div className={styles.nimbus}>

@@ -32,6 +32,7 @@ import { SPOTS, TALL, WIDE, inside, type AtticLayout, type Spot } from './layout
 import { HatSvg, MargueriteSvg } from './Marguerite';
 import { PhotoArt } from './Photos';
 import { Trunk } from './Trunk';
+import { ShadowTheatre } from './shadows/ShadowTheatre';
 import styles from './Attic.module.css';
 
 const pick = <T,>(xs: readonly T[]) => xs[Math.floor(Math.random() * xs.length)]!;
@@ -639,6 +640,7 @@ export default function Attic() {
           {clean.has('diary') ? <Diary onOpen={(n) => n >= 5 && world.effects.discover('dear-diary')} /> : null}
         </div>
       ) : null}
+      <ShadowTheatre world={world} onMarguerite={(l) => say(l)} />
     </section>
   );
 }

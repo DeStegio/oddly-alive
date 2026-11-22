@@ -357,3 +357,22 @@
     width: 42vw;
   }
 }
+
+/* the instrument: a star lights up while its note sounds (so it works with the sound off too) */
+.star[data-sounding='true'] span {
+  box-shadow: 0 0 0 6px rgba(245, 216, 115, 0.45), 0 0 26px 10px rgba(245, 216, 115, 0.7);
+  transform: scale(1.6);
+  transition: transform 120ms var(--ease-out), box-shadow 120ms;
+}
+.room[data-singing='true'] .moon {
+  filter: drop-shadow(0 0 28px rgba(245, 216, 115, 0.8));
+  animation: moon-hum 1.6s var(--ease-in-out) infinite alternate;
+}
+@keyframes moon-hum {
+  to {
+    transform: rotate(4deg) scale(1.03);
+  }
+}
+[data-motion='reduced'] .room[data-singing='true'] .moon {
+  animation: none;
+}

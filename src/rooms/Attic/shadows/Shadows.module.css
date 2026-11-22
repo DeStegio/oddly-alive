@@ -1,0 +1,181 @@
+/* The shadow theatre: a sheet on the attic wall, lit from below. */
+.section {
+  margin-top: var(--sp-7);
+}
+.title {
+  font-size: var(--fs-xl);
+}
+.stage {
+  position: relative;
+  margin-top: var(--sp-3);
+  width: 100%;
+  aspect-ratio: 800 / 450;
+  border: var(--stroke) solid #0f0d14;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: #2e2630;
+  box-shadow: 6px 8px 0 var(--shadow-ink);
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+/* the sheet: pegged up, with folds */
+.sheet {
+  position: absolute;
+  inset: 4% 3% 18% 3%;
+  background:
+    repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.05) 0 2px, transparent 2px 70px),
+    linear-gradient(#efe4cf, #e2d3b6);
+  border-top: 6px solid #8a5a3c;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+.glow {
+  position: absolute;
+  width: 70%;
+  aspect-ratio: 1.4;
+  translate: -50% -50%;
+  background: radial-gradient(closest-side, rgba(255, 236, 170, 0.55), transparent);
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+.shadows {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.prop {
+  position: absolute;
+  width: 8%;
+  aspect-ratio: 80 / 84;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: grab;
+  touch-action: none;
+  filter: drop-shadow(2px 3px 0 rgba(0, 0, 0, 0.35));
+}
+.prop:active {
+  cursor: grabbing;
+}
+.prop svg,
+.lamp svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.prop[data-selected='true'] {
+  outline: 2px dashed rgba(245, 216, 115, 0.8);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+.prop:focus-visible,
+.lamp:focus-visible {
+  outline: 3px solid var(--focus, var(--blue));
+  outline-offset: 3px;
+  border-radius: 8px;
+}
+.lamp {
+  position: absolute;
+  width: 7%;
+  aspect-ratio: 48 / 40;
+  translate: -50% -60%;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: grab;
+  touch-action: none;
+}
+/* creatures */
+.creature[data-creature='bird'] {
+  animation: fly-off 2.6s var(--ease-in-out) forwards;
+}
+@keyframes fly-off {
+  0% {
+    transform: scale(1);
+  }
+  20% {
+    transform: scale(1, 0.6);
+  }
+  35% {
+    transform: scale(1, 1.1);
+  }
+  100% {
+    transform: translate(260px, -220px) scale(0.6);
+    opacity: 0;
+  }
+}
+.creature[data-creature='rabbit'] {
+  animation: hop 0.65s var(--ease-out) 4 alternate;
+}
+@keyframes hop {
+  to {
+    transform: translateY(-26px);
+  }
+}
+.creature[data-creature='cat'] {
+  animation: chase 2.6s var(--ease-in) forwards;
+}
+.bunnyRun {
+  animation: chase 2.6s var(--ease-in) forwards;
+  animation-delay: -0.3s;
+}
+@keyframes chase {
+  40% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-420px);
+  }
+}
+.creature[data-creature='dragon'] {
+  animation: roar 0.8s var(--ease-in-out) 3 alternate;
+  transform-origin: -20px 0;
+}
+@keyframes roar {
+  to {
+    transform: rotate(-8deg) scale(1.08);
+  }
+}
+.puff {
+  animation: puff 0.8s var(--ease-out) 3;
+}
+@keyframes puff {
+  from {
+    transform: scale(0.3);
+    opacity: 0.7;
+  }
+  to {
+    transform: translateX(40px) scale(2.4);
+    opacity: 0;
+  }
+}
+.creature[data-creature='curtsy'] {
+  animation: curtsy 1.3s var(--ease-in-out) 2 alternate;
+}
+@keyframes curtsy {
+  to {
+    transform: translateY(14px) rotate(-12deg);
+  }
+}
+.under {
+  margin-top: var(--sp-2);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-2) var(--sp-4);
+}
+.line {
+  flex: 1;
+  min-width: 18ch;
+  font-family: var(--font-display);
+  font-style: italic;
+  color: var(--ink-soft);
+}
+[data-motion='reduced'] .creature,
+[data-motion='reduced'] .bunnyRun,
+[data-motion='reduced'] .puff {
+  animation: none !important;
+}

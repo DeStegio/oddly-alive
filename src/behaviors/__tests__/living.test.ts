@@ -47,19 +47,15 @@ describe('living room behaviors', () => {
     expect(fired()).toContain('pim.click.suspicious:preempted');
   });
 
-  it('the do-not-press button protests, gives up, then sets off a chain reaction', () => {
+  it('five presses of the button set off a chain reaction and a discovery', () => {
     const { world, fired, advance } = setup();
     const press = () => {
       useObjects.getState().setLiving((s) => ({ buttonPresses: s.buttonPresses + 1 }));
       world.emit('OBJECT_CLICKED', { target: 'button', repeat: 1, via: 'pointer' });
       advance(2500);
     };
-    press(); // presses = 1
-    expect(fired().some((f) => f.startsWith('button.protest'))).toBe(true);
-    press();
-    press();
-    press(); // presses = 4
-    expect(fired().some((f) => f.startsWith('button.giveup'))).toBe(true);
+    for (let i = 0; i < 4; i++) press();
+    expect(fired().some((f) => f.startsWith('button.chain'))).toBe(false);
     press(); // presses = 5
     expect(fired().some((f) => f.startsWith('button.chain'))).toBe(true);
     expect(getWorldState().discoveries.button).toBeDefined();

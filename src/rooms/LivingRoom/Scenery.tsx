@@ -9,8 +9,10 @@ const INK = {
   strokeLinejoin: 'round' as const,
 };
 
-export function Sofa() {
+/** The sofa. Its cushion is a separate, movable thing (see incidents/PropLayer); this marks where it lives. */
+export function Sofa({ cushionRef }: { cushionRef?: React.Ref<HTMLSpanElement> }) {
   return (
+    <>
     <svg viewBox="0 0 420 190" className={styles.fill} aria-hidden="true">
       <rect x="40" y="168" width="10" height="20" rx="3" fill="var(--char-ink)" />
       <rect x="370" y="168" width="10" height="20" rx="3" fill="var(--char-ink)" />
@@ -42,19 +44,22 @@ export function Sofa() {
         fill="color-mix(in srgb, var(--coral) 80%, #a8402d)"
         {...INK}
       />
-      <path
-        d="M300 64 Q 296 44 316 40 L 350 36 Q 362 36 362 50 L 360 104 L 304 106 Z"
-        fill="var(--yellow)"
-        {...INK}
-      />
-      <path
-        d="M318 58 l 22 -3 M316 72 l 24 -2 M316 86 l 24 -2"
-        stroke="var(--char-ink)"
-        strokeWidth="2"
-        opacity="0.4"
-        strokeLinecap="round"
-      />
     </svg>
+    <span ref={cushionRef} className={styles.cushionHome} aria-hidden="true" />
+    </>
+  );
+}
+
+/** A little round side table; the teacup lives on it. */
+export function SideTable({ cupRef }: { cupRef?: React.Ref<HTMLSpanElement> }) {
+  return (
+    <>
+      <svg viewBox="0 0 80 90" className={styles.fill} aria-hidden="true">
+        <path d="M40 22 V 86 M24 86 H 56" stroke="var(--char-ink)" strokeWidth="4" strokeLinecap="round" />
+        <ellipse cx="40" cy="20" rx="36" ry="9" fill="#b98a5e" {...INK} />
+      </svg>
+      <span ref={cupRef} className={styles.cupHome} aria-hidden="true" />
+    </>
   );
 }
 

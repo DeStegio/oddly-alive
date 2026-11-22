@@ -23,14 +23,19 @@ There is no goal, score, tutorial or chatbot. The activity is the website itself
 
 | | |
 | --- | --- |
-| **Living Room**: Pim the shy blob, Dot the follower, Lumen the lamp, Tick the clock, Ferdinand the fern, a dust bunny and a do-not-press button. Scroll down for how the house works, and a creaky floorboard. | ![Living Room on a phone](docs/screenshots/mobile-living-room.png) |
-| **Playground**: Matter.js shapes with faces. They have momentum, stack and collide, and the room opens with a ramp-and-domino chain reaction. Throw something hard enough and it leaves the tray: over the fence, Bip runs under it and volleys it back, so you can keep a rally going. Field Notes keep score. | ![Playground](docs/screenshots/playground.png) |
-| **Mood Room**: a tall window onto the house weather. Six objects on the sill nudge the mood; a barometer pins the weather for a few minutes (rain on every window, wind in the Playground, snow on the shapes); Nimbus keeps an almanac and can be sent to rain on another room. | ![Mood Room](docs/screenshots/mood-room.png) |
+| **Living Room**: Pim the shy blob, Dot the follower, Lumen the lamp, Tick the clock, Ferdinand the fern, a dust bunny, and characters with plans of their own: Tick straightens the crooked portrait, Dot pinches the sofa cushion or Pim's teacup (put them back, or don't), Lumen stages a spotlight show. The do-not-press button has feelings: go at it and it builds a glass box over itself; lift the glass once it has calmed down, loosen its bolts, wait it out, or ask Dot. A very small painting on the wall is of this room: zoom into it for **Infinite Rooms**, a seemingly endless run of impossible living rooms, each with a way into the next. | ![Living Room on a phone](docs/screenshots/mobile-living-room.png) |
+| **Playground**: Matter.js shapes with faces. They have momentum, stack and collide, and the room opens with a ramp-and-domino chain reaction. Throw something hard enough and it leaves the tray: over the fence, Bip volleys it back. Further down, **Back-Fence Volley**: you are Dot, Bip is over the fence; timing your swing shapes the shot; play with a ball, a balloon, a radish, a soft cube or (once the attic is found) a slipper. Field Notes keep score. | ![Playground](docs/screenshots/playground.png) |
+| **Mood Room**: a tall window onto the house weather. Six objects on the sill nudge the mood; a barometer pins the weather; and the weather has consequences: rain and tea steam the window up (draw in it), wind takes the papers off the sill, snow and the blanket make Nimbus a tent, a rainbow and the mirror throw colour round the room. Nimbus breathes on the glass and blows the odd gust himself. | ![Mood Room](docs/screenshots/mood-room.png) |
 | **Secret Space**: a dark cabinet lit by a torch that follows your pointer. It shows every secret, with optional hints, plus a chest, a token puzzle and invisible ink. | ![Secret Space](docs/screenshots/secret-space.png) |
 | **Memory Room**: everything the house remembers about this browser: visits, secrets, favourite things to poke and a silly nickname. It also has Reset Session, Reset World and Forget me. | ![Memory Room](docs/screenshots/memory-room.png) |
-| **After Hours**: a rooftop at night with a moon that's too close, stars you can connect, a radio, and a porch light that attracts a moth. A manual night switch themes the whole house. | ![After Hours](docs/screenshots/after-hours.png) |
-| **Garden**: you are the sun. Move over the sky and the light follows: plants grow where it falls, lean after it, and their shadows swing round; sink it behind the fence for night, fireflies and moonflowers. Draw shapes in the soil to plant (a line, a circle, a zigzag, a crescent, a spiral), swipe across anything ripe to pick it. Strong sun dries the beds, so draw a cloud in the sky for rain; rain opposite the sun makes a rainbow. | ![Garden](docs/screenshots/garden.png) |
-| **Attic**: up a ladder from the Living Room, under years of dust. Rub it off and dust bunnies run for whatever dust is left. Keep still over a clean photograph and it remembers one of Great-Aunt Pim's stories, with a number in pencil on the back; the trunk's lock wants all three. The wheel changes Marguerite's hat, the record plays while you turn it, and something is lying on the floor. | ![Attic](docs/screenshots/attic.png) |
+| **After Hours**: a rooftop at night with a moon that's too close, a radio, a porch light and a moth. The stars are an instrument: every star has a note, and a constellation plays as a tune (the stars light as they sound, so it works with the sound off). | ![After Hours](docs/screenshots/after-hours.png) |
+| **Garden**: you are the sun. Move over the sky and the light follows: plants grow where it falls, lean after it, and their shadows swing round; sink it behind the fence for night, fireflies and moonflowers. Draw shapes in the soil to plant (a line, a circle, a zigzag, a crescent, a spiral), swipe across anything ripe to pick it. Strong sun dries the beds, so draw a cloud in the sky for rain; rain opposite the sun makes a rainbow. Bees and a butterfly carry pollen from flower to flower and sometimes cross them into a new variety for the vase; Crumb the sparrow comes for newly planted seeds. | ![Garden](docs/screenshots/garden.png) |
+| **Attic**: up a ladder from the Living Room, under years of dust. Rub it off and dust bunnies run for whatever dust is left. Keep still over a clean photograph and it remembers one of Great-Aunt Pim's stories, with a number in pencil on the back; the trunk's lock wants all three. The wheel changes Marguerite's hat, the record plays while you turn it, and something is lying on the floor. By the old sheet, a **shadow theatre**: a lamp and things to hold up to it; some shapes come alive. | ![Attic](docs/screenshots/attic.png) |
+
+Phase 3 in pictures (the button behind its glass, Infinite Rooms, Back-Fence Volley, the shadow theatre):
+
+![The button behind glass](docs/screenshots/button-glass.png) ![Infinite Rooms](docs/screenshots/infinite-rooms.png)
+![Back-Fence Volley](docs/screenshots/volley.png) ![Shadow theatre](docs/screenshots/shadow-theatre.png)
 
 You can share any scene as a link or as a generated postcard:
 
@@ -49,8 +54,13 @@ You can share any scene as a link or as a generated postcard:
 - Draw a crescent in the Garden soil, sink the sun, and lead the fireflies to it.
 - In the attic, keep very still in front of a photograph. Spin the record backwards.
 - Look up in the Living Room once you have found a few things.
+- Press the button three times, quickly. Then wait. Or don't.
+- Leave the Living Room alone for a minute and watch.
+- Zoom into the very small painting next to the clock. Keep going; check the clocks.
+- Cross your two hands in front of the attic lamp.
+- Join five stars after hours, with the sound on.
 
-There are 47 secrets and eight letters. None of them is required for anything.
+There are 67 secrets and eight letters. None of them is required for anything.
 
 ## How it works
 

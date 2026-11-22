@@ -223,3 +223,17 @@ Added in Phase 2 (`PHASE_2_PLAN.md`). Same legend as above.
 | INT-142 | Throw a hat onto Marguerite | implemented | `Attic.tsx`, `HEAD` sensor | Checked in Chromium |
 | INT-143 | Record plays only while turned by hand; backwards works | verified | `Attic/spin.ts`, `Gramophone.tsx` | T: `spin.test.ts` |
 | INT-136 | Copy lint keeps the voice human | verified | `content/__tests__/copy.test.ts`, `VOICE.md` | T: `copy.test.ts` |
+| INT-150 | Characters act on their own (Tick straightens, Dot presses, Pim dozes, Lumen shows off, Ferdinand leans) | verified | `engine/agents`, `LivingRoom/agentGoals.ts` | T: `director.test.ts`, `agentGoals.test.ts`; E2E |
+| INT-151 | The button escalates and builds a glass shield | verified | `LivingRoom/button` | T: `buttonMachine.test.ts`, `LivingRoom.test.tsx`; E2E |
+| INT-152 | Lift the glass, loosen bolts, wait, or ask Dot (Tick puts it back) | verified | `buttonMachine.ts`, `ButtonActor.tsx`, `dot.pry-glass` | T + E2E |
+| INT-153 | Sofa incident (cushion) | verified | `incidents/incidents.ts`, `PropLayer.tsx` | T: `incidents.test.ts`; E2E |
+| INT-154 | Stolen teacup incident | verified | same | T + E2E |
+| INT-155 | Spotlight drama | verified | same | T + E2E |
+| INT-156 | Infinite Rooms: into the little painting, room after room, home | verified | `LivingRoom/InfiniteRooms` | T: `zoom.test.ts`; E2E incl. 100 transitions; axe |
+| INT-157 | Back-Fence Volley (Dot vs Bip, timed hits, five materials) | verified | `Playground/volley` | T: `model.test.ts`; E2E |
+| INT-158 | Pollinators cross flowers into hybrids for the vase | verified | `Garden/pollinators.ts` | T: `ecosystem.test.ts`; E2E |
+| INT-159 | Crumb the sparrow (shoo, follow, let go) | verified | `Garden/seedThief.ts` | T + E2E |
+| INT-160 | Shadow theatre and its creatures | verified | `Attic/shadows` | T: `geometry.test.ts`; E2E |
+| INT-161 | Mood Room weather consequences (steam, scraps, tent, colour) | verified | `MoodRoom/WindowWeather.tsx`, `moodGoals.ts` | E2E (steam, scraps) |
+| INT-162 | Constellation instrument | verified | `AfterHours/instrument.ts` | T: `instrument.test.ts`; E2E |
+| INT-163 | The house remembers (diary, story, callbacks, button trust across visits) | verified | `app/continuity.ts` | T: `continuity.test.ts`; E2E |

@@ -20,6 +20,12 @@ export interface DotMotion {
   onFrenzy?: () => void;
   /** Called when Dot starts re-tracing the pointer's recent path (INT-010). */
   onMimic?: () => void;
+  /**
+   * Somewhere Dot has decided to go (an agent goal): a point in client
+   * coordinates, read every frame so it can follow a moving prop. Beats
+   * following the pointer. onArrive fires once, when Dot gets there.
+   */
+  errand?: { target: () => { x: number; y: number } | null; onArrive?: () => void; arrived?: boolean } | null;
 }
 
 interface DotProps {
@@ -90,8 +96,10 @@ export function Dot({
       const pointerInBounds = px >= 0 && py >= 0 && px <= rect.width && py <= rect.height;
       const recentlyMoved = now - pointer.lastMove < 3500;
       // touch pointers are not followed: on phones Dot stays put and tappable
+      const errand = m.errand ?? null;
+      const goal = errand ? errand.target() : null;
       const following =
-        m.follow && pointer.active && pointer.inside && pointer.kind !== 'touch' && pointerInBounds && recentlyMoved;
+        !goal && m.follow && pointer.active && pointer.inside && pointer.kind !== 'touch' && pointerInBounds && recentlyMoved;
       // while following, Dot must never intercept the clicks meant for what's under the pointer
       if (following !== wasFollowing) {
         wasFollowing = following;
@@ -119,6 +127,14 @@ export function Dot({
         ty = p.y + mimic.oy * 0.3;
         mimic.i += dt / 16;
       }
+      if (goal) {
+        tx = goal.x - rect.left;
+        ty = goal.y - rect.top;
+        if (errand && !errand.arrived && Math.hypot(tx - x, ty - y) < 16) {
+          errand.arrived = true;
+          errand.onArrive?.();
+        }
+      }
       if (following) {
         // orbit politely: keep ~70px away, drifting around the pointer
         // ...and every so often, try to catch it (INT-014)
@@ -135,7 +151,7 @@ export function Dot({
         x = tx;
         y = ty;
       } else {
-        const k = following ? 0.0009 : 0.0005;
+        const k = following ? 0.0009 : goal ? 0.0011 : 0.0005;
         const damping = 0.86;
         vx = (vx + (tx - x) * k * dt) * damping;
         vy = (vy + (ty - y) * k * dt) * damping;

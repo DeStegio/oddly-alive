@@ -82,9 +82,18 @@ export interface WorldMemory {
   /** Personal bests (best rally, tallest tower, …). */
   records: Record<string, number>;
   attic: { unlocked: boolean; hats: string[] };
+  /**
+   * Phase 3 (additive, still v3): when notable things last happened (an
+   * incident, a shadow creature, a long rally), so characters can bring
+   * them up later. Keys only, no detail; at most MAX_STORY of them.
+   */
+  story: Record<string, number>;
+  /** How the Living Room button feels about you, between visits. */
+  button: { trust: number; suspicion: number };
 }
 
 export const GARDEN_PLOTS = 6;
+export const MAX_STORY = 24;
 export const MAX_DIARY = 40;
 
 export function emptyWorldMemory(): WorldMemory {
@@ -95,6 +104,8 @@ export function emptyWorldMemory(): WorldMemory {
     diary: [],
     records: {},
     attic: { unlocked: false, hats: [] },
+    story: {},
+    button: { trust: 0.35, suspicion: 0 },
   };
 }
 
@@ -221,6 +232,19 @@ export function cleanWorld(v: unknown): WorldMemory {
     );
   }
   if (isObj(v.attic)) w.attic = { unlocked: v.attic.unlocked === true, hats: cleanIds(v.attic.hats, 8) };
+  // Phase 3 additions: missing in older saves, so they simply start empty
+  if (isObj(v.story)) {
+    w.story = Object.fromEntries(
+      Object.entries(v.story)
+        .filter(([k, t]) => ID_PATTERN.test(k) && isNat(t))
+        .sort((a, b) => (b[1] as number) - (a[1] as number))
+        .slice(0, MAX_STORY),
+    ) as Record<string, number>;
+  }
+  if (isObj(v.button)) {
+    const unit = (n: unknown, d: number) => (typeof n === 'number' && Number.isFinite(n) ? Math.max(0, Math.min(1, n)) : d);
+    w.button = { trust: unit(v.button.trust, 0.35), suspicion: unit(v.button.suspicion, 0) };
+  }
   return w;
 }
 

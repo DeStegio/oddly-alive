@@ -1,0 +1,20 @@
+.frame {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: zoom-in;
+  transform: rotate(2deg);
+  transition: transform 260ms var(--ease-spring);
+  filter: drop-shadow(3px 3px 0 var(--shadow-ink));
+}
+.frame:hover,
+.frame:focus-visible {
+  transform: rotate(-1deg) scale(1.08);
+}
+.svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}

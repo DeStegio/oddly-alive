@@ -5,6 +5,8 @@ export const Priority = {
   RARE: 10,
   AMBIENT: 20,
   CHARACTER: 30,
+  /** Character-initiated scenes (agents): above everyday character reactions, below the visitor. */
+  INCIDENT: 35,
   DIRECT: 40,
   SAFETY: 50,
 } as const;

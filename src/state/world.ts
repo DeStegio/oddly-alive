@@ -22,6 +22,8 @@ export interface LivingObjects {
   gossip: string;
   /** Flowers from the garden arrived on the windowsill and nobody's remarked on them yet. */
   vaseNew: boolean;
+  /** What the button is up to (calm, wary, shielded…); agents read it. */
+  buttonMode: string;
 }
 
 export interface MoodObjects {
@@ -88,6 +90,7 @@ export const OBJECT_DEFAULTS: ObjectsState = {
     pimForm: 0,
     gossip: '',
     vaseNew: false,
+    buttonMode: 'calm',
   },
   mood: { lastUsed: '', teaPoured: 0, napping: false, mirrorLooks: 0 },
   secret: { slots: '', chestOpen: false, candleLit: false, keyFound: false },

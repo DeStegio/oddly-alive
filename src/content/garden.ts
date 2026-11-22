@@ -60,5 +60,12 @@ export const GARDEN_LINES = {
   rain: ['oh, proper rain. lovely.', 'there. that’ll soak in.'],
   bipRainbow: ['a rainbow! I’ve only ever read about those.', 'look over here. no, higher. a rainbow.'],
   snap: ['the snapdragon’s after the fireflies again.', 'leave them be, you.'],
+  cross: ['the bees have been mixing things. look at that one.', 'pollen everywhere. something new is coming.'],
+  hybrid: ['that’s not any flower I know. into the vase.', 'half one thing, half the other. Pim would love it.'],
+  thiefTook: ['the sparrow’s got your seed!', 'oi. that was planted.'],
+  thiefShooed: ['off you go, Crumb.', 'seed’s safe. sparrow’s sulking.'],
+  thiefDropped: ['it dropped it. not where you put it, mind.', 'there. replanted, by a sparrow.'],
+  bipSparrow: ['a sparrow just dropped a seed in my garden. beep.', 'something’s been planted over here. not by me.'],
+  thiefLabel: 'Crumb the sparrow, after your seed. Press to shoo it, or to make it drop the seed.',
   bipMorning: ['morning again. that was quick.', 'you put the sun back. thank you.'],
 } as const;
