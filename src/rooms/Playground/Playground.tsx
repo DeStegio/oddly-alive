@@ -19,6 +19,7 @@ import { goalsDone, type GoalId, type PileStats } from './goals';
 import { NextDoor, type NextDoorHandle } from './NextDoor';
 import { CALM, EJECT_SPEED, GRAVITY, MAX_BODIES, PlaygroundSim, SHAPES, defaultLayout, type Environment, type ShapeKind } from './physics';
 import { ShapeView } from './ShapeView';
+import { VolleyCourt } from './volley/VolleyCourt';
 import { encodeArrangement, readSharedArrangement } from './share';
 import { setArrangementProvider } from '../../app/share';
 import styles from './Playground.module.css';
@@ -873,6 +874,8 @@ export default function Playground() {
         motion={dotMotion}
         onActivate={() => world.emit('OBJECT_CLICKED', { target: 'dot', repeat: 1, via: 'pointer' })}
       />
+      {/* on the court Dot is you: the wandering Dot stays out of it */}
+      <VolleyCourt onActive={(on) => (dotMotion.current.follow = !on && motion === 'full')} />
     </section>
   );
 }
