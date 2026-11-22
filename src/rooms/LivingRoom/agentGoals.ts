@@ -97,7 +97,7 @@ export const LIVING_GOALS: GoalDef[] = [
     id: 'dot.pry-glass',
     actor: 'dot',
     // asked for by the visitor sometimes, so it outranks Dot's idle plans
-    priority: Priority.CHARACTER,
+    priority: Priority.INCIDENT,
     cast: ['tick'],
     rooms: LIVING,
     kind: 'ambient',
