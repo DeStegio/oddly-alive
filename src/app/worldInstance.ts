@@ -5,6 +5,7 @@ import { SurpriseDirector } from '../engine/surpriseDirector';
 import { AgentDirector } from '../engine/agents/director';
 import { CAST } from '../engine/agents/cast';
 import { useButton } from '../rooms/LivingRoom/button/buttonStore';
+import { continuity } from './continuity';
 import { World } from '../engine/world';
 import { setWorldState } from '../state/worldStore';
 import { readInitialSeed } from './share';
@@ -27,6 +28,8 @@ export function getWorld(): World {
     agents = new AgentDirector(createRng(world.seed ^ 0xa9e7));
     agents.addAgents(...CAST);
     world.use(agents);
+    // the house remembers what happened (diary, story, callbacks)
+    world.use(continuity);
     // a reset makes peace with the button too
     world.bus.on('WORLD_RESET', () => useButton.getState().reset(world.clock.now()));
     instance = world;
