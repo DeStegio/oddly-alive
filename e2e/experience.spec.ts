@@ -463,3 +463,52 @@ test.describe('Infinite Rooms', () => {
     await expect(dlg).toHaveCount(0, { timeout: 3000 });
   });
 });
+
+test.describe('Back-Fence Volley', () => {
+  test('serve straight away; a point gets scored; the ball can be swapped between points', async ({ page }) => {
+    await page.goto('./#/playground');
+    const court = page.getByRole('group', { name: /Back-Fence Volley/ });
+    await court.scrollIntoViewIfNeeded();
+    await court.focus();
+    await page.keyboard.press('Space');
+    await expect(page.locator('#volley-line')).toHaveText('served.');
+    // nobody swings: the point goes somewhere within a few seconds
+    await expect(page.locator('#volley-line')).not.toHaveText('served.', { timeout: 8000 });
+    const balloon = page.getByRole('group', { name: 'What to play with' }).getByRole('button', { name: 'Balloon', exact: true });
+    await expect(balloon).toBeEnabled({ timeout: 4000 });
+    await balloon.click();
+    await expect(balloon).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  test('swinging under the ball keeps a rally going', async ({ page }) => {
+    test.skip(test.info().project.name !== 'desktop');
+    test.setTimeout(100_000);
+    await page.goto('./#/playground');
+    const court = page.getByRole('group', { name: /Back-Fence Volley/ });
+    await court.scrollIntoViewIfNeeded();
+    const box = (await court.boundingBox())!;
+    await court.click({ position: { x: 150, y: 200 } });
+    let best = 0;
+    // a scripted (imperfect) player against a random Bip: give it time, stop as soon as it works
+    for (let i = 0; i < 900 && best < 2; i++) {
+      const s = await page.evaluate(() => {
+        const b = document.querySelector('section[aria-labelledby="volley-title"] [data-material]') as HTMLElement;
+        const d = document.querySelector('section[aria-labelledby="volley-title"] [data-swing]') as HTMLElement;
+        const rb = b.getBoundingClientRect();
+        const rd = d.getBoundingClientRect();
+        const rally = document.querySelector('section[aria-labelledby="volley-title"] p[aria-live]')?.textContent?.match(/rally (\d+)/)?.[1];
+        return { bx: rb.left + rb.width / 2, by: rb.top + rb.height / 2, dx: rd.left + rd.width / 2, dy: rd.top, rally: Number(rally ?? 0) };
+      });
+      best = Math.max(best, s.rally);
+      if (s.bx < box.x + box.width / 2) {
+        await page.mouse.move(s.bx - 10, box.y + box.height * 0.6);
+        if (Math.hypot(s.bx - s.dx, s.by - s.dy) < box.width * 0.09) {
+          await page.mouse.down();
+          await page.mouse.up();
+        }
+      }
+      await page.waitForTimeout(25);
+    }
+    expect(best).toBeGreaterThanOrEqual(2);
+  });
+});
