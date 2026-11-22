@@ -551,3 +551,19 @@ test('the living garden: bees cross two flowers into a hybrid; Crumb the sparrow
   await page.keyboard.press('Enter');
   await expect(crumb).toHaveCount(0, { timeout: 5000 });
 });
+
+test('the shadow theatre: two hands make a bird; a hand turned upright, a rabbit (keyboard)', async ({ page }) => {
+  await page.goto('./#/attic');
+  const stage = page.locator('section[aria-labelledby="shadow-title"] [data-alive]');
+  await stage.scrollIntoViewIfNeeded();
+  const L = page.getByRole('button', { name: /^Left hand/ });
+  const R = page.getByRole('button', { name: /^Right hand/ });
+  // bring the right hand over to the left one, from the keyboard (works the same on a phone)
+  await R.focus();
+  for (let i = 0; i < 12 && !(await stage.getAttribute('data-alive')); i++) await page.keyboard.press('ArrowLeft');
+  await expect(stage).toHaveAttribute('data-alive', 'bird', { timeout: 3000 });
+  await expect(stage).toHaveAttribute('data-alive', '', { timeout: 5000 });
+  await L.focus();
+  for (let i = 0; i < 6; i++) await page.keyboard.press('q');
+  await expect(stage).toHaveAttribute('data-alive', 'rabbit', { timeout: 4000 });
+});
