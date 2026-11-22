@@ -88,7 +88,8 @@ export function stepBugs(bugs: Bug[], flowers: Flower[], env: Env, now: number, 
   const visits: Visit[] = [];
   const s = dt / 1000;
   const next = bugs.map((b, i) => {
-    let { x, y, vx, vy, target, carrying, restUntil } = b;
+    let { x, y, vx, vy, target } = b;
+    const { carrying, restUntil } = b;
     const phase = b.phase + s * (b.kind === 'bee' ? 9 : 5);
     let goal: { x: number; y: number };
     if (env.night) goal = { x: env.w * 0.04, y: env.h * 0.3 }; // home to the hive by the house
