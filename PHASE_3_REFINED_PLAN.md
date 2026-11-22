@@ -225,6 +225,15 @@ Memory v4 (additive): `agents` (few notable outcomes), `button` (trust),
 
 ---
 
+### 3.4 Infinite Rooms — creative spec (as built)
+
+- **Entry**: a very small painting on the Living Room wall, of the Living Room. Press it, or scroll up over it; the first room grows out of the painting's own rectangle.
+- **Rooms** (1000×625 each, ink + cut paper): Upside Down (portal: the bottom of a glass), Paper (an origami fold), Underwater (a bubble), Impossible (a window), Wrong Scale (a keyhole in a giant door), Forgotten Gravity (a floating clock), Clock Room (a big dial), and every 9th room **Nearly Home** (the Living Room, but the clock has no hands, the lamp shines up, Pim's portrait looks away, Dot on the sofa watching the little painting).
+- **Variation**: seeded mirror, accent, wobble; cameos (Dot, Pim peeking, Inch, a dust bunny); déjà vu (a picture of the room you just left); rarely, Dot zips across a room ahead of you.
+- **Seamless**: the next room is drawn inside the portal (clipped to its shape, the clip opening as you arrive), and the one after inside that; the frame around the portal fades in the last quarter; at p = 1 the next room fills the screen exactly and becomes the room you're in at p = 0.
+- **Controls**: wheel and pinch (only inside the mode), + / − buttons, keys + − ↑ ↓ PageUp/Down, Esc / Home; pressing the portal goes through it. Reduced motion: each step is a crossfade. Zooming out of the first room shrinks back into the painting.
+- **Limits**: three rooms drawn at most; scale rebased every room; rooms rebuilt from seed + depth (no history list).
+
 ## 4. Rules everywhere
 
 Body before words (lines short, rare); quiet periods; ≤1 incident at a time;
