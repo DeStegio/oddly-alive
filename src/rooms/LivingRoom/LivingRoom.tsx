@@ -14,7 +14,6 @@ import { useCharacter } from '../../characters/useCharacter';
 import { useCircleDetector, useSense } from '../../characters/useSense';
 import { LivingTitle } from '../../components/LivingTitle';
 import { ScrollThread } from '../../components/ScrollThread';
-import { LINES } from '../../content/lines';
 import { useSettings } from '../../state/settings';
 import { useObjects } from '../../state/world';
 import { useWorldStore } from '../../state/worldStore';
@@ -23,7 +22,8 @@ import { ROOMS } from '../../app/rooms';
 import { Basement } from './Basement';
 import { HouseWindow } from './HouseWindow';
 import { PullCord } from './PullCord';
-import { DoNotPress, Door, Picture, Rug, Sofa } from './Scenery';
+import { Door, Picture, Rug, Sofa } from './Scenery';
+import { ButtonActor, type ButtonApi } from './button/ButtonActor';
 import { LIVING_GOALS, type LivingStage, type StageThing } from './agentGoals';
 import styles from './LivingRoom.module.css';
 
@@ -59,6 +59,7 @@ export default function LivingRoom() {
   const plant = useActor('ferdinand');
   const button = useActor('button');
   const picture = useCharacter('picture', 'neutral');
+  const buttonApi = useRef<ButtonApi | null>(null);
 
   const [marks, setMarks] = useState<Mark[]>([]);
   const markSeq = useRef(0);
@@ -112,6 +113,7 @@ export default function LivingRoom() {
       dotFree: () => {
         motionRef.current.errand = null;
       },
+      button: (type) => buttonApi.current?.(type === 'press' ? { type, rng: Math.random() } : { type }) ?? 'none',
     };
     const off = director.setStage('living', stage);
     return () => {
@@ -168,8 +170,6 @@ export default function LivingRoom() {
     }
   };
 
-  const buttonLabel =
-    LINES.buttonLabels[Math.min(living.buttonPresses, LINES.buttonLabels.length - 1)] ?? 'do not press';
 
   return (
     <>
@@ -284,18 +284,7 @@ export default function LivingRoom() {
             />
           </div>
           <div className={`${styles.prop} ${styles.button}`}>
-            <DoNotPress
-              label={buttonLabel}
-              pressed={living.buttonPresses}
-              cooperative={living.buttonPresses >= LINES.buttonLabels.length - 2}
-              rootRef={button.rootRef}
-              thought={button.thought}
-              onPress={() => {
-                setLiving((s) => ({ buttonPresses: s.buttonPresses + 1 }));
-                world.emit('OBJECT_CLICKED', { target: 'button', repeat: living.buttonPresses + 1, via: 'pointer' });
-                world.effects.sound('press');
-              }}
-            />
+            <ButtonActor world={world} rootRef={button.rootRef} thought={button.thought} apiRef={buttonApi} />
           </div>
           <div className={`${styles.prop} ${styles.plant}`}>
             <Plant
@@ -317,7 +306,12 @@ export default function LivingRoom() {
           gaze={dot.gaze}
           boundsRef={roomRef}
           motion={dotMotion}
-          onActivate={click('dot')}
+          onActivate={() => {
+            const director = getAgents();
+            const pry = director.goal('dot.pry-glass');
+            if (useObjects.getState().living.buttonMode === 'shielded' && pry && !director.isRunning(pry.id) && director.start(pry, world)) return;
+            click('dot')();
+          }}
         />
 
         {living.rearranged ? (
