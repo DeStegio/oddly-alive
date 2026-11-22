@@ -55,8 +55,10 @@ export interface PlaygroundObjects {
 }
 
 export interface AtticObjects {
-  /** Comma-separated ids of the boxes opened. */
+  /** Comma-separated things done up here: 'trunk', 'mem:sea', 'bunnies', 'letter'… */
   opened: string;
+  /** Comma-separated places dusted clean (photos, Marguerite, the trunk…). */
+  dust: string;
   /** The hat Marguerite has on ('' for none). */
   wearing: string;
   /** Comma-separated hats she has worn this visit. */
@@ -91,7 +93,7 @@ export const OBJECT_DEFAULTS: ObjectsState = {
   secret: { slots: '', chestOpen: false, candleLit: false, keyFound: false },
   after: { radioOn: false, lightOn: false, constellations: 0 },
   playground: { goals: '', radishes: 0 },
-  attic: { opened: '', wearing: '', worn: '' },
+  attic: { opened: '', dust: '', wearing: '', worn: '' },
 };
 
 type SliceKey = keyof ObjectsState;

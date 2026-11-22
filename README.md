@@ -29,8 +29,8 @@ There is no goal, score, tutorial or chatbot. The activity is the website itself
 | **Secret Space**: a dark cabinet lit by a torch that follows your pointer. It shows every secret, with optional hints, plus a chest, a token puzzle and invisible ink. | ![Secret Space](docs/screenshots/secret-space.png) |
 | **Memory Room**: everything the house remembers about this browser: visits, secrets, favourite things to poke and a silly nickname. It also has Reset Session, Reset World and Forget me. | ![Memory Room](docs/screenshots/memory-room.png) |
 | **After Hours**: a rooftop at night with a moon that's too close, stars you can connect, a radio, and a porch light that attracts a moth. A manual night switch themes the whole house. | ![After Hours](docs/screenshots/after-hours.png) |
-| **Garden**: Great-Aunt Pim's seed tin and six plots. Plants grow in real time, a little while you're away, and the weather helps or stops them. Flowers end up in a vase in the Living Room; radishes end up in the Playground. | ![Garden](docs/screenshots/garden.png) |
-| **Attic**: up a ladder from the Living Room. Boxes nobody sorted, Marguerite the dress form and her hats, a gramophone, the House Diary (written from your own visits) and Great-Aunt Pim's trunk of letters. | ![Attic](docs/screenshots/attic.png) |
+| **Garden**: you are the sun. Move over the sky and the light follows: plants grow where it falls, lean after it, and their shadows swing round; sink it behind the fence for night, fireflies and moonflowers. Draw shapes in the soil to plant (a line, a circle, a zigzag, a crescent, a spiral), swipe across anything ripe to pick it. Strong sun dries the beds, so draw a cloud in the sky for rain; rain opposite the sun makes a rainbow. | ![Garden](docs/screenshots/garden.png) |
+| **Attic**: up a ladder from the Living Room, under years of dust. Rub it off and dust bunnies run for whatever dust is left. Keep still over a clean photograph and it remembers one of Great-Aunt Pim's stories, with a number in pencil on the back; the trunk's lock wants all three. The wheel changes Marguerite's hat, the record plays while you turn it, and something is lying on the floor. | ![Attic](docs/screenshots/attic.png) |
 
 You can share any scene as a link or as a generated postcard:
 
@@ -46,10 +46,11 @@ You can share any scene as a link or as a generated postcard:
 - Find something in one room, then go back to the Living Room and listen.
 - Throw a pebble hard over the fence in the Playground. Catch it when it comes back.
 - Pin rain in the Mood Room, then visit the Garden. Pin a rainbow and hold up the mirror.
-- Plant a moonflower and come back after dark.
+- Draw a crescent in the Garden soil, sink the sun, and lead the fireflies to it.
+- In the attic, keep very still in front of a photograph. Spin the record backwards.
 - Look up in the Living Room once you have found a few things.
 
-There are 43 secrets and eight letters. None of them is required for anything.
+There are 47 secrets and eight letters. None of them is required for anything.
 
 ## How it works
 

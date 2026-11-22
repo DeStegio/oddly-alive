@@ -315,3 +315,72 @@ cross-room, Marguerite's 4th hat, Tourist/Homebody discoveries.
 | 10 | done | Six discoveries: Patient (Living Room nods off), Gentle Hands (10 hovers, no pokes → Pim tells a secret), Night Owl (00–04 local), Tourist (every known room in 90 s), Homebody (5 min in one room), Puddle Jumper (volley in rain). `app/watchers.ts`. Layered hints (`after`) on 11 deeper secrets; cabinet grouped into one shelf per room with counts. Living letter now needs the key found (it was stepping on the keyhole moment). Found and fixed via e2e: Bip could miss on slow frames (hit check now per 16 ms slice) and could never reach a ball resting by the net. 43 secrets total. |
 | 11 | done | Glue: garden flowers noticed in the Living Room (Ferdinand + Pim, via `living.vaseNew`), radishes greeted by Dot in the Playground, Dot’s weather opinions (Playground, Mood Room); existing gossip already covers discoveries in the new rooms. Reduced motion: global rule + per-component rules cover every new animation. Follow-up noted: Playground.tsx is ~840 lines; extracting the volleyball loop into a hook is a safe next refactor (not done here to avoid churn before release). |
 | 12 | done | Docs: README (eight rooms, new screenshots for Playground, Mood Room, Garden, Attic; things to try; privacy lists keepsakes), ARCHITECTURE (Phase 2 modules), ROADMAP (Phase 2 table), DECISIONS 17–23, INTERACTION_CATALOG INT-111…136, PRODUCT_VISION room count. Final: 208 unit tests, 43 e2e (desktop + mobile, a11y, perf) green; production build OK. Not pushed: `phase-2` is ready for the owner to review and merge. |
+
+---
+
+# Phase 2.1 — "Hands-on" (refinement)
+
+Owner feedback after release: the Garden and the Attic feel like menus of
+buttons ("press it, see what it does"). The Playground works because you *do*
+something with your hand (throw, aim, catch) and physics answers in a way that
+isn't scripted. Both rooms get that treatment. Keyboard / screen-reader paths
+stay complete (visually-hidden controls), but pointer play is physical.
+
+## Garden: hands in the dirt
+
+| Then | Now |
+| --- | --- |
+| click a packet, click a plot | pick a seed out of the tin and **throw** it; it arcs and grows where it lands. Grass: Inch eats it. Over the fence: Bip gets it. |
+| click to water | **hold the watering can**: a stream of droplets with gravity; only drops that land on soil water a plant; moving fast sprays sideways |
+| click a bloom to harvest | **pull** a ripe plant up against springy tension (let go early and it snaps back); then **throw** it: towards the house → vase; over the fence → Bip (radishes join his game, flowers he keeps) |
+| static plants | plants lean as the pointer brushes past, sunflowers turn to follow it, snapdragons snap when you get close |
+
+## Attic: the pile
+
+| Then | Now |
+| --- | --- |
+| six "open box" buttons | a **physics pile** of boxes (Matter.js, lazy chunk shared with the Playground); drag them, pull one from the bottom and the pile topples |
+| — | boxes **burst open** on a hard landing or a good shake; contents spill out as draggable objects (hats, the shoe, a dust puff, the letter fluttering down) |
+| hat buttons | **drop or throw** hats onto Marguerite's head; a thrown hat that lands is a discovery ("Nice Shot") |
+| play button | the record only plays while you **spin it by hand**: circular drag speed sets the tempo, spinning backwards plays the tune backwards; Marguerite sways in time |
+| pager buttons | drag the diary page corner to turn it |
+
+## Steps
+
+| # | Branch | Scope |
+| --- | --- | --- |
+| R1 | `feat/p21-garden-hands` | Garden rewrite: seed throwing, pouring, pull + throw harvest, plants react; keyboard fallback; tests |
+| R2 | `feat/p21-attic-pile` | Attic rewrite: physics pile, bursting boxes, physical items, hats on Marguerite (drop / throw), spin-to-play gramophone, page drag; tests |
+| R3 | `chore/p21-release` | QA (unit, e2e desktop + mobile, a11y), docs, screenshots, merge to main, deploy |
+
+## Progress log (2.1)
+
+| Step | Status | Notes |
+| --- | --- | --- |
+| R1 | done | Garden rewritten by hand: `gardenSim.ts` (pure: seeds, drops, crops; soil / lawn / house / fence landings), seed throwing from the tin (Inch eats misses; over the fence to Bip), watering can stream (only soil drops water; stale hand speed decays), pull-with-tension harvest then throw (house → vase/Playground, fence → Bip), plants lean, sunflowers watch the pointer, snapdragons snap. Keyboard tools hidden until focused. New discoveries: Long Shot, A Bouquet for Bip. |
+| R2 | done | Attic rewritten by hand: `pile.ts` (Matter.js stage with Marguerite on the left; boxes burst on a hard landing of their own or a good shake; settle period; no chain bursts), contents spill as draggable bodies (hats, shoe, dust puff, the letter from the last box), hats go on Marguerite when dropped on her head or thrown there (“Nice Shot”), `Gramophone.tsx` + `spin.ts` (record plays only while turned by hand; speed = tempo, backwards = backwards (“Scratch”); winds down), diary pages drag. Keyboard path: open next box, put hat on, give the record a spin. |
+| R3 | todo | |
+
+## Phase 2.1, revision 2 — three rooms, three languages
+
+Owner feedback on the drag-based version: it is the Playground again
+(grab, drag, throw), and the Garden and Attic feel like each other. Each room
+now gets its own input language, and none is shared:
+
+| Room | Language |
+| --- | --- |
+| Playground | grab, throw, catch (unchanged) |
+| Garden | **you are the sun** (hover = light, height = time of day) and **drawing** (stroke shapes plant species; a quick slash cuts) |
+| Attic | **scrub** away dust, **look** (hold still to replay a memory), **wheel** (Marguerite's hat carousel), **circle** (the record) |
+
+| # | Branch | Scope |
+| --- | --- | --- |
+| R4 | `feat/p21-garden-sun` | Garden: light model, sun/sky/shadows/night from pointer, stroke recognizer (|, ○, 〰, ☾, @), slash to harvest, keyboard path |
+| R5 | `feat/p21-attic-dust` | Attic: dust canvas + coverage, clean objects come alive, dwell memories on photos, wheel hats, record spin, letter under the dust, keyboard path |
+| R6 | `chore/p21-release-2` | QA, docs, screenshots, deploy |
+
+### Log
+
+- R4 done: the sun, shadows, dusk and night; strokes plant; a swipe picks. Then by request, more: clouds drawn in the sky rain and shade, strong sun dries beds and wilts plants, rainbows opposite the sun, fireflies follow you at night and light the moonflowers. Secrets: pims-hand, sundown, make-it-rain, rainbow-maker, night-light.
+- R5 done: dust (a coarse grid on a canvas) rubbed off by hand; dust bunnies flee to the thickest dust; photographs develop and tell memories only while you keep still; the memories hold the trunk's combination (wheel / swipe / arrow keys); hats found under the dust, worn on the wheel; letter on the floor. Wide and tall layouts. Secrets: spring-clean, memory-lane, dust-bunnies, combination (53).
+- R6 done: 234 unit tests, full e2e on desktop and Pixel 7 (the Living Room frame-pacing check is load-sensitive and passes on its own), axe clean, docs and screenshots, deployed.

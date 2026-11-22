@@ -73,3 +73,19 @@ Short architecture/design decision log. Newest at the bottom.
     `VOICE.md` covers the rest.
 23. **Discoveries are a cabinet, not a checklist.** Deeper secrets keep their
     hint folded until a related find; shelves are grouped by room.
+
+## Phase 2.1
+
+24. **Rooms are played by hand.** The Garden and the Attic were menus of
+    buttons; they now work like the Playground: throw, pour, pull, shake,
+    spin. Every action keeps a keyboard / screen-reader equivalent (tools
+    hidden until focused) so nothing depends on a pointer.
+25. **Matter.js is used in the Attic too** (amends 4). The pile of boxes
+    needs a real solver for stacking and toppling; it shares the lazily
+    loaded physics chunk with the Playground. The Garden's seeds, water and
+    thrown crops use a small hand-written integrator (`gardenSim.ts`),
+    like the Playground's flights.
+26. **Boxes burst only from their own impact.** A box opens when it lands
+    hard itself or is shaken; a toppling neighbour doesn't count, and a
+    freshly built pile has a settling period, so the pile never chain-
+    reacts open by accident.

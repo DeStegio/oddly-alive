@@ -7,8 +7,10 @@ const HAT_ART: Record<HatId, React.ReactNode> = {
   beret: <path d="M38 30 C 40 14 82 12 84 28 C 74 34 48 34 38 30 Z M60 13 v -5" fill="#3f7a52" {...INK} />,
   topper: (
     <g>
-      <rect x="46" y="-6" width="30" height="32" rx="3" fill="#24232b" {...INK} stroke="var(--cut-paper)" />
-      <path d="M36 28 H 86" {...INK} stroke="var(--cut-paper)" strokeWidth={5} />
+      <rect x="46" y="-6" width="30" height="32" rx="3" fill="#4a3f63" {...INK} />
+      <path d="M46 18 H 76" stroke="var(--coral)" strokeWidth={5} />
+      <path d="M36 28 H 86" {...INK} strokeWidth={5} />
+      <path d="M36 28 H 86" stroke="#4a3f63" strokeWidth={2} />
     </g>
   ),
   sunhat: (
@@ -20,6 +22,15 @@ const HAT_ART: Record<HatId, React.ReactNode> = {
   ),
   crown: <path d="M42 30 L 44 10 L 52 20 L 61 6 L 70 20 L 78 10 L 80 30 Z" fill="var(--yellow)" {...INK} />,
 };
+
+/** A hat on its own (in the pile, or in your hand). Drawn in Marguerite's head space. */
+export function HatSvg({ hat }: { hat: HatId }) {
+  return (
+    <svg viewBox="30 -10 62 46" className={styles.hatSvg} aria-hidden="true">
+      {HAT_ART[hat]}
+    </svg>
+  );
+}
 
 /** Marguerite: a dress form with opinions, and whatever hat you've handed her. */
 export function MargueriteSvg({ hat }: { hat: HatId | null }) {

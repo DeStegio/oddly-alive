@@ -94,10 +94,10 @@ export const LETTERS: Letter[] = [
   },
   {
     id: 'attic',
-    place: 'at the bottom of the last box',
-    hint: 'Six boxes in the attic. This one is under everything else.',
+    place: 'under the dust on the attic floor',
+    hint: 'Somewhere on the attic floor, under years of dust.',
     body: [
-      'Last one. I left it under everything because I knew you would get to the bottom of things.',
+      'Last one. I left it under everything, dust included, because I knew you would get to the bottom of things.',
       'When I moved out, I gave the house one job: keep someone company. Not watch them. Not keep score. Just notice that they came in, and be pleased about it.',
       'It has been doing that badly and enthusiastically ever since. If you have found all eight of these, you have been everywhere I liked. Go up on the roof tonight. They will all be there.',
     ],

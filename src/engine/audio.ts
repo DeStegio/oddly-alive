@@ -126,6 +126,12 @@ export class AudioManager {
     const ctx = this.ready();
     if (!ctx || !this.throttle(name, name === 'pop' ? 90 : 60)) return;
     const t = ctx.currentTime + 0.01;
+    // a single note by frequency (the hand-spun gramophone): 'note:523'
+    if (name.startsWith('note:')) {
+      const f = Number(name.slice(5));
+      if (Number.isFinite(f) && f > 40 && f < 4000) this.tone(f, t, 0.32, { wave: 'triangle', gain: 0.18 });
+      return;
+    }
     switch (name) {
       case 'pop':
         return this.tone(600 + Math.random() * 300, t, 0.08, { wave: 'triangle', gain: 0.3, slideTo: 300 });

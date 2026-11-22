@@ -1,4 +1,4 @@
-import { AWAY_RATE, PLANTS, WATER_MS, advance, plant, rate, stage, water, type GrowContext } from './growth';
+import { AWAY_RATE, PLANTS, WATER_MS, advance, plant, rate, stage, sunGrow, water, type GrowContext } from './growth';
 
 const MIN = 60_000;
 /** A real-ish start time (0 means 'never watered' to the garden). */
@@ -47,5 +47,20 @@ describe('garden growth', () => {
 
   it('stages go seed → sprout → leaves → bud → bloom', () => {
     expect([0, 0.2, 0.5, 0.8, 1].map(stage)).toEqual([0, 1, 2, 3, 4]);
+  });
+});
+
+describe('growing in the light', () => {
+  const seed = (kind: 'sunflower' | 'moonflower') => ({ kind, plantedAt: 0, updatedAt: 0, wateredAt: 0, growth: 0 });
+  it('full sun brings a sunflower out in under a minute; shade is slower; night stops it', () => {
+    expect(sunGrow(seed('sunflower'), 50_000, 1, false, 'clear').growth).toBe(1);
+    expect(sunGrow(seed('sunflower'), 20_000, 0.3, false, 'clear').growth).toBeLessThan(sunGrow(seed('sunflower'), 20_000, 1, false, 'clear').growth);
+    expect(sunGrow(seed('sunflower'), 20_000, 0, true, 'clear').growth).toBe(0);
+  });
+  it('the moonflower only grows in the dark', () => {
+    expect(sunGrow(seed('moonflower'), 20_000, 1, false, 'clear').growth).toBe(0);
+    expect(sunGrow(seed('moonflower'), 20_000, 0, true, 'clear').growth).toBeGreaterThan(0.35);
+    // fireflies close by speed it up
+    expect(sunGrow(seed('moonflower'), 20_000, 1, true, 'clear').growth).toBeGreaterThan(sunGrow(seed('moonflower'), 20_000, 0, true, 'clear').growth);
   });
 });

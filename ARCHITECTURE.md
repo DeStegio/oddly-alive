@@ -128,7 +128,8 @@ implementation:
 | Weather | `engine/weather.ts`, `app/weatherSync.ts`, `components/WeatherLayer.tsx` | Mood → weather map plus a 3-minute pin; `WEATHER_CHANGED`; `html[data-weather]`; CSS-only particles. |
 | Keepsakes | `state/keepsakes.ts` | Memory v3 `world`: garden, letters, almanac, diary, records, attic. |
 | Flights | `rooms/Playground/flight.ts` | Ballistics between the trays, Bip's landing prediction, lobs. |
-| Garden | `rooms/Garden/growth.ts` | Pure growth model (weather rates, away catch-up). |
+| Garden | `rooms/Garden/growth.ts`, `rooms/Garden/gardenSim.ts` | Pure growth model; seeds, droplets and thrown crops (Phase 2.1). |
+| Attic | `rooms/Attic/pile.ts`, `rooms/Attic/spin.ts` | Matter.js pile with bursting boxes; hand-spun gramophone tempo (Phase 2.1). |
 | Letters | `content/letters.ts`, `app/letters.ts` | `findLetter` keeps, notes, announces; finale in After Hours. |
 | Watchers | `app/watchers.ts` | Night Owl, Tourist, Homebody. |
 | Voice | `VOICE.md`, `content/__tests__/copy.test.ts` | |
