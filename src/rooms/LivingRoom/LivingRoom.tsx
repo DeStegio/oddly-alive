@@ -68,6 +68,13 @@ export default function LivingRoom() {
   // Infinite Rooms: through the little painting
   const littleRef = useRef<HTMLButtonElement>(null);
   const [infinite, setInfinite] = useState(false);
+  // a shadow from the attic theatre drops in, now and then
+  const [shadowVisit] = useState(() => useKeepsakes.getState().story['shadow-bird'] !== undefined && Math.random() < 0.5);
+  useEffect(() => {
+    if (!shadowVisit) return;
+    const t = window.setTimeout(() => world.emit('OBJECT_STATE_CHANGED', { target: 'living', key: 'shadow-visit', value: 'bird' }), 6000);
+    return () => window.clearTimeout(t);
+  }, [shadowVisit, world]);
   const enterInfinite = useCallback(() => {
     // the house goes quiet while you're away in there
     const director = getAgents();
@@ -275,6 +282,11 @@ export default function LivingRoom() {
         <div className={styles.dim} aria-hidden="true" />
         <div ref={stageRef} className={styles.stage} onClick={onStageClick}>
           <div className={styles.wall} data-surface="wall" aria-hidden="true" />
+          {shadowVisit ? (
+            <svg className={styles.shadowBird} viewBox="-40 -14 80 28" aria-hidden="true">
+              <path d="M-40 0 Q -20 -26 0 -4 Q 20 -26 40 0 Q 20 -10 6 4 L 0 12 L -6 4 Q -20 -10 -40 0 Z" fill="var(--char-ink)" opacity="0.28" />
+            </svg>
+          ) : null}
           <div className={styles.floor} data-surface="floor" aria-hidden="true" />
 
           {marks.map((m) => (

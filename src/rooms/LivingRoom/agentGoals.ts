@@ -4,6 +4,14 @@ import type { GoalControl, GoalDef } from '../../engine/agents/types';
 import type { ActorId, Expression } from '../../engine/types';
 import { DOT_PRIES, TICK_PUTS_BACK } from '../../content/button';
 import type { Place, PropId, PropPos, SpotTarget } from './incidents/stageProps';
+import { CALLBACKS } from '../../content/continuity';
+import { useKeepsakes } from '../../state/keepsakes';
+
+const DAY = 86_400_000;
+const story = (key: string, within = 7 * DAY) => {
+  const at = useKeepsakes.getState().story[key];
+  return at !== undefined && Date.now() - at < within;
+};
 
 /** What the Living Room offers its agents: where things are, Dot's legs, and the movable props. */
 export interface LivingStage {
@@ -45,6 +53,45 @@ const look = (c: GoalControl, id: ActorId, at: StageThing, ms: number) => {
  * ends, however it ends.
  */
 export const LIVING_GOALS: GoalDef[] = [
+  {
+    // Dot hasn't forgotten that rally
+    id: 'dot.brag',
+    actor: 'dot',
+    rooms: LIVING,
+    kind: 'ambient',
+    durationMs: 3200,
+    cooldownMs: 15 * 60_000,
+    answers: ['attention'],
+    when: (p) => story('volley-rally') && (useKeepsakes.getState().records.dotRally ?? 0) >= 6 && p.idleMs > 5000 && !p.remembers('dot:bragged'),
+    utility: () => 0.6,
+    start(c) {
+      c.actors.send('dot', { type: 'anim', name: 'bounce', durationMs: 700 });
+      c.actors.send('dot', { type: 'say', text: CALLBACKS.dotBrag(useKeepsakes.getState().records.dotRally ?? 0), durationMs: 2600 });
+      c.remember('dot:bragged');
+      c.satisfy('dot', 'attention', -0.4);
+      c.outcome = 'bragged';
+    },
+  },
+  {
+    // after the teacup business, Tick keeps an eye on it
+    id: 'tick.remembers-cup',
+    actor: 'tick',
+    rooms: LIVING,
+    kind: 'ambient',
+    durationMs: 3000,
+    cooldownMs: 15 * 60_000,
+    answers: ['order'],
+    when: (p) => story('incident-teacup', 3 * DAY) && p.owner('cup') === null && !p.remembers('tick:cup-watch') && !!p.stage('living') && p.stage<LivingStage>('living')!.props.get('cup').place === 'home',
+    utility: () => 0.5,
+    start(c) {
+      look(c, 'tick', 'cup', 2200);
+      face(c, 'tick', 'suspicious', 2200);
+      say(c, 'tick', CALLBACKS.tickCup, 2200);
+      look(c, 'dot', 'tick', 1500);
+      c.remember('tick:cup-watch');
+      c.outcome = 'watching';
+    },
+  },
   {
     // The glass is up: Dot can't resist. Tick can't resist putting it back.
     id: 'dot.pry-glass',
@@ -163,6 +210,8 @@ export const LIVING_GOALS: GoalDef[] = [
     start(c) {
       face(c, 'pim', 'sleepy', 2200);
       c.after(2200, () => face(c, 'pim', 'asleep', 8000));
+      // if someone played the stars lately, she hums it in her sleep
+      if (story('sky-tune', DAY)) c.after(4200, () => say(c, 'pim', CALLBACKS.pimHum, 2400));
       c.after(10_200, () => {
         face(c, 'pim', 'neutral', 1200);
         c.satisfy('pim', 'rest', -0.7);
