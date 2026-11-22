@@ -378,3 +378,9 @@ now gets its own input language, and none is shared:
 | R4 | `feat/p21-garden-sun` | Garden: light model, sun/sky/shadows/night from pointer, stroke recognizer (|, ○, 〰, ☾, @), slash to harvest, keyboard path |
 | R5 | `feat/p21-attic-dust` | Attic: dust canvas + coverage, clean objects come alive, dwell memories on photos, wheel hats, record spin, letter under the dust, keyboard path |
 | R6 | `chore/p21-release-2` | QA, docs, screenshots, deploy |
+
+### Log
+
+- R4 done: the sun, shadows, dusk and night; strokes plant; a swipe picks. Then by request, more: clouds drawn in the sky rain and shade, strong sun dries beds and wilts plants, rainbows opposite the sun, fireflies follow you at night and light the moonflowers. Secrets: pims-hand, sundown, make-it-rain, rainbow-maker, night-light.
+- R5 done: dust (a coarse grid on a canvas) rubbed off by hand; dust bunnies flee to the thickest dust; photographs develop and tell memories only while you keep still; the memories hold the trunk's combination (wheel / swipe / arrow keys); hats found under the dust, worn on the wheel; letter on the floor. Wide and tall layouts. Secrets: spring-clean, memory-lane, dust-bunnies, combination (53).
+- R6 done: 234 unit tests, full e2e on desktop and Pixel 7 (the Living Room frame-pacing check is load-sensitive and passes on its own), axe clean, docs and screenshots, deployed.
