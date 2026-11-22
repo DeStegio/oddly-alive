@@ -597,3 +597,24 @@ test.describe('reactive atmospheres', () => {
     await expect(page.getByRole('button', { name: 'Play it again' })).toBeVisible();
   });
 });
+
+test('the house remembers: an incident goes in the diary, and the button’s feelings survive a reload', async ({ page }) => {
+  await page.goto('./');
+  await page.mouse.move(5, 300);
+  await expect.poll(() => page.evaluate(() => typeof (window as unknown as { __oddly?: object }).__oddly)).toBe('object');
+  type Hook = { force: (id: string) => boolean };
+  await page.evaluate(() => (window as unknown as { __oddly: Hook }).__oddly.force('incident.sofa'));
+  const cushion = page.getByRole('button', { name: /The sofa cushion/ });
+  await expect(cushion).toHaveAccessibleName(/Dot has it/, { timeout: 12_000 });
+  await cushion.focus();
+  await page.keyboard.press('Enter');
+  const memory = () => page.evaluate(() => JSON.parse(localStorage.getItem('oddly-alive:memory') || '{}').world ?? {});
+  await expect.poll(async () => (await memory()).story?.['incident-sofa'] ?? null, { timeout: 15_000 }).not.toBeNull();
+  expect(((await memory()).diary ?? []).map((e: { detail: string }) => e.detail).join(' ')).toMatch(/You put it back/);
+  // upset the button, then reload: it remembers
+  const btn = page.getByRole('button', { name: /pressed \d+ times/ });
+  for (let i = 0; i < 6 && !/behind glass/.test((await btn.getAttribute('aria-label')) ?? ''); i++) await btn.click({ force: true });
+  await expect.poll(async () => (await memory()).button?.trust ?? 1, { timeout: 15_000 }).toBeLessThan(0.35);
+  await page.reload();
+  await expect.poll(async () => (await memory()).button?.trust ?? 1).toBeLessThan(0.35);
+});

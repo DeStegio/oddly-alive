@@ -41,7 +41,7 @@ export function VolleyCourt({ onActive }: { onActive?: (on: boolean) => void }) 
   const world = useWorld();
   const weather = useWeather();
   const atticFound = useKeepsakes((k) => k.attic.unlocked);
-  const best = useKeepsakes((k) => k.records['dot-rally'] ?? 0);
+  const best = useKeepsakes((k) => k.records.dotRally ?? 0);
   const courtRef = useRef<HTMLDivElement>(null);
   const dotEl = useRef<HTMLDivElement>(null);
   const bipEl = useRef<HTMLDivElement>(null);
@@ -83,7 +83,7 @@ export function VolleyCourt({ onActive }: { onActive?: (on: boolean) => void }) 
       s.server = winner;
       setScore((sc) => ({ ...sc, [winner]: sc[winner] + 1 }));
       const r = s.rally;
-      if (useKeepsakes.getState().record('dot-rally', r) && r >= 3) say(VOLLEY.best(r));
+      if (useKeepsakes.getState().record('dotRally', r) && r >= 3) say(VOLLEY.best(r));
       else say(winner === 'dot' ? (out ? VOLLEY.bipOut : VOLLEY.dotPoint) : out ? VOLLEY.dotOut : VOLLEY.bipPoint);
       if (winner === 'bip') {
         s.bip = { ...s.bip, streak: s.bip.streak + 1 };

@@ -416,3 +416,37 @@
     width: 72%;
   }
 }
+
+/* a shadow bird from the attic theatre crosses the wall, once */
+.shadowBird {
+  position: absolute;
+  left: -10%;
+  top: 18%;
+  width: clamp(60px, 7vw, 110px);
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0;
+  animation: shadow-cross 5s var(--ease-in-out) 6s 1 forwards;
+}
+@keyframes shadow-cross {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0) scaleY(1);
+  }
+  20% {
+    transform: translate(25vw, -20px) scaleY(0.6);
+  }
+  40% {
+    transform: translate(50vw, 10px) scaleY(1);
+  }
+  60% {
+    transform: translate(75vw, -10px) scaleY(0.6);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(120vw, -40px) scaleY(1);
+  }
+}
+[data-motion='reduced'] .shadowBird {
+  display: none;
+}

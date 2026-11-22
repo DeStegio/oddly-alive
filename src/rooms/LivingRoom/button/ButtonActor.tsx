@@ -6,6 +6,10 @@ import type { World } from '../../../engine/world';
 import { useObjects } from '../../../state/world';
 import { TURNS, bracketsOut, glassClosed, type ButtonInput, type ButtonOutcome } from './buttonMachine';
 import { useButton } from './buttonStore';
+import { useKeepsakes } from '../../../state/keepsakes';
+
+/** Feelings come back once per visit, from the last one. */
+let restored = false;
 import styles from './Button.module.css';
 
 /** An input without a timestamp (now is filled in). Distributes over the union. */
@@ -57,6 +61,7 @@ export function ButtonActor({ world, rootRef, thought, apiRef }: Props) {
     (input) => {
       const outcome = useButton.getState().dispatch({ ...input, now: input.now ?? Date.now() } as ButtonInput);
       const st = useButton.getState().s;
+      if (outcome !== 'none' && outcome !== 'lifting') useKeepsakes.getState().setButton(st.trust, st.suspicion);
       useObjects.getState().setLiving({ buttonMode: st.mode });
       switch (outcome) {
         case 'pressed':
@@ -128,8 +133,13 @@ export function ButtonActor({ world, rootRef, thought, apiRef }: Props) {
     return () => window.clearInterval(t);
   }, [perform, world]);
 
-  // keep the house informed of the mode on the way in
+  // keep the house informed of the mode on the way in (and remember how it felt last visit)
   useEffect(() => {
+    if (!restored) {
+      restored = true;
+      const b = useKeepsakes.getState().button;
+      useButton.getState().restore(b.trust, b.suspicion);
+    }
     useObjects.getState().setLiving({ buttonMode: useButton.getState().s.mode });
   }, []);
 

@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { GARDEN_PLOTS, MAX_DIARY, cleanWorld, emptyWorldMemory, type StoredPlot, type WorldMemory } from '../engine/memory';
+import { GARDEN_PLOTS, MAX_DIARY, MAX_STORY, cleanWorld, emptyWorldMemory, type StoredPlot, type WorldMemory } from '../engine/memory';
 
 /**
  * What the house keeps between visits (memory v3, `world`): the garden, the
@@ -21,9 +21,12 @@ export interface KeepsakesState extends WorldMemory {
   seeWeather: (kind: string, at?: number) => boolean;
   unlockAttic: () => void;
   addHat: (id: string) => void;
+  /** Note that something notable just happened (for later callbacks). */
+  remember: (key: string, at?: number) => void;
+  setButton: (trust: number, suspicion: number) => void;
 }
 
-const snapshot = (s: KeepsakesState): WorldMemory => ({ garden: s.garden, letters: s.letters, almanac: s.almanac, diary: s.diary, records: s.records, attic: s.attic });
+const snapshot = (s: KeepsakesState): WorldMemory => ({ garden: s.garden, letters: s.letters, almanac: s.almanac, diary: s.diary, records: s.records, attic: s.attic, story: s.story, button: s.button });
 
 export const useKeepsakes = create<KeepsakesState>()((set, get) => ({
   ...emptyWorldMemory(),
@@ -61,6 +64,13 @@ export const useKeepsakes = create<KeepsakesState>()((set, get) => ({
   },
   unlockAttic: () => set((s) => ({ attic: { ...s.attic, unlocked: true } })),
   addHat: (id) => set((s) => (s.attic.hats.includes(id) ? {} : { attic: { ...s.attic, hats: [...s.attic.hats, id] } })),
+  remember: (key, at = Date.now()) =>
+    set((s) => {
+      const story = { ...s.story, [key]: at };
+      const keys = Object.keys(story).sort((a, b) => story[b]! - story[a]!);
+      return { story: Object.fromEntries(keys.slice(0, MAX_STORY).map((k) => [k, story[k]!])) };
+    }),
+  setButton: (trust, suspicion) => set({ button: { trust: Math.max(0, Math.min(1, trust)), suspicion: Math.max(0, Math.min(1, suspicion)) } }),
 }));
 
 export const keepsakesSnapshot = () => snapshot(useKeepsakes.getState());

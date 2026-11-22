@@ -10,6 +10,8 @@ interface ButtonStore {
   s: ButtonState;
   dispatch(input: ButtonInput): ButtonOutcome;
   reset(now?: number): void;
+  /** Pick up where the last visit left off (feelings only; the glass starts down). */
+  restore(trust: number, suspicion: number): void;
 }
 
 export const useButton = create<ButtonStore>()((set, get) => ({
@@ -21,5 +23,8 @@ export const useButton = create<ButtonStore>()((set, get) => ({
   },
   reset(now = Date.now()) {
     set({ s: initialButton(now) });
+  },
+  restore(trust, suspicion) {
+    set((st) => ({ s: { ...st.s, trust, suspicion } }));
   },
 }));
