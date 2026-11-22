@@ -246,3 +246,4 @@ the glass is an object in that world, not a site style).
 ## 6. Progress log
 
 - 3.0 ☑ Baseline inspected; this plan written; `e2e/baseline.spec.ts` pins what every room already has (16 checks, desktop + Pixel 7, green).
+- 3.1 ☑ Agent engine (`src/engine/agents`: needs, scoring with novelty, prop locks, session memory, director plugin on the World tick, incidents run as CHARACTER-priority scheduler reactions). Living Room goals: Tick straightens the portrait, Dot walks to the button and presses it, Pim dozes, Lumen shows off, Ferdinand leans. Verified: 11 unit tests (determinism, locks, cleanup on preempt/room exit, one incident + quiet spell, busy-visitor gating, interventions); in the browser, 30 s idle produced lumen.show-off, tick.straighten, dot.press-button, pim.doze; e2e forces Dot's errand on desktop + Pixel 7.

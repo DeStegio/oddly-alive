@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { allLettersFound, findLetter } from '../../app/letters';
 import { useKeepsakes } from '../../state/keepsakes';
 import { sceneVariant } from '../../app/share';
-import { useWorld } from '../../app/worldInstance';
+import { getAgents, useWorld } from '../../app/worldInstance';
 import { Clock } from '../../characters/Clock';
 import { Dot, type DotMotion } from '../../characters/Dot';
 import { DustBunny } from '../../characters/DustBunny';
@@ -24,6 +24,7 @@ import { Basement } from './Basement';
 import { HouseWindow } from './HouseWindow';
 import { PullCord } from './PullCord';
 import { DoNotPress, Door, Picture, Rug, Sofa } from './Scenery';
+import { LIVING_GOALS, type LivingStage, type StageThing } from './agentGoals';
 import styles from './LivingRoom.module.css';
 
 interface Mark {
@@ -83,6 +84,43 @@ export default function LivingRoom() {
   useEffect(() => {
     dotMotion.current.follow = motion === 'full';
   }, [motion]);
+
+  // the room is a stage for the characters' own plans (Phase 3 agents)
+  useEffect(() => {
+    const director = getAgents();
+    director.addGoals(...LIVING_GOALS);
+    const els: Partial<Record<StageThing, React.RefObject<HTMLElement>>> = {
+      button: button.rootRef,
+      picture: picture.rootRef,
+      pim: pim.rootRef,
+      lamp: lamp.rootRef,
+      tick: tick.rootRef,
+      plant: plant.rootRef,
+    };
+    const motionRef = dotMotion;
+    const stage: LivingStage = {
+      rect: (n) => els[n]?.current?.getBoundingClientRect() ?? null,
+      dotTo: (n, onArrive) => {
+        motionRef.current.errand = {
+          target: () => {
+            const r = stage.rect(n);
+            return r ? { x: r.left + r.width / 2, y: r.top + r.height * 0.3 } : null;
+          },
+          onArrive,
+        };
+      },
+      dotFree: () => {
+        motionRef.current.errand = null;
+      },
+    };
+    const off = director.setStage('living', stage);
+    return () => {
+      off();
+      motionRef.current.errand = null;
+    };
+    // the refs are stable for the life of the room
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useSense('pim', pim.rootRef, 190, { stare: true });
   useSense('ferdinand', plant.rootRef, 120);

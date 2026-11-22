@@ -308,3 +308,15 @@ test('attic: rub the dust off, keep still to remember, wheel the lock open', asy
   await expect(page.getByRole('button', { name: /Marguerite the dress form, wearing/ })).toBeVisible();
 });
 
+
+test('characters act on their own: Dot walks over and presses the button', async ({ page }) => {
+  await page.goto('./');
+  await page.mouse.move(5, 300);
+  await expect.poll(() => page.evaluate(() => typeof (window as unknown as { __oddly?: object }).__oddly)).toBe('object');
+  await page.waitForTimeout(4500); // the visitor has to be quiet for a moment
+  type Hook = { force: (id: string) => boolean; agentLog: () => Array<{ goal: string; event: string; outcome?: string }> };
+  await page.evaluate(() => (window as unknown as { __oddly: Hook }).__oddly.force('dot.press-button'));
+  await expect
+    .poll(() => page.evaluate(() => (window as unknown as { __oddly: Hook }).__oddly.agentLog().find((l) => l.goal === 'dot.press-button' && l.event === 'end')?.outcome), { timeout: 12_000 })
+    .toBe('pressed');
+});

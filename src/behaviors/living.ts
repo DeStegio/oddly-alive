@@ -417,6 +417,20 @@ export const livingBehaviors = [
       }),
   }),
   defineBehavior({
+    // Dot pressed it (an agent goal): the button takes it personally, Tick notices
+    id: 'button.poked-by-dot',
+    on: ['OBJECT_STATE_CHANGED'],
+    rooms: LIVING,
+    priority: Priority.CHARACTER,
+    when: (c) => isTarget(c, 'button') && (c.event.payload as { key?: string }).key === 'poked',
+    react: (c) =>
+      act('button', 1800, (ctl) => {
+        anim(c, 'button', 'squish');
+        c.effects.sound('press');
+        ctl.after(500, () => face(c, 'tick', 'annoyed', 1400));
+      }),
+  }),
+  defineBehavior({
     id: 'button.chain',
     implements: ['INT-027', 'INT-058'],
     on: ['OBJECT_CLICKED'],
