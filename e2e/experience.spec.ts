@@ -298,6 +298,9 @@ test('attic: rub the dust off, keep still to remember, wheel the lock open', asy
   const her = page.getByRole('button', { name: /Marguerite the dress form/ });
   await her.evaluate((el) => el.scrollIntoView({ block: 'center' }));
   await page.waitForTimeout(200);
+  // she puts on each hat as it's found; wait for the last one to land on her
+  await page.waitForTimeout(2300);
+  const before = await her.getAttribute('aria-label');
   const m = (await her.boundingBox())!;
   await page.mouse.move(m.x + m.width / 2, m.y + m.height / 2);
   if (touch) {
@@ -305,7 +308,7 @@ test('attic: rub the dust off, keep still to remember, wheel the lock open', asy
     await page.mouse.move(m.x + m.width / 2, m.y + m.height / 2 - 60, { steps: 4 });
     await page.mouse.up();
   } else await page.mouse.wheel(0, -120);
-  await expect(page.getByRole('button', { name: /Marguerite the dress form, wearing/ })).toBeVisible();
+  await expect(her).not.toHaveAttribute('aria-label', before!);
 });
 
 
@@ -370,5 +373,51 @@ test.describe('the button that fights back', () => {
       .poll(() => page.evaluate(() => (window as unknown as { __oddly: Hook }).__oddly.agentLog().some((l) => l.goal === 'dot.pry-glass')), { timeout: 8000 })
       .toBe(true);
     await expect(page.getByRole('button', { name: /okay fine|i said no/ })).toBeVisible();
+  });
+});
+
+test.describe('Living Room incidents', () => {
+  type Hook = { force: (id: string) => boolean; agentLog: () => Array<{ goal: string; event: string; outcome?: string }> };
+  const force = (page: Page, id: string) => page.evaluate((g) => (window as unknown as { __oddly: Hook }).__oddly.force(g), id);
+  const outcome = (page: Page, id: string) =>
+    page.evaluate((g) => (window as unknown as { __oddly: Hook }).__oddly.agentLog().filter((l) => l.goal === g && l.event === 'end').at(-1)?.outcome ?? null, id);
+  const ready = async (page: Page) => {
+    await page.goto('./');
+    await page.mouse.move(5, 300);
+    await expect.poll(() => page.evaluate(() => typeof (window as unknown as { __oddly?: object }).__oddly)).toBe('object');
+  };
+
+  test('the sofa: Dot takes the cushion, and you can put it back', async ({ page }) => {
+    await ready(page);
+    expect(await force(page, 'incident.sofa')).toBe(true);
+    const cushion = page.getByRole('button', { name: /The sofa cushion/ });
+    await expect(cushion).toHaveAccessibleName(/Dot has it/, { timeout: 12_000 });
+    await cushion.focus();
+    await page.keyboard.press('Enter');
+    await expect.poll(() => outcome(page, 'incident.sofa'), { timeout: 6000 }).toBe('visitor returned it');
+    await expect(cushion).toHaveAccessibleName(/where it belongs/);
+  });
+
+  test('the teacup: Dot hides it behind the plant, and the plant gives it away', async ({ page }) => {
+    await ready(page);
+    expect(await force(page, 'incident.teacup')).toBe(true);
+    const cup = page.getByRole('button', { name: /teacup/ });
+    await expect(cup).toHaveAccessibleName(/behind the plant/, { timeout: 15_000 });
+    const plant = page.getByRole('button', { name: /Ferdinand/ });
+    await plant.focus();
+    await page.keyboard.press('Enter');
+    await expect.poll(() => outcome(page, 'incident.teacup'), { timeout: 6000 }).toBe('found behind the plant');
+  });
+
+  test('the spotlight: move it to someone else from the keyboard', async ({ page }) => {
+    await ready(page);
+    expect(await force(page, 'incident.spotlight')).toBe(true);
+    const pool = page.getByRole('button', { name: /Lumen’s spotlight/ });
+    await expect(pool).toBeVisible({ timeout: 4000 });
+    const before = await pool.getAttribute('aria-label');
+    await pool.focus();
+    await page.keyboard.press('Enter');
+    await expect(pool).not.toHaveAccessibleName(before!);
+    await expect.poll(() => outcome(page, 'incident.spotlight'), { timeout: 20_000 }).toMatch(/^redirected to /);
   });
 });

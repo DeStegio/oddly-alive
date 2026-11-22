@@ -26,6 +26,9 @@ function setup() {
     dotTo: (_t, onArrive) => (arrive = onArrive),
     dotFree: () => (arrive = undefined),
     button: () => 'pressed',
+    dotPoint: () => ({ x: 0.5, y: 0.85 }),
+    dotHold: () => {},
+    props: { get: () => ({ place: 'home', x: 0, y: 0 }), move: () => {}, spot: () => {}, outFor: () => 0 },
   };
   director.setStage('living', stage);
   return { clock, world, director, actors, arrive: () => arrive?.() };

@@ -22,7 +22,10 @@ import { ROOMS } from '../../app/rooms';
 import { Basement } from './Basement';
 import { HouseWindow } from './HouseWindow';
 import { PullCord } from './PullCord';
-import { Door, Picture, Rug, Sofa } from './Scenery';
+import { Door, Picture, Rug, SideTable, Sofa } from './Scenery';
+import { INCIDENTS } from './incidents/incidents';
+import { PropLayer } from './incidents/PropLayer';
+import { carriedByDot, useStageProps, type PropId } from './incidents/stageProps';
 import { ButtonActor, type ButtonApi } from './button/ButtonActor';
 import { LIVING_GOALS, type LivingStage, type StageThing } from './agentGoals';
 import styles from './LivingRoom.module.css';
@@ -87,23 +90,41 @@ export default function LivingRoom() {
   }, [motion]);
 
   // the room is a stage for the characters' own plans (Phase 3 agents)
+  const stageRef = useRef<HTMLDivElement>(null);
+  const cushionHome = useRef<HTMLSpanElement>(null);
+  const cupHome = useRef<HTMLSpanElement>(null);
+  const propEls = useRef<Partial<Record<PropId, HTMLElement | null>>>({});
+  const layerRefs = useMemo(
+    () => ({ stage: stageRef, cushionHome, cupHome, plant: plant.rootRef, dot: dot.rootRef, lamp: lamp.rootRef, pim: pim.rootRef, tick: tick.rootRef, button: button.rootRef }),
+    // the refs are stable for the life of the room
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  );
   useEffect(() => {
     const director = getAgents();
-    director.addGoals(...LIVING_GOALS);
+    director.addGoals(...LIVING_GOALS, ...INCIDENTS);
     const els: Partial<Record<StageThing, React.RefObject<HTMLElement>>> = {
       button: button.rootRef,
       picture: picture.rootRef,
       pim: pim.rootRef,
+      dot: dot.rootRef,
       lamp: lamp.rootRef,
       tick: tick.rootRef,
       plant: plant.rootRef,
+      'cushion-home': cushionHome,
+      'cup-home': cupHome,
     };
     const motionRef = dotMotion;
+    const stageRect = () => stageRef.current?.getBoundingClientRect() ?? null;
     const stage: LivingStage = {
-      rect: (n) => els[n]?.current?.getBoundingClientRect() ?? null,
+      rect: (n) => (n === 'cushion' || n === 'cup' ? propEls.current[n]?.getBoundingClientRect() : els[n]?.current?.getBoundingClientRect()) ?? null,
       dotTo: (n, onArrive) => {
         motionRef.current.errand = {
           target: () => {
+            if (typeof n === 'object') {
+              const sr = stageRect();
+              return sr ? { x: sr.left + n.x * sr.width, y: sr.top + n.y * sr.height } : null;
+            }
             const r = stage.rect(n);
             return r ? { x: r.left + r.width / 2, y: r.top + r.height * 0.3 } : null;
           },
@@ -113,12 +134,45 @@ export default function LivingRoom() {
       dotFree: () => {
         motionRef.current.errand = null;
       },
+      dotHold: () => {
+        const r = dot.rootRef.current?.getBoundingClientRect();
+        if (!r) return;
+        const at = { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+        const sr0 = stageRect();
+        // remember the spot relative to the stage, so scrolling doesn't drag him along
+        const fx = sr0 ? (at.x - sr0.left) / sr0.width : 0;
+        const fy = sr0 ? (at.y - sr0.top) / sr0.height : 0;
+        motionRef.current.errand = {
+          target: () => {
+            const sr = stageRect();
+            return sr ? { x: sr.left + fx * sr.width, y: sr.top + fy * sr.height } : at;
+          },
+          arrived: true,
+        };
+      },
+      dotPoint: () => {
+        const sr = stageRect();
+        const d = dot.rootRef.current?.getBoundingClientRect();
+        if (!sr || !d) return { x: 0.5, y: 0.85 };
+        return { x: Math.min(0.95, Math.max(0.05, (d.left + d.width / 2 - sr.left) / sr.width)), y: Math.min(0.94, Math.max(0.8, (d.bottom - sr.top) / sr.height)) };
+      },
       button: (type) => buttonApi.current?.(type === 'press' ? { type, rng: Math.random() } : { type }) ?? 'none',
+      props: {
+        get: (id) => useStageProps.getState()[id],
+        move: (id, place, at) => useStageProps.getState().move(id, place, at),
+        spot: (on, target) => useStageProps.getState().setSpot({ on, target: on ? (target ?? null) : null }),
+        outFor: (id) => {
+          const since = useStageProps.getState().outSince[id];
+          return since ? Date.now() - since : 0;
+        },
+      },
     };
     const off = director.setStage('living', stage);
     return () => {
       off();
       motionRef.current.errand = null;
+      // a light left on by an incident goes off with the room
+      useStageProps.getState().setSpot({ on: false, target: null });
     };
     // the refs are stable for the life of the room
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -202,7 +256,7 @@ export default function LivingRoom() {
         </div>
 
         <div className={styles.dim} aria-hidden="true" />
-        <div className={styles.stage} onClick={onStageClick}>
+        <div ref={stageRef} className={styles.stage} onClick={onStageClick}>
           <div className={styles.wall} data-surface="wall" aria-hidden="true" />
           <div className={styles.floor} data-surface="floor" aria-hidden="true" />
 
@@ -271,7 +325,10 @@ export default function LivingRoom() {
             <DustBunny />
           </div>
           <div className={`${styles.prop} ${styles.sofa}`}>
-            <Sofa />
+            <Sofa cushionRef={cushionHome} />
+          </div>
+          <div className={`${styles.prop} ${styles.sideTable}`}>
+            <SideTable cupRef={cupHome} />
           </div>
           <div className={`${styles.prop} ${styles.pim}`}>
             <Pim
@@ -297,6 +354,7 @@ export default function LivingRoom() {
               onActivate={click('ferdinand')}
             />
           </div>
+          <PropLayer world={world} refs={layerRefs} propEls={propEls} />
         </div>
 
         <Dot
@@ -308,6 +366,11 @@ export default function LivingRoom() {
           motion={dotMotion}
           onActivate={() => {
             const director = getAgents();
+            // caught carrying something: let everyone (the incident) know first
+            if (carriedByDot()) {
+              click('dot')();
+              return;
+            }
             const pry = director.goal('dot.pry-glass');
             if (useObjects.getState().living.buttonMode === 'shielded' && pry && !director.isRunning(pry.id) && director.start(pry, world)) return;
             click('dot')();
