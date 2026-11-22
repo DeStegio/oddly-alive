@@ -67,6 +67,8 @@ export const SECRETS: SecretDef[] = [
   { id: 'tourist', name: 'Tourist', room: 'anywhere', glyph: 'map', hint: 'Every room you know, quick as you can.', found: 'Went through every room you know in a minute and a half.' },
   { id: 'homebody', name: 'Homebody', room: 'anywhere', glyph: 'chair', hint: 'Pick a room. Stay in it.', found: 'Spent five minutes in one room without leaving.' },
   { id: 'puddle-jumper', name: 'Puddle Jumper', room: 'playground', glyph: 'cloud', hint: 'Bip doesn’t stop for weather.', found: 'Played volleyball with Bip in the rain.', after: 'volley' },
+  { id: 'back-fence', name: 'Back-Fence Champion', room: 'playground', glyph: 'ball', hint: 'Down the bottom of the Playground, Dot plays Bip over the fence. Ten in a row.', found: 'Kept a ten-hit rally going as Dot.' },
+  { id: 'odd-ball', name: 'Odd Ball', room: 'playground', glyph: 'ball', hint: 'Bip is good with balls. Less so with vegetables and footwear.', found: 'Won a point off Bip with a radish or a slipper.', after: 'back-fence' },
   { id: 'nap', name: 'Nap O’Clock', room: 'mood', glyph: 'moon', hint: 'A warm drink, then something soft.', found: 'Tea and a blanket put Nimbus to sleep.' },
   { id: 'mirror', name: 'The Other Cloud', room: 'mood', glyph: 'mirror', hint: 'Look long enough and something looks back.', found: 'Caught Nimbus’s reflection winking.' },
   { id: 'moodswing', name: 'Changeable Weather', room: 'anywhere', glyph: 'rainbow', hint: 'See the house in many moods in one visit.', found: 'Witnessed six kinds of weather in one visit.' },
