@@ -63,9 +63,9 @@ export function stepBall(b: BallState, m: Material, dt: number, wind = 0, _t = 0
   const ax = wind - b.vx * m.drag + (m.flutter ? Math.sin(b.x * 0.045 + b.y * 0.02) * 220 * m.flutter : 0);
   const ay = m.gravity - b.vy * m.drag;
   let vx = b.vx + ax * dt;
-  let vy = b.vy + ay * dt;
+  const vy = b.vy + ay * dt;
   let x = b.x + vx * dt;
-  let y = b.y + vy * dt;
+  const y = b.y + vy * dt;
   let hitNet = false;
   // the fence: a thin wall from the ground up to netTop
   const crossed = (b.x - COURT.net) * (x - COURT.net) <= 0 && b.x !== x;

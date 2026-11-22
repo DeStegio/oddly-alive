@@ -16,6 +16,8 @@ import { PLANTS, PLANT_KINDS, advance, isPlantKind, plant, stage, sunGrow, type 
 import { elevation, leanTowards, lightAt, phaseOf, shadow, skyColour, type Phase } from './light';
 import { MAX_CLOUDS, dryness, fireflyLight, isRaining, newCloud, orbit, rainbow, stepCloud, under, wilt, type Cloud } from './sky';
 import { classify, features, type Pt } from './strokes';
+import { hybridId, isOpen, makeBugs, stepBugs, type Bug, type Flower } from './pollinators';
+import { arrive, poke, thiefAway, tickThief, type Thief } from './seedThief';
 import { CropIcon, PlantView } from './PlantView';
 import styles from './Garden.module.css';
 
@@ -26,6 +28,11 @@ const SAVE_MS = 2000;
 const SETTLE_MS = 350;
 const STAGE_NAMES = ['just planted', 'a sprout', 'in leaf', 'in bud', 'in bloom'];
 const FIREFLIES = 9;
+/** Crosses made by the insects this visit: plot + when it was planted → the other parent. */
+const crossings = new Map<string, PlantKind>();
+const crossKey = (i: number, p: StoredPlot) => `${i}:${p.plantedAt}`;
+/** Crumb the sparrow comes at most this often. */
+const THIEF_EVERY_MS = 75_000;
 
 interface Fly {
   id: number;
@@ -75,6 +82,14 @@ export default function Garden() {
   const hand = useRef({ x: 0, y: 0, inside: false });
   const flyEls = useRef<Array<HTMLSpanElement | null>>([]);
   const snapAt = useRef<number[]>(Array.from({ length: 6 }, () => 0));
+  const bugs = useRef<Bug[] | null>(null);
+  const bugEls = useRef<Array<HTMLSpanElement | null>>([]);
+  const thief = useRef<Thief>(thiefAway());
+  const thiefSeed = useRef<PlantKind | null>(null);
+  const thiefLast = useRef(-THIEF_EVERY_MS + 8000);
+  const thiefEl = useRef<HTMLButtonElement>(null);
+  const [thiefPhase, setThiefPhase] = useState<Thief['phase']>('away');
+  const sawCross = useRef(false);
   const strokeN = useRef(0);
   const dirty = useRef(false);
   const kindsPlanted = useRef(new Set<PlantKind>());
@@ -84,6 +99,8 @@ export default function Garden() {
   const [inchLine, setInchLine] = useState<string | null>(null);
   const [bipLine, setBipLine] = useState<string | null>(null);
   const [keySeed, setKeySeed] = useState<PlantKind | null>(null);
+  const reducedRef = useRef(false);
+  reducedRef.current = useSettings((st) => st.motion) === 'reduced';
   const weatherRef = useRef(weather);
   weatherRef.current = weather;
   const night = phase === 'night';
@@ -156,8 +173,18 @@ export default function Garden() {
       const p = plotsRef.current[i];
       if (!p || !isPlantKind(p.kind)) return;
       const kind = p.kind;
+      const partner = crossings.get(crossKey(i, p));
+      crossings.delete(crossKey(i, p));
       setPlot(i, null);
-      deliver(kind);
+      if (partner && kind !== 'radish') {
+        // a hybrid: something new for the vase
+        useKeepsakes.getState().addToVase(hybridId(kind, partner));
+        useObjects.getState().setLiving({ vaseNew: true });
+        world.emit('OBJECT_STATE_CHANGED', { target: 'garden:hybrid', key: 'harvest', value: hybridId(kind, partner) });
+        world.effects.discover('hybrid-bloom');
+        world.effects.sound('chime');
+        say(setInchLine, pick(GARDEN_LINES.hybrid));
+      } else deliver(kind);
       // off it goes through the back door
       const scene = sceneRef.current;
       const el = plantEls.current[i];
@@ -168,7 +195,7 @@ export default function Garden() {
       setFlying((f) => [...f, { id, kind, x: b.left - r.left + b.width / 2, y: b.top - r.top + b.height * 0.4, hx: 24, hy: r.height * 0.7 }]);
       window.setTimeout(() => setFlying((f) => f.filter((x) => x.id !== id)), 1000);
     },
-    [deliver, setPlot],
+    [deliver, say, setPlot, world],
   );
 
   // ------------------------------------------------------------- growing
@@ -272,12 +299,14 @@ export default function Garden() {
         } else sw.ready = false;
         const wet = weatherRef.current === 'rain' || weatherRef.current === 'storm';
 
+        const open: Flower[] = [];
         plotsRef.current.forEach((p, i) => {
           const plantEl = plantEls.current[i];
           const plotEl = plotEls.current[i];
           if (!plotEl) return;
           const b = plotEl.getBoundingClientRect();
           const cx = b.left - r.left + b.width / 2;
+          if (p && p.growth >= 1 && isPlantKind(p.kind) && isOpen(p.kind, ph === 'night')) open.push({ plot: i, x: cx, y: b.top - r.top + b.height * 0.22, kind: p.kind });
           const cover = clouds.current.filter((c) => under(c, cx));
           const rained = wet || cover.some(isRaining);
           const light = lightAt(cx, sunX, s.e, r.width) * (cover.length ? 0.35 : 1);
@@ -331,6 +360,64 @@ export default function Garden() {
             }
           }
         });
+
+        // the insects: flower to flower, pollen on their legs
+        if (!bugs.current) bugs.current = makeBugs(r.width, r.height);
+        const env = { w: r.width, h: r.height, wind: weatherRef.current === 'windy' ? 140 : 0, raining: wet || clouds.current.some(isRaining), night: ph === 'night', sunX };
+        const stepped = stepBugs(bugs.current, open, env, now, dt, Math.random);
+        bugs.current = stepped.bugs;
+        stepped.bugs.forEach((bug, i) => {
+          const el = bugEls.current[i];
+          if (!el) return;
+          el.style.transform = `translate(${bug.x.toFixed(1)}px, ${bug.y.toFixed(1)}px) scaleX(${bug.vx < -2 ? -1 : 1})`;
+          el.dataset.home = String(env.night);
+        });
+        for (const v of stepped.visits) {
+          const plantEl = plantEls.current[v.plot];
+          if (plantEl) {
+            plantEl.dataset.visit = 'true';
+            window.setTimeout(() => delete plantEl.dataset.visit, 600);
+          }
+          const p = plotsRef.current[v.plot];
+          if (v.crossWith && p && !crossings.has(crossKey(v.plot, p))) {
+            crossings.set(crossKey(v.plot, p), v.crossWith);
+            rerender();
+            world.emit('OBJECT_STATE_CHANGED', { target: 'garden:cross', key: v.kind, value: v.crossWith });
+            world.effects.discover('cross-pollinated');
+            if (!sawCross.current) {
+              sawCross.current = true;
+              say(setInchLine, pick(GARDEN_LINES.cross));
+            }
+          }
+        }
+
+        // Crumb, the sparrow, after a seed you've just planted
+        const t = thief.current;
+        if (t.phase === 'away') {
+          // something planted in the last half-minute that's still small (seed or young sprout)
+          const fresh = plotsRef.current.findIndex((p) => p && p.growth < 0.45 && Date.now() - p.plantedAt < 30_000);
+          if (fresh >= 0 && ph === 'day' && !env.raining && now - thiefLast.current > THIEF_EVERY_MS && !reducedRef.current) {
+            thiefLast.current = now;
+            thief.current = arrive(fresh, now);
+            setThiefPhase('perched');
+            world.emit('OBJECT_STATE_CHANGED', { target: 'garden:thief', key: 'arrived', value: fresh });
+          }
+        } else {
+          const r2 = tickThief(t, now);
+          if (r2.thief.phase !== t.phase) setThiefPhase(r2.thief.phase);
+          if (r2.outcome === 'took') {
+            const p = plotsRef.current[t.plot];
+            thiefSeed.current = p && isPlantKind(p.kind) ? p.kind : null;
+            if (p && p.growth < 0.6) setPlot(t.plot, null);
+            say(setInchLine, pick(GARDEN_LINES.thiefTook));
+          } else if (r2.outcome === 'gone') {
+            say(setBipLine, pick(GARDEN_LINES.bipSparrow));
+            world.emit('OBJECT_STATE_CHANGED', { target: 'garden:thief', key: 'outcome', value: 'gone' });
+            thiefSeed.current = null;
+          }
+          thief.current = r2.thief;
+          placeThief(r, now);
+        }
       }),
     [bloomed, say, world],
   );
@@ -550,6 +637,53 @@ export default function Garden() {
     if (stroke.current) endStroke(e);
   };
 
+  // ------------------------------------------------------------- Crumb
+
+  /** Where Crumb is, by what it's doing. */
+  const placeThief = (r: DOMRect, now: number) => {
+    const el = thiefEl.current;
+    const t = thief.current;
+    const plotEl = plotEls.current[t.plot];
+    const fence = fenceRef.current;
+    if (!el || !plotEl || !fence) return;
+    const pb = plotEl.getBoundingClientRect();
+    const fb = fence.getBoundingClientRect();
+    const px = pb.left - r.left + pb.width / 2;
+    const soil = pb.bottom - r.top - pb.height * 0.12;
+    const perch = fb.top - r.top - 2;
+    const age = now - t.since;
+    let x = px;
+    let y = perch;
+    if (t.phase === 'hopping') {
+      const k = Math.min(1, age / 900);
+      y = perch + (soil - perch) * k - Math.sin(k * Math.PI) * 40;
+    } else if (t.phase === 'pecking') y = soil;
+    else if (t.phase === 'leaving' || t.phase === 'startled') {
+      const k = Math.min(1, age / 1400);
+      x = px + k * r.width * 0.6;
+      y = (t.phase === 'startled' ? soil : perch) - k * r.height * 0.5;
+    }
+    el.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px)`;
+  };
+
+  /** Shoo it (before it has the seed) or follow it (after): it drops the seed into a free plot. */
+  const shooThief = () => {
+    const r = poke(thief.current, performance.now());
+    if (r.outcome === 'none') return;
+    thief.current = r.thief;
+    setThiefPhase(r.thief.phase);
+    if (r.outcome === 'shooed') {
+      world.effects.discover('seed-saver');
+      say(setInchLine, pick(GARDEN_LINES.thiefShooed));
+    } else if (r.outcome === 'dropped' && thiefSeed.current) {
+      const free = plotsRef.current.findIndex((p) => !p);
+      if (free >= 0) setPlot(free, plant(thiefSeed.current, Date.now()));
+      say(setInchLine, pick(GARDEN_LINES.thiefDropped));
+      thiefSeed.current = null;
+    }
+    world.emit('OBJECT_STATE_CHANGED', { target: 'garden:thief', key: 'outcome', value: r.outcome });
+  };
+
   // ------------------------------------------------------------- keyboard
 
   /** Keyboard and screen readers: choose a seed, then act on a plot. */
@@ -674,7 +808,7 @@ export default function Garden() {
                   plotEls.current[i] = el;
                 }}
               >
-                <button type="button" className={styles.plot} data-stage={kind ? st : 'empty'} data-kind={kind ?? undefined} aria-label={label} onClick={onPlotKey(i)}>
+                <button type="button" className={styles.plot} data-stage={kind ? st : 'empty'} data-kind={kind ?? undefined} data-crossed={p && crossings.has(crossKey(i, p)) ? 'true' : undefined} aria-label={label} onClick={onPlotKey(i)}>
                   {kind && st > 0 ? <span className={styles.shadow} aria-hidden="true" /> : null}
                   <span
                     className={styles.plant}
@@ -705,6 +839,28 @@ export default function Garden() {
             ))
           : null}
 
+        {[0, 1, 2].map((i) => (
+          <span
+            key={i}
+            className={styles.bug}
+            data-kind={i < 2 ? 'bee' : 'butterfly'}
+            aria-hidden="true"
+            ref={(el) => {
+              bugEls.current[i] = el;
+            }}
+          />
+        ))}
+        {thiefPhase !== 'away' ? (
+          <button ref={thiefEl} type="button" className={styles.thief} data-phase={thiefPhase} aria-label={GARDEN_LINES.thiefLabel} onClick={shooThief}>
+            <svg viewBox="0 0 44 34" aria-hidden="true">
+              <path d="M6 20 C 6 8 26 4 34 14 L 42 12 L 36 20 C 34 28 14 30 6 20 Z" fill="#a07a5c" stroke="var(--char-ink)" strokeWidth="2.5" strokeLinejoin="round" />
+              <path className={styles.wing} d="M14 16 C 18 8 28 10 28 18 C 22 20 16 20 14 16 Z" fill="#7a5a42" stroke="var(--char-ink)" strokeWidth="2" />
+              <circle cx="31" cy="14" r="1.8" fill="var(--char-ink)" />
+              <path d="M16 28 v 5 M22 28 v 5" stroke="var(--char-ink)" strokeWidth="2" />
+              {thiefPhase === 'carrying' ? <ellipse cx="42" cy="16" rx="3" ry="2" fill="#6b4f3a" stroke="var(--char-ink)" strokeWidth="1.2" /> : null}
+            </svg>
+          </button>
+        ) : null}
         <svg ref={trailSvg} className={styles.trail} aria-hidden="true">
           <polyline ref={trailRef} points="" />
         </svg>
