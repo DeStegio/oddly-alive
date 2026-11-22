@@ -37,9 +37,6 @@ export const LINES = {
   plantGrow: ['new leaf.', 'oh. thank you.', 'growing. slowly.', 'I needed that.'],
   plantDroop: ['nobody talks to the plant.', 'I’ll just wilt here.', 'it’s fine. it’s chlorophyll.'],
 
-  buttonLabels: ['do not press', 'please do not', 'i said no', 'why are you like this', 'okay fine', 'press me'],
-  buttonProtest: ['hey.', 'stop that.', 'I’m load-bearing.', 'it does nothing. honestly. nothing.', 'my one job is to stay unpressed.', 'ow. it doesn’t hurt. ow.'],
-  buttonGiveUp: ['fine. you win. press away.', 'I’ve had a think about my life.', 'okay. I’m a normal button now.'],
 
   idleShort: ['…still there?', 'the room went quiet.', 'is this a staring contest? I’m bad at those.', 'I’ll wait. I’m furniture, I’m good at it.', 'we can just sit. that’s allowed.'],
   idleLong: ['everyone fell asleep.', 'shh. they’re asleep.'],

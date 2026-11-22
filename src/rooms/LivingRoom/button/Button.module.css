@@ -1,0 +1,337 @@
+/* The button that fights back: a coral button with a face, on a little table. */
+.root {
+  position: relative;
+  width: 100%;
+}
+.table {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* the button and everything it builds share one box, so the glass lines up */
+.mount {
+  position: absolute;
+  left: 50%;
+  top: 22%;
+  width: 46%;
+  aspect-ratio: 1.6;
+  transform: translate(-50%, -50%);
+}
+.bigButton {
+  position: absolute;
+  inset: 0;
+  appearance: none;
+  border: 0;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: transform 260ms var(--ease-spring);
+}
+.bigButton::before {
+  content: '';
+  position: absolute;
+  inset: 30% 0 0 0;
+  background: var(--char-ink);
+  border-radius: 50%;
+}
+.cap {
+  position: absolute;
+  inset: 0 6% 22% 6%;
+  background: var(--coral);
+  border: var(--stroke) solid var(--char-ink);
+  border-radius: 50%;
+  transition:
+    transform var(--dur-tap) var(--ease-out),
+    background-color var(--dur-ui);
+}
+.bigButton:hover .cap {
+  transform: translateY(-2px);
+}
+.bigButton:active .cap {
+  transform: translateY(26%);
+}
+.root[data-friendly='true'] .cap {
+  background: var(--mint);
+}
+
+/* its face: two dots and a mouth, drawn on the cap */
+.eye {
+  position: absolute;
+  top: 34%;
+  width: 11%;
+  height: 22%;
+  border-radius: 50%;
+  background: var(--char-ink);
+  transition:
+    height 160ms var(--ease-out),
+    top 160ms var(--ease-out),
+    transform 200ms var(--ease-out);
+}
+.eye:nth-child(1) {
+  left: 30%;
+}
+.eye:nth-child(2) {
+  right: 30%;
+}
+.mouth {
+  position: absolute;
+  left: 42%;
+  right: 42%;
+  top: 64%;
+  height: 10%;
+  border-bottom: 2px solid var(--char-ink);
+  border-radius: 0 0 50% 50%;
+}
+.root[data-mode='wary'] .eye {
+  height: 10%;
+  top: 40%;
+  transform: translateX(-20%);
+}
+.root[data-mode='wary'] .mouth {
+  border-radius: 0;
+}
+.root:is([data-mode='bracing'], [data-mode='shielded'], [data-mode='repairing']) .eye {
+  height: 6%;
+  top: 42%;
+}
+.root[data-mode='shielded'] .mouth {
+  border-radius: 0 0 50% 50%;
+  left: 38%;
+  right: 46%;
+  transform: rotate(-8deg);
+}
+.root[data-mode='hiding'] .eye {
+  height: 28%;
+  top: 28%;
+  width: 14%;
+}
+.root[data-mode='hiding'] .mouth {
+  border: 2px solid var(--char-ink);
+  border-radius: 50%;
+  height: 14%;
+  left: 45%;
+  right: 45%;
+}
+.root:is([data-mode='open'], [data-mode='lowering']) .eye {
+  height: 6%;
+  top: 40%;
+  border-radius: 50% 50% 0 0;
+}
+
+/* acts */
+.root[data-act='press'] .cap {
+  animation: press 320ms var(--ease-out);
+}
+@keyframes press {
+  40% {
+    transform: translateY(26%) scaleX(1.06);
+  }
+}
+.root[data-act='dodge'] .bigButton {
+  animation: dodge 520ms var(--ease-spring);
+}
+@keyframes dodge {
+  35% {
+    transform: translateX(-38%) rotate(-10deg);
+  }
+}
+.root[data-act='clink'] .glass {
+  animation: clink 300ms var(--ease-out);
+}
+@keyframes clink {
+  30% {
+    rotate: 2.5deg;
+  }
+  60% {
+    rotate: -1.5deg;
+  }
+}
+.root[data-act='slam'] .glass {
+  animation: slam 380ms var(--ease-spring);
+}
+@keyframes slam {
+  0% {
+    transform: translateY(-40%);
+  }
+}
+.root[data-mode='hiding'] .bigButton {
+  transform: translateY(70%) scale(0.75);
+}
+.root[data-anim='squish'] .cap {
+  animation: press 420ms var(--ease-out);
+}
+.root[data-anim='shake'] {
+  animation: oa-shake 450ms var(--ease-in-out);
+}
+
+/* brackets: little metal L-shapes at the corners */
+.bracket {
+  position: absolute;
+  bottom: -12%;
+  width: 20%;
+  height: 34%;
+  border: 3px solid var(--char-ink);
+  border-top: 0;
+  background: transparent;
+  animation: bracket-in 420ms var(--ease-spring) both;
+}
+.bracket[data-side='left'] {
+  left: -16%;
+  border-right: 0;
+  transform-origin: 100% 100%;
+}
+.bracket[data-side='right'] {
+  right: -16%;
+  border-left: 0;
+  transform-origin: 0 100%;
+}
+@keyframes bracket-in {
+  from {
+    transform: scale(0);
+  }
+}
+
+/* the glass: an object in the paper world, ink-outlined, with a shine */
+.glass {
+  position: absolute;
+  inset: -26% -14% -10% -14%;
+  border: 2.5px solid var(--char-ink);
+  border-radius: 12px 12px 4px 4px;
+  background:
+    linear-gradient(115deg, rgba(255, 255, 255, 0.55) 0 14%, transparent 14% 26%, rgba(255, 255, 255, 0.35) 26% 31%, transparent 31%),
+    rgba(170, 214, 230, 0.32);
+  box-shadow: 3px 3px 0 rgba(36, 35, 43, 0.18);
+  transform: translateY(calc(var(--lift, 0) * -115%));
+  cursor: grab;
+  touch-action: none;
+  z-index: 2;
+}
+.glass:active {
+  cursor: grabbing;
+}
+.glass:focus-visible {
+  outline: 3px solid var(--focus, var(--blue));
+  outline-offset: 3px;
+}
+.shine {
+  position: absolute;
+  right: 12%;
+  top: 10%;
+  width: 8%;
+  height: 40%;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.7);
+}
+.glass[data-mode='bracing'],
+.glass[data-mode='repairing'] {
+  animation: glass-down 900ms var(--ease-spring) both;
+}
+@keyframes glass-down {
+  from {
+    transform: translateY(-170%);
+    opacity: 0;
+  }
+  60% {
+    opacity: 1;
+  }
+}
+.glass[data-mode='open'] {
+  transform: translateY(-125%) rotate(-6deg);
+  opacity: 0.75;
+  pointer-events: none;
+}
+.glass[data-mode='lowering'] {
+  animation: glass-up 1100ms var(--ease-in-out) forwards;
+  pointer-events: none;
+}
+@keyframes glass-up {
+  to {
+    transform: translateY(-170%);
+    opacity: 0;
+  }
+}
+.glass[data-mode='hiding'] {
+  animation: glass-fall 1100ms cubic-bezier(0.5, 0, 0.9, 0.6) forwards;
+  pointer-events: none;
+}
+@keyframes glass-fall {
+  30% {
+    transform: translate(10%, 10%) rotate(14deg);
+  }
+  100% {
+    transform: translate(70%, 330%) rotate(80deg);
+    opacity: 0;
+  }
+}
+
+/* bolts on the brackets: small to look at, big enough to tap */
+.bolt {
+  position: absolute;
+  bottom: -30%;
+  width: 28px;
+  height: 28px;
+  margin: 0 -14px;
+  padding: 0;
+  border: 0;
+  background: none;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  z-index: 3;
+  touch-action: manipulation;
+}
+.bolt[data-side='left'] {
+  left: -6%;
+}
+.bolt[data-side='right'] {
+  right: -6%;
+}
+.bolt span {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #c9c4bb;
+  border: 2px solid var(--char-ink);
+  position: relative;
+  transform: rotate(var(--turn, 0deg));
+  transition: transform 260ms var(--ease-spring);
+}
+.bolt span::after {
+  content: '';
+  position: absolute;
+  left: 1px;
+  right: 1px;
+  top: 50%;
+  height: 2px;
+  margin-top: -1px;
+  background: var(--char-ink);
+}
+.bolt:hover span {
+  background: #ddd8cf;
+}
+
+.plate {
+  position: absolute;
+  left: 50%;
+  top: 56%;
+  transform: translateX(-50%) rotate(2deg);
+  white-space: nowrap;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: var(--cut-paper);
+  color: #24232b;
+  border: 2px solid var(--char-ink);
+  padding: 1px 6px;
+  border-radius: 3px;
+}
+
+[data-motion='reduced'] .glass,
+[data-motion='reduced'] .bracket,
+[data-motion='reduced'] .root[data-act] .cap,
+[data-motion='reduced'] .root[data-act] .bigButton {
+  animation: none !important;
+}
