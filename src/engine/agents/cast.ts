@@ -11,5 +11,6 @@ export const CAST: AgentDef[] = [
   { id: 'pim', start: { rest: 0.4 }, growth: { rest: 0.3, curiosity: 0.1 }, regard: { dot: 0.3, tick: 0.1, lumen: -0.1 } },
   { id: 'tick', start: { order: 0.5 }, growth: { order: 0.35 }, regard: { dot: -0.4, pim: 0.2 } },
   { id: 'lumen', start: { attention: 0.4 }, growth: { attention: 0.3 }, regard: { pim: 0.4, dot: 0.1, tick: -0.2 } },
+  { id: 'nimbus', start: { attention: 0.4, play: 0.3 }, growth: { attention: 0.25, play: 0.2 }, regard: { pim: 0.3, dot: 0.2 } },
   { id: 'ferdinand', start: { curiosity: 0.3 }, growth: { curiosity: 0.2 }, regard: { lumen: 0.5 } },
 ];
