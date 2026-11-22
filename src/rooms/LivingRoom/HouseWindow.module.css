@@ -137,3 +137,8 @@
 .stem[data-kind='mint'] {
   --flower: var(--mint);
 }
+
+/* hybrids from the garden: two flowers in one */
+.stem[data-kind^='hybrid']::after {
+  background: conic-gradient(var(--coral) 0 25%, var(--yellow) 0 50%, var(--lavender) 0 75%, var(--mint) 0);
+}
