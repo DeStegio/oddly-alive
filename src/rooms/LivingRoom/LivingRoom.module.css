@@ -127,6 +127,12 @@
   width: 36%;
   z-index: 8;
 }
+.sideTable {
+  left: 20.5%;
+  bottom: 13%;
+  width: clamp(54px, 5vw, 84px);
+  z-index: 7;
+}
 .pim {
   left: 37%;
   bottom: 32%;
