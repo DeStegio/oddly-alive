@@ -1,6 +1,8 @@
 import { pickLine } from '../../behaviors/helpers';
+import { Priority } from '../../engine/scheduler';
 import type { GoalControl, GoalDef } from '../../engine/agents/types';
 import type { ActorId, Expression } from '../../engine/types';
+import { DOT_PRIES, TICK_PUTS_BACK } from '../../content/button';
 
 /** What the Living Room offers its agents: where things are, and Dot's legs. */
 export interface LivingStage {
@@ -10,6 +12,8 @@ export interface LivingStage {
   dotTo(target: StageThing, onArrive?: () => void): void;
   /** Let Dot go back to following the visitor. */
   dotFree(): void;
+  /** Act on the button (Dot prying the glass, Tick putting it back). */
+  button(type: 'pry' | 'putBack' | 'press'): string;
 }
 export type StageThing = 'button' | 'picture' | 'pim' | 'lamp' | 'tick' | 'sofa' | 'cushion' | 'cup' | 'plant';
 
@@ -28,6 +32,51 @@ const look = (c: GoalControl, id: ActorId, at: StageThing, ms: number) => {
  * ends, however it ends.
  */
 export const LIVING_GOALS: GoalDef[] = [
+  {
+    // The glass is up: Dot can't resist. Tick can't resist putting it back.
+    id: 'dot.pry-glass',
+    actor: 'dot',
+    // asked for by the visitor sometimes, so it outranks Dot's idle plans
+    priority: Priority.CHARACTER,
+    cast: ['tick'],
+    rooms: LIVING,
+    kind: 'ambient',
+    props: ['button'],
+    durationMs: 14_000,
+    cooldownMs: 25_000,
+    answers: ['play', 'curiosity'],
+    when: (p) => p.flag('living.buttonMode') === 'shielded' && !!p.stage('living'),
+    utility: () => 0.9,
+    start(c) {
+      const stage = c.stage<LivingStage>('living')!;
+      face(c, 'dot', 'mischievous', 3000);
+      stage.dotTo('button', () => {
+        c.actors.send('dot', { type: 'anim', name: 'wiggle', durationMs: 700 });
+        c.after(700, () => {
+          if (stage.button('pry') !== 'pried') return c.done('too late');
+          if (c.rng() < 0.5) say(c, 'dot', DOT_PRIES, 1200);
+          c.satisfy('dot', 'play', -0.4);
+          c.remember('dot:pried-glass');
+          c.outcome = 'pried';
+          // Tick has views on this
+          c.after(1400, () => {
+            look(c, 'tick', 'button', 2400);
+            face(c, 'tick', 'annoyed', 2400);
+          });
+          c.after(4200, () => {
+            if (stage.button('putBack') === 'repaired') {
+              say(c, 'tick', TICK_PUTS_BACK, 1800);
+              c.satisfy('tick', 'order', -0.4);
+              c.outcome = 'pried, put back';
+            }
+          });
+          c.after(5600, () => c.done());
+        });
+      });
+      return () => stage.dotFree();
+    },
+  },
+
   {
     // Tick can't stand a crooked frame
     id: 'tick.straighten',
@@ -73,12 +122,14 @@ export const LIVING_GOALS: GoalDef[] = [
       face(c, 'dot', 'mischievous', 3000);
       stage.dotTo('button', () => {
         c.actors.send('dot', { type: 'anim', name: 'squish', durationMs: 500 });
-        c.emit('OBJECT_STATE_CHANGED', { target: 'button', key: 'poked', value: 'dot' });
+        const result = stage.button('press');
+        if (result !== 'pressed') c.outcome = result;
+        c.after(500, () => face(c, 'tick', 'annoyed', 1400));
         c.after(700, () => {
           face(c, 'dot', 'happy', 1500);
           c.satisfy('dot', 'play', -0.5);
           c.remember('dot:pressed-button');
-          c.outcome = 'pressed';
+          if (!c.outcome) c.outcome = 'pressed';
         });
         c.after(1800, () => c.done());
       });

@@ -391,46 +391,6 @@ export const livingBehaviors = [
 
   // --------------------------------------------------------------- Button
   defineBehavior({
-    id: 'button.protest',
-    implements: ['INT-016', 'INT-020'],
-    on: ['OBJECT_CLICKED'],
-    rooms: LIVING,
-    priority: Priority.DIRECT,
-    when: (c) => isTarget(c, 'button') && num(c.view.flag('living.buttonPresses')) < 4,
-    react: (c) =>
-      act('button', 1600, () => {
-        anim(c, 'button', 'shake');
-        say(c, 'button', LINES.buttonProtest, 1600);
-      }),
-  }),
-  defineBehavior({
-    id: 'button.giveup',
-    implements: ['INT-023'],
-    on: ['OBJECT_CLICKED'],
-    rooms: LIVING,
-    priority: Priority.DIRECT,
-    when: (c) => isTarget(c, 'button') && num(c.view.flag('living.buttonPresses')) === 4,
-    react: (c) =>
-      act('button', 2400, () => {
-        say(c, 'button', LINES.buttonGiveUp, 2400);
-        face(c, 'pim', 'surprised', 1400);
-      }),
-  }),
-  defineBehavior({
-    // Dot pressed it (an agent goal): the button takes it personally, Tick notices
-    id: 'button.poked-by-dot',
-    on: ['OBJECT_STATE_CHANGED'],
-    rooms: LIVING,
-    priority: Priority.CHARACTER,
-    when: (c) => isTarget(c, 'button') && (c.event.payload as { key?: string }).key === 'poked',
-    react: (c) =>
-      act('button', 1800, (ctl) => {
-        anim(c, 'button', 'squish');
-        c.effects.sound('press');
-        ctl.after(500, () => face(c, 'tick', 'annoyed', 1400));
-      }),
-  }),
-  defineBehavior({
     id: 'button.chain',
     implements: ['INT-027', 'INT-058'],
     on: ['OBJECT_CLICKED'],

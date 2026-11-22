@@ -3,6 +3,7 @@ import type { ActorChannel } from '../actors';
 import type { WorldEffects } from '../behaviorEngine';
 import type { EventPayloads, EventType } from '../events';
 import type { Rng } from '../rng';
+import type { PriorityLevel } from '../scheduler';
 import type { ActorId } from '../types';
 import type { Weather } from '../weather';
 
@@ -83,6 +84,8 @@ export interface GoalDef {
   kind: 'ambient' | 'incident';
   /** Props held exclusively while the goal runs. */
   props?: string[];
+  /** Scheduler priority (default: AMBIENT, or CHARACTER for incidents). */
+  priority?: PriorityLevel;
   /** Hard time limit; cleanup always runs. */
   durationMs: number;
   cooldownMs: number;
