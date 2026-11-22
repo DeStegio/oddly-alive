@@ -25,6 +25,8 @@ import { PullCord } from './PullCord';
 import { Door, Picture, Rug, SideTable, Sofa } from './Scenery';
 import { INCIDENTS } from './incidents/incidents';
 import { PropLayer } from './incidents/PropLayer';
+import { InfiniteRooms } from './InfiniteRooms/InfiniteRooms';
+import { LittleFrame } from './InfiniteRooms/LittleFrame';
 import { carriedByDot, useStageProps, type PropId } from './incidents/stageProps';
 import { ButtonActor, type ButtonApi } from './button/ButtonActor';
 import { LIVING_GOALS, type LivingStage, type StageThing } from './agentGoals';
@@ -63,6 +65,21 @@ export default function LivingRoom() {
   const button = useActor('button');
   const picture = useCharacter('picture', 'neutral');
   const buttonApi = useRef<ButtonApi | null>(null);
+  // Infinite Rooms: through the little painting
+  const littleRef = useRef<HTMLButtonElement>(null);
+  const [infinite, setInfinite] = useState(false);
+  const enterInfinite = useCallback(() => {
+    // the house goes quiet while you're away in there
+    const director = getAgents();
+    director.cancelAll(world);
+    director.setEnabled(false);
+    setInfinite(true);
+  }, [world]);
+  const leaveInfinite = useCallback(() => {
+    getAgents().setEnabled(true);
+    setInfinite(false);
+    window.setTimeout(() => littleRef.current?.focus(), 0);
+  }, []);
 
   const [marks, setMarks] = useState<Mark[]>([]);
   const markSeq = useRef(0);
@@ -286,6 +303,9 @@ export default function LivingRoom() {
               }}
             />
           </div>
+          <div className={`${styles.prop} ${styles.littleFrame}`}>
+            <LittleFrame frameRef={littleRef} onEnter={enterInfinite} />
+          </div>
           <div className={`${styles.prop} ${styles.clock}`}>
             <Clock
               expression={tick.expression}
@@ -384,6 +404,7 @@ export default function LivingRoom() {
         ) : null}
       </section>
       <Basement />
+      {infinite ? <InfiniteRooms world={world} seed={seed} fromRect={() => littleRef.current?.getBoundingClientRect() ?? null} onClose={leaveInfinite} /> : null}
     </>
   );
 }
