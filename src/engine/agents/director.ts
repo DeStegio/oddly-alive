@@ -216,7 +216,7 @@ export class AgentDirector implements WorldPlugin {
     const result = world.scheduler.schedule({
       id: `agent:${def.id}`,
       channel: def.actor,
-      priority: def.priority ?? (def.kind === 'incident' ? Priority.CHARACTER : Priority.AMBIENT),
+      priority: def.priority ?? (def.kind === 'incident' ? Priority.INCIDENT : Priority.AMBIENT),
       durationMs: def.durationMs,
       ambient: def.kind === 'ambient',
       run: (rc) => {

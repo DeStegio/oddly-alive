@@ -259,7 +259,7 @@ test('attic: rub the dust off, keep still to remember, wheel the lock open', asy
 
   // keep still over it and it remembers, down to the pencil on the back
   await page.mouse.move(p.x + p.width / 2, p.y + p.height / 2, { steps: 3 });
-  await expect(page.getByText('We took the early train because I insisted.')).toBeVisible({ timeout: 5000 });
+  await expect(page.getByText('We took the early train because I insisted.')).toBeVisible({ timeout: 9000 });
   await expect(page.getByText(/On the back, in pencil/)).toBeVisible({ timeout: 12000 });
 
   // the rest by keyboard, then the lock by wheel: 4, 7, 2
@@ -315,7 +315,7 @@ test('attic: rub the dust off, keep still to remember, wheel the lock open', asy
 test('characters act on their own: Dot walks over and presses the button', async ({ page }) => {
   await page.goto('./');
   await page.mouse.move(5, 300);
-  await expect.poll(() => page.evaluate(() => typeof (window as unknown as { __oddly?: object }).__oddly)).toBe('object');
+  await expect.poll(() => page.evaluate(() => typeof (window as unknown as { __oddly?: object }).__oddly), { timeout: 15_000 }).toBe('object');
   await page.waitForTimeout(4500); // the visitor has to be quiet for a moment
   type Hook = { force: (id: string) => boolean; agentLog: () => Array<{ goal: string; event: string; outcome?: string }> };
   await page.evaluate(() => (window as unknown as { __oddly: Hook }).__oddly.force('dot.press-button'));
@@ -384,7 +384,7 @@ test.describe('Living Room incidents', () => {
   const ready = async (page: Page) => {
     await page.goto('./');
     await page.mouse.move(5, 300);
-    await expect.poll(() => page.evaluate(() => typeof (window as unknown as { __oddly?: object }).__oddly)).toBe('object');
+    await expect.poll(() => page.evaluate(() => typeof (window as unknown as { __oddly?: object }).__oddly), { timeout: 15_000 }).toBe('object');
   };
 
   test('the sofa: Dot takes the cushion, and you can put it back', async ({ page }) => {
@@ -601,7 +601,7 @@ test.describe('reactive atmospheres', () => {
 test('the house remembers: an incident goes in the diary, and the button’s feelings survive a reload', async ({ page }) => {
   await page.goto('./');
   await page.mouse.move(5, 300);
-  await expect.poll(() => page.evaluate(() => typeof (window as unknown as { __oddly?: object }).__oddly)).toBe('object');
+  await expect.poll(() => page.evaluate(() => typeof (window as unknown as { __oddly?: object }).__oddly), { timeout: 15_000 }).toBe('object');
   type Hook = { force: (id: string) => boolean };
   await page.evaluate(() => (window as unknown as { __oddly: Hook }).__oddly.force('incident.sofa'));
   const cushion = page.getByRole('button', { name: /The sofa cushion/ });

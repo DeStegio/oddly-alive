@@ -67,6 +67,8 @@ export function VolleyCourt({ onActive }: { onActive?: (on: boolean) => void }) 
     bipActUntil: 0,
   });
   const m = MATERIALS[material];
+  // on a phone it's a tap, not a click
+  const [coarse] = useState(() => typeof window !== 'undefined' && !!window.matchMedia?.('(pointer: coarse)').matches);
   const matRef = useRef(m);
   matRef.current = m;
 
@@ -330,7 +332,7 @@ export function VolleyCourt({ onActive }: { onActive?: (on: boolean) => void }) 
         <div ref={ballEl} className={styles.ball} data-material={material} style={{ width: `${(m.r * 2 * 100) / COURT.w}%` }} aria-hidden="true">
           <BallArt id={material} />
         </div>
-        {phase === 'ready' && g.current.server === 'dot' ? <span className={styles.hint} aria-hidden="true">{VOLLEY.tapToServe}</span> : null}
+        {phase === 'ready' && g.current.server === 'dot' ? <span className={styles.hint} aria-hidden="true">{coarse ? VOLLEY.tapToServeTouch : VOLLEY.tapToServe}</span> : null}
       </div>
       <p id="volley-line" className={styles.line} aria-live="polite">
         {line}

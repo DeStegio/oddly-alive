@@ -149,3 +149,17 @@ describe('agent model', () => {
     expect(score(g, p, [])).toBeGreaterThan(score(g, calm, []));
   });
 });
+
+describe('incidents and everyday reactions', () => {
+  it('an ordinary character reaction on the same channel does not cut an incident short; the visitor still can', () => {
+    const cleaned: string[] = [];
+    const { run, world, director } = setup(21, [goal('scene', { kind: 'incident', durationMs: 60_000, start: () => () => cleaned.push('x') })]);
+    for (let i = 0; i < 20 && !director.isRunning('scene'); i++) run(1500);
+    expect(director.isRunning('scene')).toBe(true);
+    world.scheduler.schedule({ id: 'idle-fidget', channel: 'dot', priority: Priority.CHARACTER, durationMs: 100, run: () => {} });
+    expect(director.isRunning('scene')).toBe(true);
+    world.scheduler.schedule({ id: 'clicked', channel: 'dot', priority: Priority.DIRECT, durationMs: 100, run: () => {} });
+    expect(director.isRunning('scene')).toBe(false);
+    expect(cleaned).toHaveLength(1);
+  });
+});

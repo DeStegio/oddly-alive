@@ -89,3 +89,35 @@ Short architecture/design decision log. Newest at the bottom.
     hard itself or is shaken; a toppling neighbour doesn't count, and a
     freshly built pile has a settling period, so the pile never chain-
     reacts open by accident.
+
+## Phase 3
+
+27. **Agents sit on the existing engine.** Goals run as scheduler reactions on
+    the character's channel, so priorities, preemption by the visitor and
+    guaranteed cleanup come for free. The director decides every 1.5 s from
+    discrete facts, never per-frame positions; one incident at a time, a
+    quiet spell after, nothing while the visitor is busy, all cancelled on
+    leaving a room. Seeded, so decisions are reproducible in tests.
+28. **Incidents get their own priority (35).** The scheduler lets an equal
+    priority take a channel; at CHARACTER level any everyday reaction (an
+    idle fidget) ended a running incident. INCIDENT sits above everyday
+    reactions and below the visitor's direct input, which still interrupts.
+29. **The button is a machine with feelings, not a counter.** Bounded,
+    decaying irritation, trust, intensity and suspicion decide; the glass is
+    a real element over the button with its own hit target. Several ways
+    through (lift when calm, bolts, wait, Dot), none of them spamming.
+30. **Infinite Rooms rebase every room.** The zoom is a similarity about the
+    portal's fixed point (p = 1 lands exactly on it); at p = 1 the next room
+    becomes the current one at p = 0. At most three rooms are drawn; rooms
+    are rebuilt from seed + depth, never stored. SVG/CSS only.
+31. **Back-Fence Volley sits beside the old toy.** The throw-to-Bip volleyball
+    stays; the new game has its own pure model (materials, Bip's prediction
+    with reaction delay and mistakes).
+32. **Memory stays v3, additively.** `story` (when notable things happened,
+    at most 24 keys) and `button` (trust, suspicion) are validated with
+    defaults, so older saves load unchanged; no migration needed. Garden
+    crosses stay session-only.
+33. **One e2e retry.** A few interaction tests simulate fast throws and are
+    timing-sensitive under parallel load; a pass on retry is reported as
+    flaky, not hidden. Chasing those flakes found two real bugs (incident
+    priority, the sparrow's trigger).
