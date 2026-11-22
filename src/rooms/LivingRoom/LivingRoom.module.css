@@ -87,6 +87,11 @@
   top: 4%;
   width: clamp(110px, 11vw, 180px);
 }
+.littleFrame {
+  left: 35%;
+  top: 11%;
+  width: clamp(44px, 4.2vw, 72px);
+}
 .clock {
   left: 44%;
   top: 6%;

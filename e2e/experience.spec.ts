@@ -421,3 +421,45 @@ test.describe('Living Room incidents', () => {
     await expect.poll(() => outcome(page, 'incident.spotlight'), { timeout: 20_000 }).toMatch(/^redirected to /);
   });
 });
+
+test.describe('Infinite Rooms', () => {
+  test('into the little painting, two rooms deep, back out, and home (focus comes back)', async ({ page }) => {
+    await page.goto('./');
+    const frame = page.getByRole('button', { name: /very small painting/ });
+    await frame.scrollIntoViewIfNeeded();
+    await frame.click();
+    const dlg = page.getByRole('dialog', { name: 'Infinite Rooms' });
+    await expect(dlg).toBeVisible();
+    await expect(dlg).toHaveAttribute('data-depth', '1');
+    await page.getByRole('button', { name: /Zoom in/ }).click();
+    await expect(dlg).toHaveAttribute('data-depth', '2', { timeout: 4000 });
+    await page.keyboard.press('+');
+    await expect(dlg).toHaveAttribute('data-depth', '3', { timeout: 4000 });
+    // the rooms are the same every time for the same seed: a different kind each step
+    const kinds = await dlg.getAttribute('data-archetype');
+    expect(kinds).toBeTruthy();
+    await page.keyboard.press('-');
+    await expect(dlg).toHaveAttribute('data-depth', '2', { timeout: 4000 });
+    await page.getByRole('button', { name: 'Home' }).click();
+    await expect(dlg).toHaveCount(0, { timeout: 3000 });
+    await expect(frame).toBeFocused();
+  });
+
+  test('a hundred rooms in and out without the page growing', async ({ page }) => {
+    test.skip(test.info().project.name !== 'desktop');
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.goto('./');
+    await page.getByRole('button', { name: /very small painting/ }).click();
+    const dlg = page.getByRole('dialog', { name: 'Infinite Rooms' });
+    await expect(dlg).toBeVisible();
+    const count = () => page.evaluate(() => document.querySelectorAll('*').length);
+    const before = await count();
+    for (let i = 0; i < 100; i++) await page.keyboard.press('+');
+    await expect(dlg).toHaveAttribute('data-depth', '101');
+    for (let i = 0; i < 100; i++) await page.keyboard.press('-');
+    await expect(dlg).toHaveAttribute('data-depth', '1');
+    expect(Math.abs((await count()) - before)).toBeLessThan(before * 0.15);
+    await page.keyboard.press('Escape');
+    await expect(dlg).toHaveCount(0, { timeout: 3000 });
+  });
+});
