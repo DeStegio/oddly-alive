@@ -182,66 +182,6 @@ test('navigation always works, even mid-reaction', async ({ page }) => {
   await expect(page.locator('main#scene')).toHaveAttribute('data-room', 'memory');
 });
 
-test('garden: draw to plant, swipe to pick, and you are the sun', async ({ page }) => {
-  await page.addInitScript(() => {
-    if (sessionStorage.getItem('seeded-garden')) return;
-    sessionStorage.setItem('seeded-garden', '1');
-    const now = Date.now();
-    const ripe = { kind: 'sunflower', plantedAt: now, updatedAt: now, wateredAt: 0, growth: 1 };
-    localStorage.setItem(
-      'oddly-alive:memory',
-      JSON.stringify({
-        version: 3, visits: 1, firstVisit: now, lastVisit: now, discoveries: {}, counts: {}, roomVisits: {}, eventTotals: {}, lastRoom: 'garden', trust: 0.3,
-        settings: { sound: false, motion: 'full', motionExplicit: false, afterHours: false },
-        world: { garden: { plots: [null, ripe, null, null, null, null], vase: [] }, letters: [], almanac: {}, diary: [], records: {}, attic: { unlocked: false, hats: [] } },
-      }),
-    );
-  });
-  await page.goto('./#/garden');
-  const empty = page.getByRole('button', { name: 'Plot 1: empty' });
-  await empty.evaluate((el) => el.scrollIntoView({ block: 'center' }));
-  await page.waitForTimeout(300);
-
-  // a line drawn upwards in the soil is a sunflower
-  const e = (await empty.boundingBox())!;
-  await page.mouse.move(e.x + e.width / 2, e.y + e.height * 0.9);
-  await page.mouse.down();
-  for (let i = 1; i <= 10; i++) await page.mouse.move(e.x + e.width / 2 + (i % 2), e.y + e.height * 0.9 - i * 9);
-  await page.mouse.up();
-  await expect(page.getByRole('button', { name: /^Plot 1: sunflower/ })).toBeVisible();
-
-  // a swipe across the ripe one picks it, and it goes to the vase
-  const ripe = (await page.getByRole('button', { name: /^Plot 2: sunflower, in bloom/ }).boundingBox())!;
-  const y = ripe.y + ripe.height * 0.5;
-  await page.mouse.move(ripe.x - 10, y);
-  await page.mouse.down();
-  for (let i = 1; i <= 8; i++) await page.mouse.move(ripe.x - 10 + i * ((ripe.width + 20) / 8), y + (i % 2));
-  await page.mouse.up();
-  await expect(page.getByRole('button', { name: 'Plot 2: empty' })).toBeVisible();
-  await expect
-    .poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('oddly-alive:memory') || '{}').world?.garden?.vase ?? []), { timeout: 6000 })
-    .toContain('sunflower');
-
-  // the pointer is the sun: rest it behind the fence and night comes; lift it and it's day
-  const room = page.getByRole('region', { name: 'Garden' });
-  const fence = (await page.locator('[class*="fence"]').first().boundingBox())!;
-  await page.mouse.move(fence.x + fence.width * 0.5, fence.y + fence.height * 0.7, { steps: 4 });
-  await page.waitForTimeout(500);
-  await page.mouse.move(fence.x + fence.width * 0.52, fence.y + fence.height * 0.75);
-  await expect(room).toHaveAttribute('data-phase', 'night', { timeout: 4000 });
-  await page.mouse.move(fence.x + fence.width * 0.5, fence.y - 120, { steps: 4 });
-  await expect(room).toHaveAttribute('data-phase', 'day', { timeout: 4000 });
-
-  // a curl drawn in the sky becomes a raincloud
-  const cx = fence.x + fence.width * 0.3;
-  const cy = fence.y - 110;
-  await page.mouse.move(cx + 40, cy);
-  await page.mouse.down();
-  for (let i = 1; i <= 24; i++) await page.mouse.move(cx + Math.cos((i / 24) * Math.PI * 2) * 40, cy + Math.sin((i / 24) * Math.PI * 2) * 22);
-  await page.mouse.up();
-  await expect(page.locator('[class*="_cloud_"]')).toHaveCount(1);
-});
-
 test('attic: rub the dust off, keep still to remember, wheel the lock open', async ({ page }) => {
   test.setTimeout(60_000);
   await page.goto('./#/attic');
@@ -511,45 +451,6 @@ test.describe('Back-Fence Volley', () => {
     }
     expect(best).toBeGreaterThanOrEqual(2);
   });
-});
-
-test('the living garden: bees cross two flowers into a hybrid; Crumb the sparrow comes for a new seed', async ({ page }) => {
-  test.setTimeout(90_000);
-  await page.addInitScript(() => {
-    if (sessionStorage.getItem('seeded-eco')) return;
-    sessionStorage.setItem('seeded-eco', '1');
-    const now = Date.now();
-    const p = (kind: string) => ({ kind, plantedAt: now, updatedAt: now, wateredAt: 0, growth: 1 });
-    localStorage.setItem(
-      'oddly-alive:memory',
-      JSON.stringify({
-        version: 3, visits: 1, firstVisit: now, lastVisit: now, discoveries: {}, counts: {}, roomVisits: {}, eventTotals: {}, lastRoom: 'garden', trust: 0.3,
-        settings: { sound: false, motion: 'full', motionExplicit: false, afterHours: false },
-        world: { garden: { plots: [p('sunflower'), p('snapdragon'), null, null, null, null], vase: [] }, letters: [], almanac: {}, diary: [], records: {}, attic: { unlocked: false, hats: [] } },
-      }),
-    );
-  });
-  await page.goto('./#/garden');
-  // the sun up high, from the keyboard
-  const height = page.getByRole('slider', { name: /Sun height/ });
-  await height.focus();
-  await height.fill('90');
-  await expect.poll(() => page.locator('button[data-crossed="true"]').count(), { timeout: 60_000 }).toBeGreaterThan(0);
-  await page.locator('button[data-crossed="true"]').first().focus();
-  await page.keyboard.press('Enter');
-  await expect
-    .poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('oddly-alive:memory') || '{}').world?.garden?.vase ?? []), { timeout: 6000 })
-    .toEqual(expect.arrayContaining([expect.stringMatching(/^hybrid:/)]));
-  await page.getByRole('button', { name: 'Mint seeds' }).focus();
-  await page.keyboard.press('Enter');
-  const empty = page.getByRole('button', { name: /: empty$/ }).last();
-  await empty.focus();
-  await page.keyboard.press('Enter');
-  const crumb = page.getByRole('button', { name: /Crumb the sparrow/ });
-  await expect(crumb).toBeVisible({ timeout: 30_000 });
-  await crumb.focus();
-  await page.keyboard.press('Enter');
-  await expect(crumb).toHaveCount(0, { timeout: 5000 });
 });
 
 test('the shadow theatre: two hands make a bird; a hand turned upright, a rabbit (keyboard)', async ({ page }) => {

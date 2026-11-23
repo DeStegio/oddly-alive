@@ -1,21 +1,23 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { useKeepsakes } from '../../state/keepsakes';
 import { useObjects } from '../../state/world';
-import { getWorldState, initialWorldState, setWorldState } from '../../state/worldStore';
-import Garden from './Garden';
+import { initialWorldState, setWorldState } from '../../state/worldStore';
+import Garden, { resetGardenSession } from './Garden';
 
-const MIN = 60_000;
-
+/**
+ * The garden by keyboard only (the same path a screen-reader user takes):
+ * pick a seed, plant it, move the sun with the arrows, let days go with
+ * Enter, take a day back. Covers the old behaviour that was replaced
+ * (glyph planting, swipe-to-pick) with the Phase 4 puzzle box.
+ */
 describe('<Garden />', () => {
   beforeEach(() => {
-    vi.useFakeTimers();
-    vi.setSystemTime(10_000_000);
     setWorldState(initialWorldState());
     useObjects.getState().resetObjects();
     useKeepsakes.getState().reset();
+    resetGardenSession();
   });
-  afterEach(() => vi.useRealTimers());
 
   const renderGarden = () =>
     render(
@@ -24,37 +26,68 @@ describe('<Garden />', () => {
       </MemoryRouter>,
     );
 
-  it('keyboard: choose a seed, plant it, pick it when ripe; radishes go to the Playground', () => {
-    useKeepsakes.getState().setPlot(1, { kind: 'radish', plantedAt: Date.now(), updatedAt: Date.now(), wateredAt: 0, growth: 1 });
+  it('opens on the first job with someone already asking, and the play area ready', () => {
     renderGarden();
-    expect(screen.getAllByRole('button', { name: /empty/ })).toHaveLength(5);
-    fireEvent.click(screen.getByRole('button', { name: 'Sunflower seeds' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Plot 1: empty' }));
-    expect(screen.getByRole('button', { name: /Plot 1: sunflower, just planted/ })).toBeInTheDocument();
-    expect(useKeepsakes.getState().garden.plots[0]?.kind).toBe('sunflower');
-
-    // not ripe: nothing happens to it
-    fireEvent.click(screen.getByRole('button', { name: /Plot 1: sunflower/ }));
-    expect(useKeepsakes.getState().garden.plots[0]?.kind).toBe('sunflower');
-
-    fireEvent.click(screen.getByRole('button', { name: /Plot 2: radish, in bloom \(ready to pick\)/ }));
-    expect(useObjects.getState().playground.radishes).toBe(1);
-    expect(useKeepsakes.getState().garden.plots[1]).toBeNull();
+    expect(screen.getByRole('heading', { name: 'Garden' })).toBeInTheDocument();
+    expect(screen.getByText(/look at me\. at the house/)).toBeInTheDocument();
+    expect(screen.getAllByRole('gridcell')).toHaveLength(28);
+    expect(screen.getByRole('slider', { name: /The sun/ })).toHaveAttribute('aria-valuetext', 'noon sun (high)');
+    // no rules printed: no card of shapes, no instructions paragraph
+    expect(screen.queryByText(/Draw it in the soil/)).toBeNull();
   });
 
-  it('the sun has keyboard controls', () => {
+  it('job 1 by keyboard: plant a sunflower, two noons, then an evening: it faces the house', () => {
     renderGarden();
-    expect(screen.getByRole('slider', { name: /Sun, across the garden/ })).toBeInTheDocument();
-    expect(screen.getByRole('slider', { name: /Sun height/ })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /Sunflower seeds, 1 left/ }));
+    fireEvent.click(screen.getByRole('gridcell', { name: /^4, 2: empty soil/ }));
+    expect(screen.getByRole('gridcell', { name: /^4, 2: sunflower, a seed/ })).toBeInTheDocument();
+    const sun = screen.getByRole('slider', { name: /The sun/ });
+    act(() => {
+      fireEvent.keyDown(sun, { key: 'Enter' });
+    });
+    act(() => {
+      fireEvent.keyDown(sun, { key: 'Enter' });
+    });
+    expect(screen.getByRole('gridcell', { name: /^4, 2: sunflower, grown, facing south/ })).toBeInTheDocument();
+    fireEvent.keyDown(sun, { key: 'ArrowLeft' });
+    expect(sun).toHaveAttribute('aria-valuetext', 'evening sun (west, low)');
+    act(() => {
+      fireEvent.keyDown(sun, { key: 'Enter' });
+    });
+    expect(screen.getByRole('gridcell', { name: /^4, 2: sunflower, in bloom, facing west/ })).toBeInTheDocument();
+    expect(useKeepsakes.getState().garden2.solved).toContain('facing');
+    expect(screen.getByRole('button', { name: /next job/ })).toBeInTheDocument();
+    expect(useKeepsakes.getState().garden2.herbarium).toContain('sun-face');
   });
 
-  it('flowers go to the vase; a garden left alone keeps growing', () => {
-    useKeepsakes.getState().setPlot(2, { kind: 'mint', plantedAt: Date.now() - 2 * 60 * MIN, updatedAt: Date.now() - 2 * 60 * MIN, wateredAt: 0, growth: 0.1 });
+  it('a wrong answer is cheap: take the sun back and the bed is exactly as it was', () => {
     renderGarden();
-    // two hours away at half speed is plenty for mint
-    expect(screen.getByRole('button', { name: /Plot 3: mint, in bloom/ })).toBeInTheDocument();
-    expect(getWorldState().discoveries['came-back']).toBeDefined();
-    fireEvent.click(screen.getByRole('button', { name: /Plot 3: mint/ }));
-    expect(useKeepsakes.getState().garden.vase).toEqual(['mint']);
+    fireEvent.click(screen.getByRole('button', { name: /Sunflower seeds/ }));
+    fireEvent.click(screen.getByRole('gridcell', { name: /^2, 2: empty soil/ }));
+    const sun = screen.getByRole('slider', { name: /The sun/ });
+    for (let i = 0; i < 4; i++)
+      act(() => {
+        fireEvent.keyDown(sun, { key: 'Enter' });
+      });
+    expect(screen.getByText(/looking somewhere else/)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /Take the sun back one day/ }));
+    expect(screen.getByRole('gridcell', { name: /^2, 2: sunflower, in bloom, facing south/ })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /Go back to the start of day 1/ }));
+    expect(screen.getByRole('gridcell', { name: /^2, 2: sunflower, a seed/ })).toBeInTheDocument();
+  });
+
+  it('a seed planted today digs back up into the tin', () => {
+    renderGarden();
+    fireEvent.click(screen.getByRole('button', { name: /Sunflower seeds, 1 left/ }));
+    fireEvent.click(screen.getByRole('gridcell', { name: /^1, 1: empty soil/ }));
+    fireEvent.click(screen.getByRole('gridcell', { name: /^1, 1: sunflower/ }));
+    expect(screen.getByRole('button', { name: /Sunflower seeds, 1 left/ })).toBeInTheDocument();
+  });
+
+  it('free play is always there: the whole tin, no job', () => {
+    renderGarden();
+    fireEvent.click(screen.getByRole('button', { name: /Free play/ }));
+    expect(screen.getByRole('button', { name: /Moonflower seeds, 9 left/ })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Creeper seeds/ })).toBeInTheDocument();
   });
 });

@@ -25,11 +25,12 @@ test.describe('Phase 3 baseline: what every room already has', () => {
     await expect(page.getByRole('button', { name: /^Bip, the/ })).toBeVisible();
   });
 
-  test('Garden: six plots, Pim’s card, the sun sliders', async ({ page }) => {
+  test('Garden: a bed, the sun, the seed tin, the jobs on the fence (Phase 4)', async ({ page }) => {
     await visit(page, 'garden');
-    await expect(page.getByRole('button', { name: /^Plot \d/ })).toHaveCount(6);
-    await expect(page.getByText('Draw it in the soil')).toBeVisible();
-    await expect(page.getByRole('slider', { name: /Sun height/ })).toBeAttached();
+    await expect(page.getByRole('gridcell')).toHaveCount(28);
+    await expect(page.getByRole('slider', { name: /The sun/ })).toBeVisible();
+    await expect(page.getByRole('group', { name: 'The seed tin' })).toBeVisible();
+    await expect(page.getByRole('navigation', { name: 'Garden jobs' })).toBeVisible();
   });
 
   test('Mood Room: the barometer and the windowsill', async ({ page }) => {
