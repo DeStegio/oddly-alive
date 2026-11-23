@@ -31,6 +31,8 @@ interface Props {
   world: World;
   /** Marguerite has views on her own shadow. */
   onMarguerite: (line: string) => void;
+  /** A shape came alive (the attic turns it into a memory). */
+  onCreature?: (c: Creature) => void;
 }
 
 /**
@@ -38,7 +40,7 @@ interface Props {
  * things to hold up to the light. Drag them (and the lamp); turn them with
  * the wheel, Q / E, or the Turn button. Some combinations come alive.
  */
-export function ShadowTheatre({ world, onMarguerite }: Props) {
+export function ShadowTheatre({ world, onMarguerite, onCreature }: Props) {
   const [props, setProps] = useState<Prop[]>(startProps);
   const [lamp, setLamp] = useState<Lamp>({ x: 400, y: 430 });
   const [alive, setAlive] = useState<(Recognition & { n: number }) | null>(null);
@@ -70,6 +72,7 @@ export function ShadowTheatre({ world, onMarguerite }: Props) {
       world.effects.discover('shadow-play');
       if (seen.current.size >= 5) world.effects.discover('menagerie');
       if (r.creature === 'curtsy') onMarguerite(SHADOWS.marguerite);
+      onCreature?.(r.creature);
       world.effects.sound('chime');
       window.setTimeout(() => {
         setAlive((a) => (a?.n === n ? null : a));
@@ -77,7 +80,7 @@ export function ShadowTheatre({ world, onMarguerite }: Props) {
         cooling.current = performance.now() + 900;
       }, 2800);
     },
-    [alive, onMarguerite, world],
+    [alive, onCreature, onMarguerite, world],
   );
 
   // look again a moment after things settle (or once the last creature's moment is over)

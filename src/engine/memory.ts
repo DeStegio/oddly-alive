@@ -126,7 +126,7 @@ export function emptyWorldMemory(): WorldMemory {
 /** Garden and valley bonus water is capped: it is a bonus, never needed. */
 export const MAX_BONUS_BARREL = 3;
 const SANDBOX_MAX = 6000;
-const PIN_VALUE = /^[a-z][a-z0-9-]{0,24}:[0-9]{4}$/;
+const PIN_VALUE = /^([a-z][a-z0-9-]{0,24})?:([0-9]{4})?$/;
 
 export interface MemoryV3 extends Omit<MemoryV2, 'version'> {
   version: 3;

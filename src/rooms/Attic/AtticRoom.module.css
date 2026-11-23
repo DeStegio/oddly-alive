@@ -1,0 +1,597 @@
+/* The attic, Phase 4: the dusty attic on the left, the Memory Board on the right. */
+
+.room {
+  background: #2b241f;
+  color: #f3ede2;
+}
+.roof > span {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(160deg, transparent 49.6%, #1d1814 50%, transparent 50.6%) 0 0 / 220px 220px,
+    radial-gradient(ellipse at 30% 0%, #4a3b30, #2b241f 70%);
+}
+
+.layout {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  padding: calc(var(--nav-h) + 52px) clamp(10px, 2vw, 32px) 16px;
+  display: grid;
+  grid-template-columns: minmax(0, 1.65fr) minmax(300px, 1fr);
+  gap: clamp(10px, 1.6vw, 24px);
+  align-items: start;
+  align-content: start;
+  overflow-y: auto;
+}
+.tabs {
+  display: none;
+}
+.left {
+  display: grid;
+  gap: 8px;
+}
+.say {
+  justify-self: start;
+  max-width: 640px;
+  min-height: 2.4em;
+  padding: 8px 12px;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: var(--fs-md);
+  line-height: 1.25;
+  border: var(--stroke) solid #0d0b0a;
+  border-radius: 12px 12px 12px 4px;
+  box-shadow: 3px 4px 0 #0d0b0a;
+  animation: say-in 320ms var(--ease-spring);
+}
+.say[data-empty='true'] {
+  visibility: hidden;
+}
+@keyframes say-in {
+  from {
+    opacity: 0;
+    scale: 0.94;
+  }
+}
+
+/* ---------- the attic scene ---------- */
+.scene {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  border: 3px solid #0d0b0a;
+  border-radius: 14px;
+  background: #4a3b30;
+  touch-action: none;
+  box-shadow: 6px 7px 0 #0d0b0a;
+  cursor: grab;
+}
+.world {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-origin: 0 0;
+}
+.beams {
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 118px, #3a2d24 118px 132px),
+    linear-gradient(to bottom, #5a4636, #4a3b30);
+}
+.floor {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: repeating-linear-gradient(90deg, #6b5240 0 96px, #5e4636 96px 99px);
+  border-top: 3px solid #2b241f;
+}
+.skylight {
+  position: absolute;
+  left: 560px;
+  top: 0;
+  width: 150px;
+  height: 70px;
+  background: #34404f;
+  border: 3px solid #1d1814;
+  border-top: 0;
+  transition: background 1.2s var(--ease-in-out);
+}
+.skylight[data-open='true'] {
+  background: linear-gradient(to bottom, #cfe0ff, #fff3d0);
+  box-shadow: 0 60px 120px 40px rgb(255 240 200 / 0.18);
+}
+.sheetSpot {
+  position: absolute;
+  padding: 0;
+  border: 2px solid #0d0b0a;
+  border-radius: 3px 3px 10px 10px;
+  background: #efe6d4;
+  cursor: pointer;
+  z-index: 3;
+  box-shadow: 3px 3px 0 #0d0b0a;
+}
+.sheetSpot span {
+  position: absolute;
+  inset: 20% 30%;
+  background: radial-gradient(circle, rgb(245 216 115 / 0.7), transparent 70%);
+}
+.marguerite {
+  position: absolute;
+  z-index: 2;
+}
+.marguerite button,
+.marguerite svg {
+  width: 100%;
+  height: 100%;
+}
+.gramSpot {
+  position: absolute;
+  z-index: 2;
+}
+.item {
+  position: absolute;
+  z-index: 2;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  filter: drop-shadow(2px 3px 0 rgb(0 0 0 / 0.45));
+  transition: scale var(--dur-ui) var(--ease-spring);
+}
+.item svg {
+  width: 100%;
+  height: 100%;
+}
+.item:disabled {
+  cursor: inherit;
+}
+.item[data-up='true']:hover {
+  scale: 1.08;
+}
+.item[data-fall='true'] {
+  animation: fall 1.1s cubic-bezier(0.5, 0, 0.75, 0) backwards;
+}
+@keyframes fall {
+  0% {
+    translate: 40px -420px;
+    rotate: -30deg;
+  }
+  80% {
+    translate: 0 0;
+    rotate: 8deg;
+  }
+  90% {
+    translate: 0 -10px;
+  }
+}
+.houseDiary {
+  position: absolute;
+  z-index: 2;
+  padding: 0;
+  border: 2px solid #0d0b0a;
+  border-radius: 3px;
+  background: var(--coral-d1);
+  cursor: pointer;
+}
+.houseDiary:disabled {
+  cursor: inherit;
+}
+.envelope {
+  position: absolute;
+  z-index: 2;
+  background: var(--paper);
+  border: 2px solid #0d0b0a;
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+}
+.trunk {
+  position: absolute;
+  z-index: 2;
+}
+.trunk svg {
+  width: 100%;
+  height: 100%;
+}
+.trunk[data-open='true'] .lid {
+  transform: translateY(-14px) rotate(-6deg);
+  transform-origin: 10% 100%;
+}
+.lock {
+  position: absolute;
+  left: 22%;
+  right: 22%;
+  bottom: 16%;
+  display: flex;
+  justify-content: space-between;
+}
+.dial {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 26px;
+  font: 700 15px var(--font-mono);
+  color: #24232b;
+  background: #e2c98a;
+  border: 2px solid #0d0b0a;
+  border-radius: 4px;
+  cursor: pointer;
+  user-select: none;
+}
+.dust {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 4;
+  pointer-events: none;
+  image-rendering: auto;
+}
+.closed {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 5;
+  background: repeating-linear-gradient(100deg, #1b1612 0 40px, #221b16 40px 46px);
+  border-left: 3px solid #0d0b0a;
+  display: grid;
+  place-items: center;
+}
+.closed span {
+  font-family: var(--font-display);
+  font-style: italic;
+  color: #a99d8c;
+  font-size: 22px;
+}
+.beam {
+  /* the bulb's light, swinging gently; darkness everywhere else */
+  position: absolute;
+  inset: -20%;
+  z-index: 6;
+  pointer-events: none;
+  background: radial-gradient(ellipse 30% 45% at 30% 40%, transparent 30%, rgb(10 8 6 / 0.55) 100%);
+  transform-origin: 30% 0%;
+  animation: swing 5s var(--ease-in-out) infinite alternate;
+  transition: opacity 1.4s;
+}
+.scene[data-act='2'] .beam {
+  opacity: 0.55;
+}
+.scene[data-act='3'] .beam {
+  opacity: 0.3;
+}
+.scene[data-intro='true'] .beam {
+  background: radial-gradient(ellipse 26% 40% at 28% 60%, transparent 20%, rgb(10 8 6 / 0.82) 100%);
+}
+@keyframes swing {
+  from {
+    rotate: -4deg;
+  }
+  to {
+    rotate: 4deg;
+  }
+}
+.keys {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+.small {
+  font: 600 var(--fs-xs) var(--font-ui);
+  padding: 4px 10px;
+  border: 2px solid #0d0b0a;
+  border-radius: var(--radius-pill);
+  background: var(--paper);
+  color: var(--ink);
+  cursor: pointer;
+}
+.tip {
+  font-size: var(--fs-xs);
+  color: #d8cfbf;
+}
+
+/* ---------- the Memory Board (a corkboard) ---------- */
+.board {
+  padding: 14px;
+  background:
+    radial-gradient(circle at 20% 30%, rgb(0 0 0 / 0.08) 1px, transparent 2px) 0 0 / 9px 9px,
+    #b88a5a;
+  color: #24232b;
+  border: 6px solid #6b4a30;
+  border-radius: 8px;
+  box-shadow: 6px 7px 0 #0d0b0a;
+  display: grid;
+  gap: 12px;
+}
+.boardTitle {
+  font-size: var(--fs-lg);
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+.boardTitle span {
+  font: 600 var(--fs-xs) var(--font-ui);
+}
+.people {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.person {
+  position: relative;
+  width: 86px;
+  padding: 6px 4px 6px;
+  background: var(--paper);
+  border: 2px solid #24232b;
+  border-top: 6px solid var(--who);
+  text-align: center;
+  rotate: -1deg;
+  box-shadow: 2px 3px 0 rgb(0 0 0 / 0.4);
+}
+.person:nth-child(even) {
+  rotate: 1.5deg;
+}
+.person svg {
+  width: 40px;
+  height: 46px;
+}
+.personName {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.15;
+}
+.personRole {
+  display: block;
+  font-size: 10px;
+  color: #5b5866;
+}
+.things {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+.thing {
+  position: relative;
+  display: grid;
+  grid-template-columns: 52px 1fr;
+  gap: 8px;
+  align-items: center;
+  padding: 6px 8px;
+  background: #fffaf1;
+  border: 2px solid #24232b;
+  border-left: 6px solid var(--who);
+  box-shadow: 2px 3px 0 rgb(0 0 0 / 0.35);
+}
+.thing::before {
+  /* the pin */
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--coral);
+  border: 2px solid #24232b;
+}
+.thing[data-locked='true'] {
+  background: var(--mint-l2);
+}
+.thing[data-locked='true']::before {
+  background: var(--yellow);
+}
+.thing[data-fresh='true'] {
+  animation: pin-in 900ms var(--ease-spring);
+}
+@keyframes pin-in {
+  30% {
+    scale: 1.05;
+    rotate: -2deg;
+  }
+}
+.thingArt {
+  width: 52px;
+  height: 52px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+.thingArt svg {
+  width: 100%;
+  height: 100%;
+}
+.thingBody {
+  display: grid;
+  gap: 4px;
+  font-size: var(--fs-sm);
+}
+.owners {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.ownerChip {
+  position: relative;
+  min-width: 34px;
+  height: 30px;
+  padding: 0 6px;
+  font: 700 13px var(--font-ui);
+  color: #24232b;
+  background: var(--paper);
+  border: 2px solid #24232b;
+  border-bottom: 5px solid var(--who);
+  border-radius: 6px;
+  cursor: pointer;
+}
+.ownerChip span {
+  position: absolute;
+  top: -7px;
+  right: -5px;
+  font-size: 9px;
+  background: #24232b;
+  color: #fff;
+  border-radius: 6px;
+  padding: 0 3px;
+}
+.ownerChip[aria-checked='true'] {
+  background: var(--who);
+  translate: 0 -2px;
+}
+.decade {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700;
+}
+.decade button {
+  width: 30px;
+  height: 28px;
+  border: 2px solid #24232b;
+  border-radius: 6px;
+  background: var(--yellow-l1);
+  cursor: pointer;
+  color: #24232b;
+}
+.decade span {
+  min-width: 52px;
+  text-align: center;
+}
+.lockedNote {
+  font-size: var(--fs-xs);
+  font-weight: 600;
+}
+.empty {
+  font-size: var(--fs-sm);
+}
+.notebook summary {
+  cursor: pointer;
+  font-weight: 700;
+}
+.notebook ul {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 0;
+  display: grid;
+  gap: 6px;
+  max-height: 260px;
+  overflow: auto;
+}
+.notebook li {
+  display: grid;
+  font-size: var(--fs-xs);
+  background: var(--paper);
+  border: 1px solid #24232b;
+  padding: 4px 6px;
+}
+.notebook li button {
+  justify-self: start;
+  border: 0;
+  background: none;
+  font-weight: 700;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+  color: #24232b;
+}
+
+/* ---------- reading, the theatre, the twist ---------- */
+.reader {
+  position: absolute;
+  z-index: 90;
+  left: 50%;
+  top: 50%;
+  translate: -50% -50%;
+  width: min(92vw, 420px);
+  padding: 18px;
+  background: var(--paper);
+  color: var(--ink);
+  border: var(--stroke) solid #0d0b0a;
+  border-radius: 10px;
+  box-shadow: var(--shadow-lg);
+  display: grid;
+  gap: 8px;
+}
+.readerArt {
+  width: 96px;
+  height: 96px;
+}
+.reader h2 {
+  font-size: var(--fs-lg);
+}
+.small2 {
+  font-size: var(--fs-xs);
+  color: var(--ink-soft);
+}
+.overlay {
+  position: absolute;
+  z-index: 85;
+  inset: var(--nav-h) 0 0 0;
+  padding: 16px clamp(8px, 3vw, 40px);
+  overflow: auto;
+  background: rgb(20 16 12 / 0.92);
+  display: grid;
+  gap: 12px;
+  justify-items: center;
+  align-content: start;
+}
+.twist {
+  max-width: 620px;
+  display: grid;
+  gap: 10px;
+  padding: 20px;
+  background: var(--paper);
+  color: var(--ink);
+  border: var(--stroke) solid #0d0b0a;
+  border-radius: 12px;
+  font-family: var(--font-display);
+  font-size: var(--fs-lg);
+}
+.twist svg {
+  width: 80px;
+}
+
+@media (max-width: 860px) {
+  .layout {
+    grid-template-columns: 1fr;
+    padding-top: calc(var(--nav-h) + 40px);
+  }
+  .tabs {
+    display: flex;
+    gap: 6px;
+  }
+  .tabs button {
+    flex: 1;
+    padding: 6px;
+    font: 700 var(--fs-sm) var(--font-ui);
+    border: 2px solid #0d0b0a;
+    border-radius: 8px;
+    background: #4a3b30;
+    color: #f3ede2;
+  }
+  .tabs button[aria-selected='true'] {
+    background: var(--yellow);
+    color: #24232b;
+  }
+  .layout[data-panel='attic'] .right,
+  .layout[data-panel='board'] .left {
+    display: none;
+  }
+  .say {
+    font-size: var(--fs-sm);
+  }
+}
+
+[data-motion='reduced'] .beam,
+[data-motion='reduced'] .item {
+  animation: none;
+}
