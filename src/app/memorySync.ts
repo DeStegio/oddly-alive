@@ -35,7 +35,7 @@ export function composeMemory(now: number): MemoryV3 {
     eventTotals: persistableTotals(mergeCounts(prev.eventTotals as Record<string, number>, s.eventTotals)),
     lastRoom: s.room,
     trust: s.vars.trust,
-    settings: { sound: settings.sound, motion: settings.motion, motionExplicit: settings.motionExplicit, afterHours: settings.afterHours },
+    settings: { sound: settings.sound, motion: settings.motion, motionExplicit: settings.motionExplicit, afterHours: settings.afterHours, hints: settings.hints },
     world: keepsakesSnapshot(),
   };
 }
@@ -65,6 +65,7 @@ export function startMemory(world: World): () => void {
   // sound is never restored: every visit starts silent until the visitor opts in
   useSettings.getState().hydrate({
     afterHours: st.afterHours,
+    hints: st.hints,
     ...(st.motionExplicit ? { motion: st.motion, motionExplicit: true } : {}),
   });
   setWorldState({

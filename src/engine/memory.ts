@@ -35,6 +35,8 @@ export interface MemorySettings {
   motion: 'full' | 'reduced';
   motionExplicit: boolean;
   afterHours: boolean;
+  /** Phase 4: characters may nudge you when you seem stuck (opt-out). */
+  hints: boolean;
 }
 
 export interface MemoryV2 {
@@ -90,6 +92,15 @@ export interface WorldMemory {
   story: Record<string, number>;
   /** How the Living Room button feels about you, between visits. */
   button: { trust: number; suspicion: number };
+  /**
+   * Phase 4 (additive, still v3). The garden's jobs done, the Herbarium pages
+   * found, and bonus barrel water from the valley's rain.
+   */
+  garden2: { solved: string[]; herbarium: string[]; barrel: number };
+  /** The Weather Workshop: postcards answered, and the sandbox valley (a compact string, '' for none). */
+  workshop: { solved: string[]; sandbox: string };
+  /** The attic Memory Board: evidence found, pins (object → 'owner:decade'), locked objects, shadow scenes, act. */
+  board: { found: string[]; pins: Record<string, string>; locked: string[]; scenes: string[]; act: number };
 }
 
 export const GARDEN_PLOTS = 6;
@@ -106,8 +117,16 @@ export function emptyWorldMemory(): WorldMemory {
     attic: { unlocked: false, hats: [] },
     story: {},
     button: { trust: 0.35, suspicion: 0 },
+    garden2: { solved: [], herbarium: [], barrel: 0 },
+    workshop: { solved: [], sandbox: '' },
+    board: { found: [], pins: {}, locked: [], scenes: [], act: 1 },
   };
 }
+
+/** Garden and valley bonus water is capped: it is a bonus, never needed. */
+export const MAX_BONUS_BARREL = 3;
+const SANDBOX_MAX = 6000;
+const PIN_VALUE = /^[a-z][a-z0-9-]{0,24}:[0-9]{4}$/;
 
 export interface MemoryV3 extends Omit<MemoryV2, 'version'> {
   version: 3;
@@ -128,7 +147,7 @@ export interface MemoryV1 {
 
 export type LoadStatus = 'fresh' | 'restored' | 'migrated' | 'corrupt' | 'unavailable' | 'disabled';
 
-export const DEFAULT_SETTINGS: MemorySettings = { sound: false, motion: 'full', motionExplicit: false, afterHours: false };
+export const DEFAULT_SETTINGS: MemorySettings = { sound: false, motion: 'full', motionExplicit: false, afterHours: false, hints: true };
 
 export function emptyMemory(now: number): MemoryV3 {
   return {
@@ -168,6 +187,7 @@ function cleanSettings(v: unknown): MemorySettings {
     motion: v.motion === 'reduced' ? 'reduced' : 'full',
     motionExplicit: v.motionExplicit === true,
     afterHours: v.afterHours === true,
+    hints: v.hints !== false,
   };
 }
 
@@ -244,6 +264,30 @@ export function cleanWorld(v: unknown): WorldMemory {
   if (isObj(v.button)) {
     const unit = (n: unknown, d: number) => (typeof n === 'number' && Number.isFinite(n) ? Math.max(0, Math.min(1, n)) : d);
     w.button = { trust: unit(v.button.trust, 0.35), suspicion: unit(v.button.suspicion, 0) };
+  }
+  // Phase 4 additions: missing in older saves, so they start empty
+  if (isObj(v.garden2)) {
+    w.garden2 = {
+      solved: cleanIds(v.garden2.solved, 32),
+      herbarium: cleanIds(v.garden2.herbarium, 48),
+      barrel: isNat(v.garden2.barrel) ? Math.min(MAX_BONUS_BARREL, Math.floor(v.garden2.barrel)) : 0,
+    };
+  }
+  if (isObj(v.workshop)) {
+    const sb = v.workshop.sandbox;
+    w.workshop = { solved: cleanIds(v.workshop.solved, 24), sandbox: typeof sb === 'string' && sb.length <= SANDBOX_MAX && /^[A-Za-z0-9+/=,.:;|-]*$/.test(sb) ? sb : '' };
+  }
+  if (isObj(v.board)) {
+    const pins: Record<string, string> = {};
+    if (isObj(v.board.pins)) for (const [k, val] of Object.entries(v.board.pins).slice(0, 24)) if (ID_PATTERN.test(k) && typeof val === 'string' && PIN_VALUE.test(val)) pins[k] = val;
+    const act = v.board.act;
+    w.board = {
+      found: cleanIds(v.board.found, 64),
+      pins,
+      locked: cleanIds(v.board.locked, 24),
+      scenes: cleanIds(v.board.scenes, 8),
+      act: act === 2 || act === 3 ? act : 1,
+    };
   }
   return w;
 }
