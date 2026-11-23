@@ -170,7 +170,7 @@ export const VIGNETTES: string[] = [
   'The wireless man took the back bedroom after the war. He mended things that weren’t broken, to see how they worked. That lamp downstairs was his. He talked to it.',
   'A little girl lived here. She drew a shy thing with big eyes on this very wall, and told everyone its name.',
   'The bee man grew sunflowers by the fence so the bees had somewhere to go. He hummed to them. He hummed to me.',
-  'The night nurse slept in the daytime and sat up with the house at night. She set every clock. One of them still keeps her hours.',
+  'The night nurse slept in the daytime and sat up with the house at night, watching the little valley in its glass box. She set every clock. One still keeps her hours.',
 ];
 
 /** The twist, when the whole board is pinned. */
