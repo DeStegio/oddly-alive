@@ -11,11 +11,11 @@ through behavior:
 - a shy blob looks away if you stare
 - a lamp sulks if you flick it too often
 - a fern grows a leaf for every secret you find
-- the weather follows the house's mood, and every room feels it
+- the weather comes from a little valley in a glass box (the mood fills it when you don't), and every room feels it
 - a robot next door plays volleyball with whatever you throw over the fence
 - Great-Aunt Pim left a letter in every room
 
-There is no goal, score, tutorial or chatbot. The activity is the website itself.
+Most of the house has no goal, score, tutorial or chatbot: the activity is the website itself. Three rooms are small games with rules you discover by trying things (Phase 4): the Garden, the Weather Workshop and the Attic.
 
 **Live demo:** https://destegio.github.io/oddly-alive/. Every push to `main` builds it to the `gh-pages` branch; GitHub Pages has to be pointed at that branch once (see "Deployment").
 
@@ -25,12 +25,12 @@ There is no goal, score, tutorial or chatbot. The activity is the website itself
 | --- | --- |
 | **Living Room**: Pim the shy blob, Dot the follower, Lumen the lamp, Tick the clock, Ferdinand the fern, a dust bunny, and characters with plans of their own: Tick straightens the crooked portrait, Dot pinches the sofa cushion or Pim's teacup (put them back, or don't), Lumen stages a spotlight show. The do-not-press button has feelings: go at it and it builds a glass box over itself; lift the glass once it has calmed down, loosen its bolts, wait it out, or ask Dot. A very small painting on the wall is of this room: zoom into it for **Infinite Rooms**, a seemingly endless run of impossible living rooms, each with a way into the next. | ![Living Room on a phone](docs/screenshots/mobile-living-room.png) |
 | **Playground**: Matter.js shapes with faces. They have momentum, stack and collide, and the room opens with a ramp-and-domino chain reaction. Throw something hard enough and it leaves the tray: over the fence, Bip volleys it back. Further down, **Back-Fence Volley**: you are Dot, Bip is over the fence; timing your swing shapes the shot; play with a ball, a balloon, a radish, a soft cube or (once the attic is found) a slipper. Field Notes keep score. | ![Playground](docs/screenshots/playground.png) |
-| **Mood Room**: a tall window onto the house weather. Six objects on the sill nudge the mood; a barometer pins the weather; and the weather has consequences: rain and tea steam the window up (draw in it), wind takes the papers off the sill, snow and the blanket make Nimbus a tent, a rainbow and the mirror throw colour round the room. Nimbus breathes on the glass and blows the odd gust himself. | ![Mood Room](docs/screenshots/mood-room.png) |
+| **Weather Workshop** (was the Mood Room): the window is a little valley in a glass box, and its weather is not chosen, it happens. Put a teacup, an ice cube, a fan, the sun lamp or the mirror into the valley, raise or lower the weathervane, wring Nimbus out: heat rises, cold wet air makes cloud, heavy cloud rains (or snows, if the ground is cold), wind blows from cold to warm, fog settles in still cold air, rainbows land opposite the lamp. Ten postcards ask for particular weather; the barometer forecasts by looking ten seconds ahead. Whatever the valley does is the whole house's weather. | ![Weather Workshop](docs/phase4/after/mood-desktop-day-5s.png) |
 | **Secret Space**: a dark cabinet lit by a torch that follows your pointer. It shows every secret, with optional hints, plus a chest, a token puzzle and invisible ink. | ![Secret Space](docs/screenshots/secret-space.png) |
 | **Memory Room**: everything the house remembers about this browser: visits, secrets, favourite things to poke and a silly nickname. It also has Reset Session, Reset World and Forget me. | ![Memory Room](docs/screenshots/memory-room.png) |
 | **After Hours**: a rooftop at night with a moon that's too close, a radio, a porch light and a moth. The stars are an instrument: every star has a note, and a constellation plays as a tune (the stars light as they sound, so it works with the sound off). | ![After Hours](docs/screenshots/after-hours.png) |
-| **Garden**: you are the sun. Move over the sky and the light follows: plants grow where it falls, lean after it, and their shadows swing round; sink it behind the fence for night, fireflies and moonflowers. Draw shapes in the soil to plant (a line, a circle, a zigzag, a crescent, a spiral), swipe across anything ripe to pick it. Strong sun dries the beds, so draw a cloud in the sky for rain; rain opposite the sun makes a rainbow. Bees and a butterfly carry pollen from flower to flower and sometimes cross them into a new variety for the vase; Crumb the sparrow comes for newly planted seeds. | ![Garden](docs/screenshots/garden.png) |
-| **Attic**: up a ladder from the Living Room, under years of dust. Rub it off and dust bunnies run for whatever dust is left. Keep still over a clean photograph and it remembers one of Great-Aunt Pim's stories, with a number in pencil on the back; the trunk's lock wants all three. The wheel changes Marguerite's hat, the record plays while you turn it, and something is lying on the floor. By the old sheet, a **shadow theatre**: a lamp and things to hold up to it; some shapes come alive. | ![Attic](docs/screenshots/attic.png) |
+| **Garden**: a bed of plants with opinions, and you are the sun. Drag the sun along the sky and let go: a day passes, lit from where you left it (shadows are long when the sun is low). Sunflowers face the sun and throw shade, moonflowers grow in shade and open at night, mint spreads from wet soil and swallows seeds, snapdragons eat mint, radishes need company, creepers climb rock and carry water, bees cross blooms into new seeds, Crumb the sparrow takes lone seeds. Twelve jobs from the house; the day track takes you back; the Herbarium only writes down what you have made happen. | ![Garden](docs/phase4/after/garden-desktop-day-5s.png) |
+| **Attic**: *What Marguerite Forgot*. Five people lived in this house across sixty years and left fifteen things in the attic. Rub the dust off to find them, and the evidence: photographs, pages from the house's old diary, record sleeves, labels, five memories in the shadow theatre. Pin each thing to the Memory Board with a person and a decade; three right at once and Marguerite remembers. Three acts, a trunk that wants a year, and a twist. | ![Attic](docs/phase4/after/attic-desktop-day-5s.png) |
 
 Phase 3 in pictures (the button behind its glass, Infinite Rooms, Back-Fence Volley, the shadow theatre):
 
@@ -47,17 +47,18 @@ You can share any scene as a link or as a generated postcard:
 - Press the button that says *do not press*. Keep going.
 - Nudge Great-Aunt Pim's portrait. Then visit the Playground.
 - Type `hello`, `wonk` or `dance` anywhere.
-- In the Mood Room, pour tea and then unfold the blanket.
 - Find something in one room, then go back to the Living Room and listen.
 - Throw a pebble hard over the fence in the Playground. Catch it when it comes back.
-- Pin rain in the Mood Room, then visit the Garden. Pin a rainbow and hold up the mirror.
-- Draw a crescent in the Garden soil, sink the sun, and lead the fireflies to it.
-- In the attic, keep very still in front of a photograph. Spin the record backwards.
+- Garden: plant the sunflower, then put the sun where the house is for its last day.
+- Weather Workshop: put the teacup low in the valley and watch the barometer before it rains.
+- Attic: rub the photograph that falls at your feet, then pin the hat block to the board.
+- Rain on the valley's field fills the garden's barrel. A new flower from the garden turns up in the attic.
+- In the attic, spin the record backwards.
 - Look up in the Living Room once you have found a few things.
 - Press the button three times, quickly. Then wait. Or don't.
 - Leave the Living Room alone for a minute and watch.
 - Zoom into the very small painting next to the clock. Keep going; check the clocks.
-- Cross your two hands in front of the attic lamp.
+- Cross your two hands in front of the attic lamp. It's a memory.
 - Join five stars after hours, with the sound on.
 
 There are 67 secrets and eight letters. None of them is required for anything.
@@ -105,8 +106,9 @@ More detail: [`ARCHITECTURE.md`](ARCHITECTURE.md), [`DECISIONS.md`](DECISIONS.md
   - per-object counts
   - a trust number
   - a few settings
-  - keepsakes: the garden, letters found, weather seen, personal bests, and a
-    short diary (40 lines at most) with the date of a few big moments
+  - keepsakes: garden jobs done and Herbarium pages, postcards answered and the
+    sandbox valley, the attic's Memory Board, letters found, weather seen,
+    personal bests, and a short diary (40 lines at most)
 
   The Memory Room shows the raw data and can delete it. Memory can also be
   switched off.

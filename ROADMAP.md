@@ -78,3 +78,18 @@ Planned and tracked in `PHASE_3_REFINED_PLAN.md`.
 | Storage corruption | versioned schema, validation, safe defaults, try/catch |
 | Accessibility regressions | keyboard alternatives listed per behavior, E2E keyboard flows |
 | Claims we can't verify (FPS, user delight) | report only measured things; UX targets listed as hypotheses |
+
+## Phase 4 — "Rules You Can Discover"
+
+Planned and tracked in `PHASE_4_REFINED_PLAN.md` (baseline, laws, steps, L8
+numbers, critiques, honest limits).
+
+| Step | Scope | Status |
+| --- | --- | --- |
+| 4.0 | Audit, plan, baseline screenshots, art kit, stage layout | done |
+| 4.1 | Garden: pure sim, 12 solver-checked commissions, rewind by day track, Herbarium, free play, "ask me something" | done |
+| 4.2 | Weather Workshop: atmosphere sim, 7 tools, 10 postcards, barometer as gauge, idle mode = house weather | done |
+| 4.3 | Attic: "What Marguerite Forgot", Memory Board, evidence, 3 acts, trunk, fairness tests | done |
+| 4.4 | Cross-room links (barrel, pressed flower, house weather, vignettes) + memory tests | done |
+| 4.5 | Art pass: compact tags everywhere, weather grading, grain, contact shadows | done (partial on the older rooms; see the plan's honest limits) |
+| 4.6 | Hints, copy, a11y, perf, full e2e, docs, release | done |

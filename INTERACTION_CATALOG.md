@@ -234,6 +234,24 @@ Added in Phase 2 (`PHASE_2_PLAN.md`). Same legend as above.
 | INT-158 | Pollinators cross flowers into hybrids for the vase | verified | `Garden/pollinators.ts` | T: `ecosystem.test.ts`; E2E |
 | INT-159 | Crumb the sparrow (shoo, follow, let go) | verified | `Garden/seedThief.ts` | T + E2E |
 | INT-160 | Shadow theatre and its creatures | verified | `Attic/shadows` | T: `geometry.test.ts`; E2E |
-| INT-161 | Mood Room weather consequences (steam, scraps, tent, colour) | verified | `MoodRoom/WindowWeather.tsx`, `moodGoals.ts` | E2E (steam, scraps) |
+| INT-161 | Mood Room weather consequences (steam, scraps, tent, colour) | retired in Phase 4 (the Mood Room became the Weather Workshop, INT-174–177) | — | — |
 | INT-162 | Constellation instrument | verified | `AfterHours/instrument.ts` | T: `instrument.test.ts`; E2E |
 | INT-163 | The house remembers (diary, story, callbacks, button trust across visits) | verified | `app/continuity.ts` | T: `continuity.test.ts`; E2E |
+
+## L. Phase 4: rules you can discover
+
+| ID | Interaction | Status | Where | Evidence |
+| --- | --- | --- | --- | --- |
+| INT-170 | Garden: drag the sun, let go for a day; shadows preview for the light held | verified | `Garden/Garden.tsx`, `Garden/sim/core.ts` | T: `sim.test.ts`, `Garden.test.tsx`; E2E `garden.spec.ts` |
+| INT-171 | Garden: twelve commissions (solution, idle, naive, random-play checks) | verified | `content/garden.ts` | T: `sim.test.ts` |
+| INT-172 | Garden: rewind by the day track (exact restore), dig up today's seed | verified | `Garden/sim/history.ts` | T; E2E |
+| INT-173 | Garden: Herbarium pages only for rules you caused; free play; "ask me something" | verified | `Garden.tsx`, `sim/ask.ts` | T |
+| INT-174 | Workshop: tools dragged into the valley change temperature, moisture, wind | verified | `Weather/sim/valley.ts`, `Workshop.tsx` | T: `valley.test.ts`; E2E `weather.spec.ts` |
+| INT-175 | Workshop: ten postcards with hold times and stored scripts | verified | `content/weather.ts`, `sim/run.ts` | T |
+| INT-176 | Workshop: barometer forecasts by running the valley ahead | verified | `sim/read.ts` | T; E2E |
+| INT-177 | Workshop: the valley is the house weather; idle mode, mood fills an empty valley | verified | `app/valley.ts`, `app/weatherSync.ts` | T: `links.test.tsx`; E2E |
+| INT-178 | Attic: dust hides evidence; names appear with the clue that reveals them | verified | `Attic/Attic.tsx` | T: `Attic.test.tsx`; E2E `attic.spec.ts` |
+| INT-179 | Attic: Memory Board confirms in groups of three, never names a wrong pin | verified | `Attic/mystery/board.ts` | T: `mystery.test.ts` |
+| INT-180 | Attic: five shadow-theatre memories, a trunk opened with a deduced year, the twist | verified | `Attic.tsx`, `content/attic.ts` | T; E2E (desktop full playthrough) |
+| INT-181 | Cross-room: valley rain fills the barrel; a garden hybrid puts a pressed flower in the attic | verified | `app/valley.ts`, `Attic.tsx` | T: `links.test.tsx` |
+| INT-182 | Hint ladder (glance 30 s, vague 60 s, specific 120 s), opt-out in the Memory Room | verified | `app/hints.ts` | T (pure rung); manual |
