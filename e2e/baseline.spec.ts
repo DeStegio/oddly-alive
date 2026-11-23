@@ -57,11 +57,12 @@ test.describe('Phase 3 baseline: what every room already has', () => {
     await expect(page.getByLabel(/\d+ visits?/).first()).toBeAttached();
   });
 
-  test('Attic: photographs, Marguerite, the lock, the gramophone', async ({ page }) => {
+  test('Attic: the dusty attic, Marguerite, the Memory Board, the gramophone, the shadow sheet (Phase 4)', async ({ page }) => {
     await visit(page, 'attic');
-    await expect(page.getByRole('img', { name: /photograph/i })).toHaveCount(3);
+    await expect(page.getByRole('group', { name: /The attic, under the dust/ })).toBeVisible();
     await expect(page.getByRole('button', { name: /Marguerite the dress form/ })).toBeAttached();
-    await expect(page.getByRole('spinbutton')).toHaveCount(3);
+    await expect(page.getByRole('heading', { name: /^Memory Board/ })).toBeAttached();
     await expect(page.getByRole('img', { name: /gramophone/i })).toBeAttached();
+    await expect(page.getByRole('button', { name: /shadow theatre/ })).toBeAttached();
   });
 });

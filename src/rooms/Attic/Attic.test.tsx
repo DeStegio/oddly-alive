@@ -1,92 +1,84 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { diaryDate } from '../../content/attic';
-import { PullCord } from '../LivingRoom/PullCord';
 import { useKeepsakes } from '../../state/keepsakes';
 import { useObjects } from '../../state/world';
 import { getWorldState, initialWorldState, setWorldState } from '../../state/worldStore';
-import Attic from './Attic';
+import Attic, { SETTLE_MS } from './Attic';
 
-const wrap = (ui: React.ReactNode) => render(<MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>{ui}</MemoryRouter>);
-
+/**
+ * The attic by keyboard: uncover act 1 with "Dust the next thing", pin the
+ * five things on the Memory Board, and watch the first memories lock in.
+ * Replaces the Phase 3 tests (digits on photos, a three-number lock, hats on
+ * a wheel), which covered behaviour that no longer exists.
+ */
 describe('<Attic />', () => {
   beforeEach(() => {
+    vi.useFakeTimers();
     setWorldState(initialWorldState());
     useObjects.getState().resetObjects();
     useKeepsakes.getState().reset();
   });
+  afterEach(() => vi.useRealTimers());
 
-  it('finding it unlocks it for good and counts as a discovery', () => {
-    wrap(<Attic />);
-    expect(useKeepsakes.getState().attic.unlocked).toBe(true);
+  const renderAttic = () =>
+    render(
+      <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+        <Attic />
+      </MemoryRouter>,
+    );
+  const settle = () =>
+    act(() => {
+      vi.advanceTimersByTime(SETTLE_MS + 50);
+    });
+  const dustAll = (n: number) => {
+    for (let i = 0; i < n; i++) fireEvent.click(screen.getByRole('button', { name: 'Dust the next thing' }));
+  };
+  const pinThing = (name: RegExp, owner: string, laterPresses: number) => {
+    const card = screen.getAllByRole('listitem').find((li) => within(li).queryByText(name))!;
+    fireEvent.click(within(card).getByRole('radio', { name: owner }));
+    for (let i = 0; i < laterPresses; i++) fireEvent.click(within(card).getByRole('button', { name: 'Later' }));
+    settle();
+  };
+
+  it('finding the attic is a discovery; Marguerite asks who she was wearing', () => {
+    renderAttic();
     expect(getWorldState().discoveries.attic).toBeDefined();
+    act(() => {
+      vi.advanceTimersByTime(1500);
+    });
+    expect(screen.getByText(/Who was I wearing/)).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /^Memory Board/ })).toBeInTheDocument();
   });
 
-  it('keyboard: dusting uncovers the hats, the letter, and the trunk; the lock takes the numbers from the photos', () => {
-    wrap(<Attic />);
-    const dustNext = screen.getByRole('button', { name: 'Dust the next thing' });
-    for (let i = 0; i < 12; i++) fireEvent.click(dustNext);
-    expect(useObjects.getState().attic.dust.split(',')).toHaveLength(12);
-    expect([...useKeepsakes.getState().attic.hats].sort()).toEqual(['beret', 'crown', 'sunhat', 'topper']);
+  it('act 1 by keyboard: uncover, pin, and the board locks in groups of three', () => {
+    renderAttic();
+    dustAll(16);
+    // names come with the evidence
+    expect(screen.getAllByText('Odile Marchetti').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Walter Pryce').length).toBeGreaterThan(0);
     expect(useKeepsakes.getState().letters).toContain('attic');
 
-    // 4, 7, 2: one number from each photograph
-    const dials = screen.getAllByRole('spinbutton');
-    [4, 7, 2].forEach((n, i) => {
-      for (let k = 0; k < n; k++) fireEvent.keyDown(dials[i]!, { key: 'ArrowUp' });
-    });
-    expect(useObjects.getState().attic.opened.split(',')).toContain('trunk');
-    expect(getWorldState().discoveries.combination).toBeDefined();
-    expect(screen.getByRole('heading', { name: /trunk/ })).toBeInTheDocument();
-  });
-
-  it('Marguerite changes hats with the arrow keys, and wears every hat for a discovery', () => {
-    for (const h of ['beret', 'topper', 'sunhat', 'crown']) useKeepsakes.getState().addHat(h);
-    useObjects.getState().setSlice('attic', { dust: 'marguerite' });
-    wrap(<Attic />);
-    const m = screen.getByRole('button', { name: /Marguerite the dress form/ });
-    for (let i = 0; i < 4; i++) fireEvent.keyDown(m, { key: 'ArrowUp' });
-    expect(screen.getByRole('button', { name: /wearing a paper crown/ })).toBeInTheDocument();
-    expect(getWorldState().discoveries['dress-rehearsal']).toBeDefined();
-    fireEvent.keyDown(m, { key: 'ArrowUp' });
-    expect(useObjects.getState().attic.wearing).toBe('');
-  });
-
-  it('the diary reads back the visit; pages turn', () => {
-    for (let i = 0; i < 6; i++) useKeepsakes.getState().note(`n${i}`, `Thing number ${i + 1} happened.`);
-    useObjects.getState().setSlice('attic', { dust: 'diary' });
-    wrap(<Attic />);
-    fireEvent.click(screen.getByRole('button', { name: 'Open the house diary' }));
-    expect(screen.getByText(/Thing number 6 happened/)).toBeInTheDocument();
-    expect(getWorldState().discoveries['dear-diary']).toBeDefined();
-    fireEvent.click(screen.getByRole('button', { name: '← earlier' }));
-    expect(screen.getByText(/Thing number 1 happened/)).toBeInTheDocument();
+    pinThing(/^Hat block$/, 'Odile Marchetti', 1); // 1920s
+    pinThing(/^Tin of feathers$/, 'Odile Marchetti', 2); // 1930s
+    expect(useKeepsakes.getState().board.locked).toEqual([]);
+    pinThing(/^Wireless valve$/, 'Walter Pryce', 4); // a wrong decade (1950s)
+    expect(useKeepsakes.getState().board.locked).toEqual([]); // nothing says which
+    pinThing(/^Wrist pin cushion$/, 'Odile Marchetti', 1);
+    expect(useKeepsakes.getState().board.locked).toEqual(['hat-block', 'feather-tin', 'pin-cushion']);
+    expect(getWorldState().discoveries['memory-lane']).toBeDefined();
+    // fix the valve, pin the headphones: the last two finish act 1
+    const valve = screen.getAllByRole('listitem').find((li) => within(li).queryByText(/^Wireless valve$/))!;
+    fireEvent.click(within(valve).getByRole('button', { name: 'Earlier' }));
+    settle();
+    pinThing(/^Headphones$/, 'Walter Pryce', 4);
+    expect(useKeepsakes.getState().board.locked).toHaveLength(5);
+    expect(useKeepsakes.getState().board.act).toBe(2);
   });
 
   it('diary dates read like a person wrote them', () => {
-    const now = new Date(2026, 10, 20, 18, 30).getTime();
-    expect(diaryDate(new Date(2026, 10, 20, 10, 0).getTime(), now)).toBe('today, late morning');
-    expect(diaryDate(new Date(2026, 10, 19, 20, 0).getTime(), now)).toBe('yesterday, evening');
-  });
-});
-
-describe('<PullCord />', () => {
-  beforeEach(() => {
-    setWorldState(initialWorldState());
-    useKeepsakes.getState().reset();
-  });
-
-  it('appears after three discoveries and brings the ladder down', () => {
-    const { rerender } = wrap(<PullCord />);
-    expect(screen.queryByRole('button', { name: /cord/ })).toBeNull();
-    setWorldState({ discoveries: { a: 1, b: 2, c: 3 } });
-    rerender(
-      <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-        <PullCord />
-      </MemoryRouter>,
-    );
-    fireEvent.click(screen.getByRole('button', { name: /cord hanging from the ceiling/ }));
-    expect(useKeepsakes.getState().attic.unlocked).toBe(true);
-    expect(screen.getByRole('link', { name: 'Up to the attic' })).toHaveAttribute('href', '/attic');
+    const now = new Date(2024, 4, 15, 15, 0).getTime();
+    expect(diaryDate(new Date(2024, 4, 15, 10, 0).getTime(), now)).toBe('today, late morning');
+    expect(diaryDate(new Date(2024, 4, 14, 20, 0).getTime(), now)).toBe('yesterday, evening');
   });
 });

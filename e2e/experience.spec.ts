@@ -182,74 +182,6 @@ test('navigation always works, even mid-reaction', async ({ page }) => {
   await expect(page.locator('main#scene')).toHaveAttribute('data-room', 'memory');
 });
 
-test('attic: rub the dust off, keep still to remember, wheel the lock open', async ({ page }) => {
-  test.setTimeout(60_000);
-  await page.goto('./#/attic');
-  const stage = page.locator('[class*="_stage_"]').first();
-  await stage.evaluate((el) => el.scrollIntoView({ block: 'center' }));
-  await page.waitForTimeout(500);
-
-  // rub the first photograph clean
-  const p = (await page.getByRole('img', { name: /photograph frame/ }).first().boundingBox())!;
-  await page.mouse.move(p.x + 4, p.y + 4);
-  await page.mouse.down();
-  for (let k = 0; k < 8; k++) for (let j = 0; j <= 6; j++) await page.mouse.move(p.x + (k % 2 ? p.width - (j * p.width) / 6 : (j * p.width) / 6), p.y + (k * p.height) / 7, { steps: 2 });
-  await page.mouse.up();
-  await expect(page.getByRole('img', { name: /Photograph: The seaside/ })).toBeVisible({ timeout: 3000 });
-
-  // keep still over it and it remembers, down to the pencil on the back
-  await page.mouse.move(p.x + p.width / 2, p.y + p.height / 2, { steps: 3 });
-  await expect(page.getByText('We took the early train because I insisted.')).toBeVisible({ timeout: 9000 });
-  await expect(page.getByText(/On the back, in pencil/)).toBeVisible({ timeout: 12000 });
-
-  // the rest by keyboard, then the lock by wheel: 4, 7, 2
-  const dustNext = page.getByRole('button', { name: 'Dust the next thing' });
-  await dustNext.focus();
-  for (let i = 0; i < 12; i++) await page.keyboard.press('Enter');
-  // done with the keyboard: let the helper buttons fold away again
-  await dustNext.evaluate((el) => (el as HTMLElement).blur());
-  const dials = page.getByRole('spinbutton');
-  await dials.first().evaluate((el) => el.scrollIntoView({ block: 'center' }));
-  await page.waitForTimeout(200);
-  const touch = test.info().project.name === 'mobile';
-  for (const [i, n] of [4, 7, 2].entries()) {
-    const d = (await dials.nth(i).boundingBox())!;
-    const x = d.x + d.width / 2;
-    const y = d.y + d.height / 2;
-    await page.mouse.move(x, y);
-    if (touch) {
-      // no wheel on a phone: swipe up on the dial, a notch at a time
-      for (let tries = 0; tries < 20 && (await dials.nth(i).getAttribute('aria-valuenow')) !== String(n); tries++) {
-        await page.mouse.move(x, y);
-        await page.mouse.down();
-        await page.mouse.move(x, y - 34, { steps: 3 });
-        await page.mouse.up();
-      }
-    } else {
-      for (let k = 0; k < n; k++) {
-        await page.mouse.wheel(0, -60);
-        await page.waitForTimeout(30);
-      }
-    }
-  }
-  await expect(page.getByRole('heading', { name: /trunk/ })).toBeVisible();
-
-  // the wheel over Marguerite changes her hat
-  const her = page.getByRole('button', { name: /Marguerite the dress form/ });
-  await her.evaluate((el) => el.scrollIntoView({ block: 'center' }));
-  await page.waitForTimeout(200);
-  // she puts on each hat as it's found; wait for the last one to land on her
-  await page.waitForTimeout(2300);
-  const before = await her.getAttribute('aria-label');
-  const m = (await her.boundingBox())!;
-  await page.mouse.move(m.x + m.width / 2, m.y + m.height / 2);
-  if (touch) {
-    await page.mouse.down();
-    await page.mouse.move(m.x + m.width / 2, m.y + m.height / 2 - 60, { steps: 4 });
-    await page.mouse.up();
-  } else await page.mouse.wheel(0, -120);
-  await expect(her).not.toHaveAttribute('aria-label', before!);
-});
 
 
 test('characters act on their own: Dot walks over and presses the button', async ({ page }) => {
@@ -453,8 +385,9 @@ test.describe('Back-Fence Volley', () => {
   });
 });
 
-test('the shadow theatre: two hands make a bird; a hand turned upright, a rabbit (keyboard)', async ({ page }) => {
+test('the shadow theatre: two hands make a bird (a memory); a hand turned upright, a rabbit (keyboard)', async ({ page }) => {
   await page.goto('./#/attic');
+  await page.getByRole('button', { name: /shadow theatre/ }).click();
   const stage = page.locator('section[aria-labelledby="shadow-title"] [data-alive]');
   await stage.scrollIntoViewIfNeeded();
   const L = page.getByRole('button', { name: /^Left hand/ });
@@ -463,6 +396,7 @@ test('the shadow theatre: two hands make a bird; a hand turned upright, a rabbit
   await R.focus();
   for (let i = 0; i < 12 && !(await stage.getAttribute('data-alive')); i++) await page.keyboard.press('ArrowLeft');
   await expect(stage).toHaveAttribute('data-alive', 'bird', { timeout: 3000 });
+  await expect(page.getByRole('dialog', { name: 'A memory in the shadow theatre' })).toBeVisible();
   await expect(stage).toHaveAttribute('data-alive', '', { timeout: 5000 });
   await L.focus();
   for (let i = 0; i < 6; i++) await page.keyboard.press('q');

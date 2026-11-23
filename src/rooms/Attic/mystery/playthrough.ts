@@ -1,0 +1,65 @@
+import type { Move } from './board';
+
+/**
+ * One complete, fair playthrough of "What Marguerite Forgot", in the order a
+ * player could do it: uncover, read, pin. Used by the headless test and the
+ * Playwright e2e (which performs the same steps through the UI).
+ */
+export const PLAYTHROUGH: Move[] = [
+  // act 1: the photo that fell, the shop sign, the bench
+  'find photo-shop',
+  'find hat-block',
+  'find shop-sign',
+  'find radio-card',
+  'find feather-tin',
+  'find feather-receipt',
+  'find pin-cushion',
+  'find diary-1928',
+  'find radio-valve',
+  'find valve-box',
+  'find photo-bench',
+  'find headphones',
+  'find diary-1953',
+  'pin hat-block odile 1920',
+  'pin feather-tin odile 1930',
+  'pin pin-cushion odile 1920',
+  'pin radio-valve walter 1940',
+  'pin headphones walter 1950',
+  // act 2: the wall, the bees
+  'find soldering-iron',
+  'find iron-tag',
+  'find diary-1948',
+  'find wall-name',
+  'find drawing',
+  'find diary-1949',
+  'find whistle',
+  'find photo-bench-back',
+  'find bee-letter',
+  'find photo-bees',
+  'find smoker',
+  'find honey-jar',
+  'find honey-label',
+  'pin soldering-iron walter 1940',
+  'pin drawing bea 1950',
+  'pin whistle bea 1950',
+  'pin smoker arthur 1960',
+  'pin honey-jar arthur 1960',
+  // act 3: the far end, the trunk
+  'find skipping-rope',
+  'find diary-1957',
+  'find veil',
+  'find rota',
+  'find diary-moon',
+  'find fob-watch',
+  'find diary-1974',
+  'find sleep-mask',
+  'find diary-dawn',
+  'trunk 1971',
+  'find cap-badge',
+  'find badge-box',
+  'pin skipping-rope bea 1950',
+  'pin veil arthur 1960',
+  'pin fob-watch june 1970',
+  'pin sleep-mask june 1970',
+  'pin cap-badge june 1980',
+];
