@@ -62,6 +62,7 @@ export default function MemoryRoom() {
   const world = useWorld();
   const s = useWorldStore();
   const memoryEnabled = useSettings((st) => st.memoryEnabled);
+  const hints = useSettings((st) => st.hints);
   const [confirm, setConfirm] = useState(false);
   const [showRaw, setShowRaw] = useState(false);
   const [notice, setNotice] = useState('');
@@ -189,7 +190,7 @@ export default function MemoryRoom() {
             <li>totals of a few interaction kinds, rooms visited, the last room</li>
             <li>how much the house trusts you (a number between 0 and 1)</li>
             <li>your motion and After Hours settings (sound always starts off)</li>
-            <li>keepsakes: what grows in the garden, letters found, kinds of weather seen, personal bests</li>
+            <li>keepsakes: garden jobs done and Herbarium pages, postcards answered and the sandbox valley, the attic’s Memory Board, letters found, kinds of weather seen, personal bests</li>
             <li>a short house diary (up to 40 lines) with the date of a few big moments, like a first discovery</li>
           </ul>
           <p className={styles.small}>Never stored: where your pointer went, what you typed, a log of everything you did, anything about you.</p>
@@ -204,6 +205,10 @@ export default function MemoryRoom() {
               }}
             />
             <span>Let the house remember me</span>
+          </label>
+          <label className={styles.toggle}>
+            <input type="checkbox" checked={hints} onChange={(e) => useSettings.getState().setHints(e.target.checked)} />
+            <span>Hints when I seem stuck (in the Garden, the Weather Workshop and the Attic)</span>
           </label>
 
           <button type="button" className="paper-btn" aria-expanded={showRaw} onClick={() => setShowRaw((v) => !v)}>

@@ -225,6 +225,4 @@ export function diaryDate(at: number, now = Date.now()): string {
   return `${d.toLocaleDateString(undefined, { day: 'numeric', month: 'long' })}, ${part}`;
 }
 
-/** The Living Room ceiling cord that drops the ladder. */
-export const CORD_LINES = ['there’s a cord. there’s always been a cord.', 'pull it. gently. the ladder’s old.'];
-export const LADDER_LINES = ['the ladder came down. mind your head up there.', 'oh. we have an attic. I forgot we had an attic.'];
+export { CORD_LINES, LADDER_LINES } from './ladder';

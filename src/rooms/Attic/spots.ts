@@ -58,5 +58,5 @@ export const SPOTS: Record<string, Rect> = {
 export const FIXTURES = {
   marguerite: { x: 330, y: 150, w: 110, h: 280 },
   gramophone: { x: 236, y: 250, w: 80, h: 90 },
-  sheet: { x: 470, y: 26, w: 100, h: 74 },
+  sheet: { x: 330, y: 30, w: 100, h: 74 },
 } as const;

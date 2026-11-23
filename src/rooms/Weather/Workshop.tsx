@@ -3,7 +3,7 @@ import { useHintLadder } from '../../app/hints';
 import { enterWorkshop, getValley, leaveWorkshop, publish, setValley } from '../../app/valley';
 import { useWorld } from '../../app/worldInstance';
 import { Layer, Stage } from '../../art/Stage';
-import { POSTCARDS, type Postcard, type PostcardFrom } from '../../content/weather';
+import { POSTCARDS, type Postcard, type PostcardFrom } from '../../content/postcards';
 import { onFrame } from '../../engine/frameLoop';
 import { useKeepsakes } from '../../state/keepsakes';
 import { useSettings } from '../../state/settings';
