@@ -32,9 +32,9 @@ describe('the cabinet', () => {
     renderCabinet();
     fireEvent.click(screen.getByRole('button', { name: 'Show hints' }));
     const garden = within(screen.getByRole('region', { name: /^Garden:/ }));
-    expect(garden.getByText(/Great-Aunt Pim left a tin of seeds/)).toBeInTheDocument();
+    expect(garden.getByText(/There are jobs pinned to the garden fence/)).toBeInTheDocument();
     expect(garden.getAllByText('Find something nearby first.').length).toBeGreaterThan(0);
-    expect(garden.queryByText('Six plots. All at once.')).toBeNull();
+    expect(garden.queryByText('Twelve jobs on the fence. All of them.')).toBeNull();
   });
 });
 

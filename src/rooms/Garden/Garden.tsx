@@ -1,884 +1,694 @@
-import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useHintLadder } from '../../app/hints';
 import { findLetter } from '../../app/letters';
 import { useWorld } from '../../app/worldInstance';
-import { Inch } from '../../characters/Inch';
+import { Layer, Stage } from '../../art/Stage';
+import { ContactShadow } from '../../art/ContactShadow';
 import { ThoughtBubble } from '../../characters/ThoughtBubble';
-import { LivingTitle } from '../../components/LivingTitle';
-import { WeatherLayer } from '../../components/WeatherLayer';
-import { useWeather } from '../../components/useWeather';
-import { BIP_FENCE, CARD_SKY, CARD_TITLE, CLOUD_GLYPH, GARDEN_LINES, INCH_GARDEN, PACKETS, SHAPE_GLYPH, SHAPE_PLANT } from '../../content/garden';
-import { onFrame } from '../../engine/frameLoop';
-import type { StoredPlot } from '../../engine/memory';
+import { ASKER_NAMES, BIP_FENCE, COMMISSIONS, FREE_PLAY_SEEDS, GARDEN_LINES, HERBARIUM, SEED_NAMES, commissionById, type Commission } from '../../content/garden';
 import { useKeepsakes } from '../../state/keepsakes';
 import { useSettings } from '../../state/settings';
 import { useObjects } from '../../state/world';
-import { PLANTS, PLANT_KINDS, advance, isPlantKind, plant, stage, sunGrow, type GrowContext, type PlantKind, type Stage } from './growth';
-import { elevation, leanTowards, lightAt, phaseOf, shadow, skyColour, type Phase } from './light';
-import { MAX_CLOUDS, dryness, fireflyLight, isRaining, newCloud, orbit, rainbow, stepCloud, under, wilt, type Cloud } from './sky';
-import { classify, features, type Pt } from './strokes';
-import { hybridId, isOpen, makeBugs, stepBugs, type Bug, type Flower } from './pollinators';
-import { arrive, poke, thiefAway, tickThief, type Thief } from './seedThief';
-import { CropIcon, PlantView } from './PlantView';
+import { PacketArt, PlantArt } from './PlantArt';
+import { Portrait } from './Portrait';
+import { askSomething } from './sim/ask';
+import { cellAt, inBloom, makeState, shadeMap, type LevelLayout } from './sim/core';
+import { advance, apply, rewind, rewindTo, startTimeline, type Timeline } from './sim/history';
+import { judge } from './sim/replay';
+import { HYBRID_NAMES, isHybrid, speciesName, traits } from './sim/species';
+import type { Action, RuleId, SimEvent, Species, SunPos } from './sim/types';
 import styles from './Garden.module.css';
 
-const pick = <T,>(lines: readonly T[]) => lines[Math.floor(Math.random() * lines.length)]!;
-const CAME_BACK_MS = 30 * 60_000;
-const SAVE_MS = 2000;
-/** The pointer has to rest behind the fence this long before the sun follows it down. */
-const SETTLE_MS = 350;
-const STAGE_NAMES = ['just planted', 'a sprout', 'in leaf', 'in bud', 'in bloom'];
-const FIREFLIES = 9;
-/** Crosses made by the insects this visit: plot + when it was planted → the other parent. */
-const crossings = new Map<string, PlantKind>();
-const crossKey = (i: number, p: StoredPlot) => `${i}:${p.plantedAt}`;
-/** Crumb the sparrow comes at most this often. */
-const THIEF_EVERY_MS = 75_000;
+const pick = <T,>(xs: readonly T[]) => xs[Math.floor(Math.random() * xs.length)]!;
+/** The sky arc: three stops on it, and night behind the fence. */
+const STOPS: Record<Exclude<SunPos, 'night'>, number> = { evening: 152, noon: 90, morning: 28 };
+const ARC = { cx: 500, cy: 300, r: 240 };
+const stopPoint = (sun: SunPos) => {
+  if (sun === 'night') return { x: 500, y: 340 };
+  const a = (STOPS[sun] * Math.PI) / 180;
+  return { x: ARC.cx + ARC.r * Math.cos(a), y: ARC.cy - ARC.r * Math.sin(a) };
+};
+const SUN_ORDER: SunPos[] = ['evening', 'noon', 'morning', 'night'];
+const SUN_WORDS: Record<SunPos, string> = { morning: 'morning sun (east, low)', noon: 'noon sun (high)', evening: 'evening sun (west, low)', night: 'night (sun behind the fence)' };
+const STAGE_WORDS = ['a seed', 'a sprout', 'grown', 'in bloom'];
+const FREE = 'free';
+const displayName = (k: string) => HYBRID_NAMES[k] ?? SEED_NAMES[k] ?? speciesName(k as Species);
 
-interface Fly {
-  id: number;
-  kind: PlantKind;
-  x: number;
-  y: number;
-  hx: number;
-  hy: number;
+interface Job {
+  id: string;
+  c: Commission | null;
+}
+
+/** The beds in progress this visit, per job (leave and come back: they're as you left them). */
+const sessionBeds = new Map<string, Timeline>();
+/** Forget the beds in progress (Reset World, tests). */
+export function resetGardenSession() {
+  sessionBeds.clear();
+}
+
+function freeLayout(hybrids: string[]): LevelLayout {
+  const seeds: Record<string, number> = { ...FREE_PLAY_SEEDS };
+  for (const h of hybrids) seeds[h] = 3;
+  return { map: ['S......', 'S......', '.......', '.......'], water: 2, seeds, barrel: 3 };
+}
+
+/** A fresh bed. Rain the valley sent to the barrel goes into this bed (a bonus, never needed) and is used up. */
+function startBed(layout: LevelLayout): Timeline {
+  const k = useKeepsakes.getState();
+  const bonus = k.garden2.barrel;
+  if (bonus > 0) k.addBarrel(-bonus);
+  return startTimeline(makeState({ ...layout, barrel: layout.barrel + bonus }));
 }
 
 /**
- * The back garden, where you are the sun. Move over the sky and the light goes
- * with you: plants grow where it falls, lean after it, and their shadows swing
- * round. Lower it behind the fence and night comes (the moonflower's time).
- * Plant by drawing a shape in the soil; pick by swiping across a ripe plant.
- * Strong sun dries the beds out, so draw a cloud in the sky for rain (with the
- * sun on the other side, a rainbow). At night the fireflies follow you, and
- * their light is what the moonflowers grow by.
+ * The garden as a puzzle box: a bed of plants with opinions. You are still
+ * the sun: drag it along the sky to choose the light, let go and a day
+ * passes; the day track under the sky takes you back. Jobs from the house
+ * are pinned to the fence; the Herbarium writes down only what you have
+ * made happen. All the rules live in `./sim` (pure, tested).
  */
 export default function Garden() {
   const world = useWorld();
-  const weather = useWeather();
-  const afterHours = useSettings((s) => s.afterHours);
-  const [, rerender] = useReducer((n: number) => n + 1, 0);
-  const plotsRef = useRef<Array<StoredPlot | null>>(useKeepsakes.getState().garden.plots.slice());
-  const sceneRef = useRef<HTMLDivElement>(null);
-  const fenceRef = useRef<HTMLDivElement>(null);
-  const plotEls = useRef<Array<HTMLLIElement | null>>([]);
-  const plantEls = useRef<Array<HTMLSpanElement | null>>([]);
-  const trailRef = useRef<SVGPolylineElement>(null);
-  const trailSvg = useRef<SVGSVGElement>(null);
-  const inchRef = useRef<HTMLDivElement>(null);
-  const startNight = afterHours || weather === 'night';
-  const sun = useRef({ x: 0.35, e: startNight ? -0.4 : 0.65, tx: 0.35, te: startNight ? -0.4 : 0.65, bandSince: 0 });
-  const [phase, setPhase] = useState<Phase>(startNight ? 'night' : 'day');
-  const phaseRef = useRef<Phase>(phase);
-  const sawNight = useRef(false);
-  const stroke = useRef<{ pts: Pt[]; n: number; where: 'soil' | 'sky' } | null>(null);
-  const clouds = useRef<Cloud[]>([]);
-  const cloudId = useRef(1);
-  const [cloudViews, setCloudViews] = useState<Array<{ id: number; w: number }>>([]);
-  const cloudEls = useRef(new Map<number, HTMLDivElement>());
-  const dry = useRef<number[]>(Array.from({ length: 6 }, () => 0.3));
-  const saidAt = useRef({ thirsty: 0, snap: 0, rain: 0 });
-  const sawRainbow = useRef(false);
-  const swarm = useRef({ x: 0, y: 0, ready: false });
-  const hand = useRef({ x: 0, y: 0, inside: false });
-  const flyEls = useRef<Array<HTMLSpanElement | null>>([]);
-  const snapAt = useRef<number[]>(Array.from({ length: 6 }, () => 0));
-  const bugs = useRef<Bug[] | null>(null);
-  const bugEls = useRef<Array<HTMLSpanElement | null>>([]);
-  const thief = useRef<Thief>(thiefAway());
-  const thiefSeed = useRef<PlantKind | null>(null);
-  const thiefLast = useRef(-THIEF_EVERY_MS + 8000);
-  const thiefEl = useRef<HTMLButtonElement>(null);
-  const [thiefPhase, setThiefPhase] = useState<Thief['phase']>('away');
-  const sawCross = useRef(false);
-  const strokeN = useRef(0);
-  const dirty = useRef(false);
-  const kindsPlanted = useRef(new Set<PlantKind>());
-  const [mark, setMark] = useState<{ text: string; x: number; y: number; ok: boolean; n: number } | null>(null);
-  const [flying, setFlying] = useState<Fly[]>([]);
-  const flyId = useRef(1);
-  const [inchLine, setInchLine] = useState<string | null>(null);
+  const reduced = useSettings((s) => s.motion) === 'reduced';
+  const solved = useKeepsakes((s) => s.garden2.solved);
+  const herbarium = useKeepsakes((s) => s.garden2.herbarium);
+  const firstOpen = COMMISSIONS.find((c) => !solved.includes(c.id));
+  const [job, setJob] = useState<Job>(() => ({ id: firstOpen?.id ?? FREE, c: firstOpen ?? null }));
+  const layout = useMemo(() => job.c?.layout ?? freeLayout(herbarium.filter(isHybrid)), [job, herbarium]);
+  const [t, setT] = useState<Timeline>(() => sessionBeds.get(job.id) ?? startBed(layout));
+  const [sun, setSun] = useState<SunPos>('noon');
+  const [dragging, setDragging] = useState(false);
+  const [seed, setSeed] = useState<Species | null>(null);
+  const [pour, setPour] = useState(false);
+  const [line, setLine] = useState<string | null>(null);
+  const [status, setStatus] = useState('');
+  const [verdict, setVerdict] = useState<'open' | 'solved' | 'failed'>('open');
+  const [book, setBook] = useState(false);
+  const [newPage, setNewPage] = useState(false);
+  const [focus, setFocus] = useState<[number, number]>([0, 0]);
   const [bipLine, setBipLine] = useState<string | null>(null);
-  const [keySeed, setKeySeed] = useState<PlantKind | null>(null);
-  const reducedRef = useRef(false);
-  reducedRef.current = useSettings((st) => st.motion) === 'reduced';
-  const weatherRef = useRef(weather);
-  weatherRef.current = weather;
-  const night = phase === 'night';
+  const skyRef = useRef<SVGSVGElement>(null);
+  const dragMoved = useRef(false);
+  const cellEls = useRef(new Map<string, HTMLButtonElement>());
+  const s = t.now;
+  const c = job.c;
+  const { rung, progress } = useHintLadder(job.id, !!c && verdict === 'open');
 
-  const say = useCallback((set: React.Dispatch<React.SetStateAction<string | null>>, text: string, ms = 2600) => {
-    set(text);
-    window.setTimeout(() => set((cur) => (cur === text ? null : cur)), ms);
+  const say = useCallback((text: string, ms = 3600) => {
+    setLine(text);
+    window.setTimeout(() => setLine((cur) => (cur === text ? null : cur)), ms);
   }, []);
 
-  const persistAll = useCallback(() => {
-    const now = Date.now();
-    plotsRef.current.forEach((p, i) => {
-      const q = p ? { ...p, updatedAt: now } : null;
-      plotsRef.current[i] = q;
-      useKeepsakes.getState().setPlot(i, q);
-    });
-  }, []);
+  // Reset World tidies the beds
+  useEffect(() => world.bus.on('WORLD_RESET', () => resetGardenSession()), [world]);
 
-  const setPlot = useCallback((i: number, p: StoredPlot | null) => {
-    plotsRef.current[i] = p;
-    useKeepsakes.getState().setPlot(i, p);
-    rerender();
-  }, []);
+  // keep the bed for this visit
+  useEffect(() => {
+    sessionBeds.set(job.id, t);
+  }, [job.id, t]);
 
-  const bloomed = useCallback(
-    (kind: PlantKind) => {
-      world.emit('OBJECT_STATE_CHANGED', { target: `garden:${kind}`, key: 'bloom', value: true });
-      world.effects.discover('green-thumb');
-      useKeepsakes.getState().note('garden:first-bloom', `The first ${PACKETS[kind].name.toLowerCase()} came out in the garden.`, { once: true });
-      if (kind === 'moonflower') world.effects.discover('night-shift');
-      if (plotsRef.current.every((p) => p && p.growth >= 1)) world.effects.discover('full-bed');
-    },
-    [world],
-  );
+  // a job arrives: the asker says what they want (the first second already has someone talking)
+  useEffect(() => {
+    if (c) setLine(c.ask);
+    else setLine(useKeepsakes.getState().garden2.solved.length >= COMMISSIONS.length ? GARDEN_LINES.freePlay : GARDEN_LINES.sandbox);
+    setVerdict('open');
+  }, [c]);
 
-  // ------------------------------------------------------------- planting and picking
+  // the hint ladder: a glance at 30 s, then a vague line, then a specific one
+  useEffect(() => {
+    if (!c || rung < 2) return;
+    const h = c.hints[rung === 2 ? 0 : 1];
+    if (h) say(h, 6000);
+  }, [rung, c, say]);
 
-  const sow = useCallback(
-    (i: number, kind: PlantKind) => {
-      setPlot(i, plant(kind, Date.now()));
-      say(setInchLine, pick(GARDEN_LINES.plant));
-      world.emit('OBJECT_STATE_CHANGED', { target: `garden:${kind}`, key: 'plant', value: i });
-      kindsPlanted.current.add(kind);
-      if (kindsPlanted.current.size === PLANT_KINDS.length) world.effects.discover('pims-hand');
-    },
-    [say, setPlot, world],
-  );
+  const switchJob = (id: string) => {
+    const cm = id === FREE ? null : (commissionById(id) ?? null);
+    const lay = cm?.layout ?? freeLayout(herbarium.filter(isHybrid));
+    setJob({ id, c: cm });
+    setT(sessionBeds.get(id) ?? startBed(lay));
+    setSeed(null);
+    setPour(false);
+    setSun('noon');
+    world.emit('OBJECT_CLICKED', { target: 'garden:job', repeat: 1, via: 'pointer' });
+  };
 
-  /** A picked plant goes indoors: flowers to the vase, radishes to the Playground. */
-  const deliver = useCallback(
-    (kind: PlantKind) => {
-      if (kind === 'moonflower') findLetter(world, 'garden');
-      world.emit('OBJECT_STATE_CHANGED', { target: `garden:${kind}`, key: 'harvest', value: 'house' });
-      world.effects.sound('pop');
-      if (PLANTS[kind].harvest === 'playground') {
-        const s = useObjects.getState();
-        s.setSlice('playground', { radishes: Math.min(6, s.playground.radishes + 1) });
-        say(setInchLine, pick(GARDEN_LINES.harvestRadish));
-        return;
+  const askMe = () => {
+    const made = askSomething(Date.now() & 0xffff);
+    if (!made) return;
+    setJob({ id: made.id, c: made });
+    setT(startBed(made.layout));
+    setSeed(null);
+    setSun('noon');
+  };
+
+  // ------------------------------------------------------------- what the bed did
+
+  /** New Herbarium pages, discoveries and voices for the things that happened on a day. */
+  const learn = useCallback(
+    (events: SimEvent[]) => {
+      const k = useKeepsakes.getState();
+      let fresh = false;
+      for (const e of events) {
+        if (HERBARIUM[e.rule] && k.learnRule(e.rule)) fresh = true;
+        if (e.rule === 'bee-cross' && e.kind && k.learnRule(e.kind)) fresh = true;
       }
-      useKeepsakes.getState().addToVase(kind);
-      useObjects.getState().setLiving({ vaseNew: true });
-      say(setInchLine, pick(GARDEN_LINES.harvestVase));
+      if (fresh) {
+        setNewPage(true);
+        setStatus(GARDEN_LINES.sketchbook);
+      }
+      const has = (r: RuleId) => events.some((e) => e.rule === r);
+      if (has('moon-night')) world.effects.discover('night-shift');
+      if (has('bee-cross')) {
+        world.effects.discover('cross-pollinated');
+        world.emit('OBJECT_STATE_CHANGED', { target: 'garden:cross', key: 'seed', value: events.find((e) => e.rule === 'bee-cross')!.kind ?? '' });
+        say(GARDEN_LINES.cross);
+      }
+      if (has('crumb')) {
+        say(GARDEN_LINES.crumb);
+        world.emit('OBJECT_STATE_CHANGED', { target: 'garden:thief', key: 'outcome', value: 'gone' });
+      }
     },
     [say, world],
   );
 
-  const harvest = useCallback(
-    (i: number) => {
-      const p = plotsRef.current[i];
-      if (!p || !isPlantKind(p.kind)) return;
-      const kind = p.kind;
-      const partner = crossings.get(crossKey(i, p));
-      crossings.delete(crossKey(i, p));
-      setPlot(i, null);
-      if (partner && kind !== 'radish') {
-        // a hybrid: something new for the vase
-        useKeepsakes.getState().addToVase(hybridId(kind, partner));
-        useObjects.getState().setLiving({ vaseNew: true });
-        world.emit('OBJECT_STATE_CHANGED', { target: 'garden:hybrid', key: 'harvest', value: hybridId(kind, partner) });
-        world.effects.discover('hybrid-bloom');
-        world.effects.sound('chime');
-        say(setInchLine, pick(GARDEN_LINES.hybrid));
-      } else deliver(kind);
-      // off it goes through the back door
-      const scene = sceneRef.current;
-      const el = plantEls.current[i];
-      if (!scene || !el) return;
-      const r = scene.getBoundingClientRect();
-      const b = el.getBoundingClientRect();
-      const id = flyId.current++;
-      setFlying((f) => [...f, { id, kind, x: b.left - r.left + b.width / 2, y: b.top - r.top + b.height * 0.4, hx: 24, hy: r.height * 0.7 }]);
-      window.setTimeout(() => setFlying((f) => f.filter((x) => x.id !== id)), 1000);
+  const finish = useCallback(
+    (cm: Commission) => {
+      setVerdict('solved');
+      say(cm.thanks, 6000);
+      world.effects.sound('chime');
+      world.effects.discover('green-thumb');
+      const k = useKeepsakes.getState();
+      if (COMMISSIONS.some((x) => x.id === cm.id) && k.solveGarden(cm.id)) {
+        k.note(`garden:job:${cm.id}`, `Did a garden job for ${ASKER_NAMES[cm.asker]}.`, { once: true });
+      }
+      if (cm.id === 'night-flower') findLetter(world, 'garden');
+      if (cm.id === 'same-night') world.effects.discover('night-light');
+      if (cm.id === 'picture') world.effects.discover('pims-hand');
+      if (COMMISSIONS.every((x) => useKeepsakes.getState().garden2.solved.includes(x.id))) world.effects.discover('full-bed');
+      world.emit('OBJECT_STATE_CHANGED', { target: 'garden:job', key: 'solved', value: cm.id });
     },
-    [deliver, say, setPlot, world],
+    [say, world],
   );
 
-  // ------------------------------------------------------------- growing
+  // ------------------------------------------------------------- days
 
-  // catch up on time spent away, once, on the way in
-  useEffect(() => {
-    const now = Date.now();
-    const away: GrowContext = { weather: 'clear', night: false, present: false };
-    let cameBack = false;
-    plotsRef.current = plotsRef.current.map((p, i) => {
-      if (!p) return null;
-      const next = advance(p, now, away);
-      if (now - p.updatedAt >= CAME_BACK_MS && next.growth - p.growth >= 0.2) cameBack = true;
-      if (next !== p) useKeepsakes.getState().setPlot(i, next);
-      return next;
-    });
-    rerender();
-    if (cameBack) world.effects.discover('came-back');
-  }, [world]);
-
-  // save now and then, and on the way out
-  useEffect(() => {
-    const t = window.setInterval(() => {
-      if (!dirty.current) return;
-      dirty.current = false;
-      persistAll();
-    }, SAVE_MS);
-    return () => {
-      window.clearInterval(t);
-      persistAll();
-    };
-  }, [persistAll]);
-
-  // the sun, the sky, the light on each plant
-  useEffect(
-    () =>
-      onFrame((dt, now) => {
-        const el = sceneRef.current;
-        const fence = fenceRef.current;
-        if (!el || !fence) return;
-        const r = el.getBoundingClientRect();
-        if (!r.width) return;
-        const s = sun.current;
-        const k = 1 - Math.exp(-dt / 110);
-        s.x += (s.tx - s.x) * k;
-        s.e += (s.te - s.e) * k;
-        const top = r.height * 0.07;
-        const horizon = fence.getBoundingClientRect().top - r.top;
-        const sunX = s.x * r.width;
-        const sunY = horizon - s.e * (horizon - top);
-        const nightness = Math.max(0, Math.min(1, -s.e * 4));
-        el.style.setProperty('--sun-x', `${sunX.toFixed(1)}px`);
-        el.style.setProperty('--sun-y', `${sunY.toFixed(1)}px`);
-        el.style.setProperty('--night', nightness.toFixed(3));
-        el.style.setProperty('--day', Math.max(0, Math.min(1, s.e * 2)).toFixed(3));
-        el.style.setProperty('--garden-sky', skyColour(s.e));
-        el.style.setProperty('--garden-sky-top', skyColour(s.e - 0.18));
-
-        const ph = phaseOf(s.e);
-        if (ph !== phaseRef.current) {
-          phaseRef.current = ph;
-          setPhase(ph);
-        }
-
-        // clouds drift downwind, rain, and thin out
-        const wind = weatherRef.current === 'windy' ? 0.03 : 0.008;
-        const before = clouds.current.length;
-        clouds.current = clouds.current.map((c) => stepCloud(c, dt, wind, r.width)).filter((c): c is Cloud => c !== null);
-        if (clouds.current.length !== before) setCloudViews(clouds.current.map((c) => ({ id: c.id, w: c.w })));
-        for (const c of clouds.current) {
-          const ce = cloudEls.current.get(c.id);
-          if (!ce) continue;
-          ce.style.transform = `translate(${(c.x - c.w / 2).toFixed(1)}px, ${(c.y - c.w * 0.25).toFixed(1)}px)`;
-          ce.style.setProperty('--rain-h', `${Math.max(0, r.height * 0.9 - c.y).toFixed(0)}px`);
-          ce.style.opacity = Math.min(1, c.life / 1800).toFixed(2);
-          ce.dataset.rain = String(isRaining(c));
-          const bow = rainbow(c, sunX, s.e, r.width);
-          ce.dataset.bow = String(bow);
-          if (bow && !sawRainbow.current) {
-            sawRainbow.current = true;
-            world.effects.discover('rainbow-maker');
-            say(setBipLine, pick(GARDEN_LINES.bipRainbow));
-          }
-        }
-
-        // at night the fireflies follow your hand (or wander, if you've gone)
-        const sw = swarm.current;
-        if (ph === 'night') {
-          const h = hand.current;
-          const tx = h.inside ? h.x : r.width * (0.5 + Math.sin(now / 4000) * 0.3);
-          const ty = h.inside ? h.y : r.height * (0.62 + Math.cos(now / 3100) * 0.08);
-          if (!sw.ready) Object.assign(sw, { x: tx, y: ty, ready: true });
-          const kf = 1 - Math.exp(-dt / 450);
-          sw.x += (tx - sw.x) * kf;
-          sw.y += (ty - sw.y) * kf;
-          flyEls.current.forEach((fe, i) => {
-            if (!fe) return;
-            const o = orbit(i, now, sw.x, sw.y);
-            fe.style.transform = `translate(${o.x.toFixed(1)}px, ${o.y.toFixed(1)}px)`;
-          });
-        } else sw.ready = false;
-        const wet = weatherRef.current === 'rain' || weatherRef.current === 'storm';
-
-        const open: Flower[] = [];
-        plotsRef.current.forEach((p, i) => {
-          const plantEl = plantEls.current[i];
-          const plotEl = plotEls.current[i];
-          if (!plotEl) return;
-          const b = plotEl.getBoundingClientRect();
-          const cx = b.left - r.left + b.width / 2;
-          if (p && p.growth >= 1 && isPlantKind(p.kind) && isOpen(p.kind, ph === 'night')) open.push({ plot: i, x: cx, y: b.top - r.top + b.height * 0.22, kind: p.kind });
-          const cover = clouds.current.filter((c) => under(c, cx));
-          const rained = wet || cover.some(isRaining);
-          const light = lightAt(cx, sunX, s.e, r.width) * (cover.length ? 0.35 : 1);
-          const was = dry.current[i]!;
-          const d = dryness(was, p && p.growth < 1 ? light : light * 0.5, dt, rained);
-          dry.current[i] = d;
-          plotEl.style.setProperty('--dry', d.toFixed(3));
-          if (rained && was > 0.6 && d <= 0.6 && p && now - saidAt.current.rain > 8000) {
-            saidAt.current.rain = now;
-            say(setInchLine, pick(GARDEN_LINES.rain));
-          }
-          const headY = b.top - r.top + b.height * 0.35;
-          const glow = ph === 'night' && sw.ready ? fireflyLight(cx, headY, sw.x, sw.y) : 0;
-          const sh = shadow(cx, sunX, s.e);
-          plotEl.style.setProperty('--lit', light.toFixed(3));
-          plotEl.style.setProperty('--sh-dx', `${sh.dx.toFixed(1)}px`);
-          plotEl.style.setProperty('--sh-s', sh.stretch.toFixed(3));
-          plotEl.style.setProperty('--sh-a', sh.alpha.toFixed(3));
-          if (plantEl) {
-            plantEl.style.setProperty('--lean', `${leanTowards(cx, sunX, s.e, r.width).toFixed(1)}deg`);
-            plantEl.style.setProperty('--wilt', wilt(d).toFixed(3));
-            if (p?.kind === 'moonflower' && glow > 0.6) world.effects.discover('night-light');
-            if (p?.kind === 'snapdragon' && p.growth >= 1 && glow > 0.7 && now - snapAt.current[i]! > 1500) {
-              snapAt.current[i] = now;
-              plantEl.dataset.snap = 'true';
-              window.setTimeout(() => delete plantEl.dataset.snap, 380);
-              if (now - saidAt.current.snap > 15000) {
-                saidAt.current.snap = now;
-                say(setInchLine, pick(GARDEN_LINES.snap));
-              }
-            }
-            plantEl.style.setProperty('--look', `${Math.max(-35, Math.min(35, ((sunX - cx) / r.width) * 80)).toFixed(1)}deg`);
-          }
-          if (!p || p.growth >= 1) return;
-          if (d >= 1) {
-            if (now - saidAt.current.thirsty > 20000) {
-              saidAt.current.thirsty = now;
-              say(setInchLine, pick(GARDEN_LINES.thirsty));
-            }
-            return; // parched: nothing grows until it rains
-          }
-          const q = sunGrow(p, dt, ph === 'night' ? glow : light, ph === 'night', weatherRef.current);
-          if (q === p) return;
-          plotsRef.current[i] = q;
-          dirty.current = true;
-          if (stage(q.growth) !== stage(p.growth)) {
-            rerender();
-            if (q.growth >= 1 && isPlantKind(q.kind)) {
-              useKeepsakes.getState().setPlot(i, { ...q, updatedAt: Date.now() });
-              bloomed(q.kind);
-            }
-          }
-        });
-
-        // the insects: flower to flower, pollen on their legs
-        if (!bugs.current) bugs.current = makeBugs(r.width, r.height);
-        const env = { w: r.width, h: r.height, wind: weatherRef.current === 'windy' ? 140 : 0, raining: wet || clouds.current.some(isRaining), night: ph === 'night', sunX };
-        const stepped = stepBugs(bugs.current, open, env, now, dt, Math.random);
-        bugs.current = stepped.bugs;
-        stepped.bugs.forEach((bug, i) => {
-          const el = bugEls.current[i];
-          if (!el) return;
-          el.style.transform = `translate(${bug.x.toFixed(1)}px, ${bug.y.toFixed(1)}px) scaleX(${bug.vx < -2 ? -1 : 1})`;
-          el.dataset.home = String(env.night);
-        });
-        for (const v of stepped.visits) {
-          const plantEl = plantEls.current[v.plot];
-          if (plantEl) {
-            plantEl.dataset.visit = 'true';
-            window.setTimeout(() => delete plantEl.dataset.visit, 600);
-          }
-          const p = plotsRef.current[v.plot];
-          if (v.crossWith && p && !crossings.has(crossKey(v.plot, p))) {
-            crossings.set(crossKey(v.plot, p), v.crossWith);
-            rerender();
-            world.emit('OBJECT_STATE_CHANGED', { target: 'garden:cross', key: v.kind, value: v.crossWith });
-            world.effects.discover('cross-pollinated');
-            if (!sawCross.current) {
-              sawCross.current = true;
-              say(setInchLine, pick(GARDEN_LINES.cross));
-            }
-          }
-        }
-
-        // Crumb, the sparrow, after a seed you've just planted
-        const t = thief.current;
-        if (t.phase === 'away') {
-          // something planted in the last half-minute that's still small (seed or young sprout)
-          const fresh = plotsRef.current.findIndex((p) => p && p.growth < 0.45 && Date.now() - p.plantedAt < 30_000);
-          if (fresh >= 0 && ph === 'day' && !env.raining && now - thiefLast.current > THIEF_EVERY_MS && !reducedRef.current) {
-            thiefLast.current = now;
-            thief.current = arrive(fresh, now);
-            setThiefPhase('perched');
-            world.emit('OBJECT_STATE_CHANGED', { target: 'garden:thief', key: 'arrived', value: fresh });
-          }
-        } else {
-          const r2 = tickThief(t, now);
-          if (r2.thief.phase !== t.phase) setThiefPhase(r2.thief.phase);
-          if (r2.outcome === 'took') {
-            const p = plotsRef.current[t.plot];
-            thiefSeed.current = p && isPlantKind(p.kind) ? p.kind : null;
-            if (p && p.growth < 0.6) setPlot(t.plot, null);
-            say(setInchLine, pick(GARDEN_LINES.thiefTook));
-          } else if (r2.outcome === 'gone') {
-            say(setBipLine, pick(GARDEN_LINES.bipSparrow));
-            world.emit('OBJECT_STATE_CHANGED', { target: 'garden:thief', key: 'outcome', value: 'gone' });
-            thiefSeed.current = null;
-          }
-          thief.current = r2.thief;
-          placeThief(r, now);
-        }
-      }),
-    [bloomed, say, world],
+  const letDayGo = useCallback(
+    (light: SunPos) => {
+      if (c && (s.day >= c.days || verdict === 'solved')) {
+        say(verdict === 'solved' ? c.thanks : GARDEN_LINES.limit);
+        return;
+      }
+      const planted = s.cells.some((cl) => cl.plant && cl.plant.stage === 0);
+      const next = advance(t, light);
+      setT(next);
+      progress();
+      learn(next.now.events);
+      world.emit('OBJECT_STATE_CHANGED', { target: 'garden:sun', key: 'day', value: light });
+      world.effects.sound('pop');
+      if (light === 'night') world.effects.discover('sundown');
+      if (s.crumb && s.day === 0 && planted && !next.now.events.some((e) => e.rule === 'crumb')) world.effects.discover('seed-saver');
+      if (!c) return;
+      const v = judge({ layout: c.layout, days: c.days, check: c.check, goal: c.goal }, next.now);
+      if (v === 'solved') finish(c);
+      else if (v === 'failed') {
+        setVerdict('failed');
+        say(c.fail, 6000);
+        world.emit('OBJECT_STATE_CHANGED', { target: 'garden:job', key: 'failed', value: c.id });
+      }
+    },
+    [c, finish, learn, progress, s, say, t, verdict, world],
   );
 
-  // dusk, night and morning: the neighbours notice
-  useEffect(() => {
-    if (phase === 'night') {
-      sawNight.current = true;
-      say(setBipLine, pick(GARDEN_LINES.bipNight));
-    } else if (phase === 'dusk' && !sawNight.current) {
-      say(setInchLine, pick(GARDEN_LINES.dusk));
-    } else if (phase === 'day' && sawNight.current) {
-      sawNight.current = false;
-      say(setBipLine, pick(GARDEN_LINES.bipMorning));
-      world.effects.discover('sundown');
+  const back = useCallback(
+    (to?: number) => {
+      if (!t.days.length) return;
+      setT(to === undefined ? rewind(t) : rewindTo(t, to));
+      setVerdict('open');
+      setStatus(GARDEN_LINES.rewound);
+      progress();
+      world.effects.discover('came-back');
+      world.emit('OBJECT_STATE_CHANGED', { target: 'garden:sun', key: 'rewind', value: true });
+    },
+    [progress, t, world],
+  );
+
+  const resetBed = () => {
+    setT(startBed(layout));
+    setVerdict('open');
+    progress();
+  };
+
+  // ------------------------------------------------------------- hands in the soil
+
+  const doAct = (a: Action) => {
+    const r = apply(t, a);
+    if (!r.ok) {
+      const why: Record<string, string> = { occupied: GARDEN_LINES.occupied, 'no-seed': GARDEN_LINES.noSeed, 'not-soil': GARDEN_LINES.rock, watered: GARDEN_LINES.watered, 'barrel-empty': GARDEN_LINES.barrelEmpty, 'not-ripe': GARDEN_LINES.notRipe };
+      setStatus(why[r.why ?? ''] ?? '');
+      return false;
     }
-  }, [phase, say, world]);
-
-  // ------------------------------------------------------------- the sun, by hand
-
-  const toLocal = (e: React.PointerEvent) => {
-    const r = sceneRef.current!.getBoundingClientRect();
-    return { x: e.clientX - r.left, y: e.clientY - r.top, r };
-  };
-
-  /** Over the sky the pointer is the sun; behind the fence (held a moment) it sets. */
-  const aimSun = (e: React.PointerEvent) => {
-    const { x, y, r } = toLocal(e);
-    const fence = fenceRef.current?.getBoundingClientRect();
-    if (!fence) return;
-    const fTop = fence.top - r.top;
-    const fBottom = fence.bottom - r.top;
-    const s = sun.current;
-    if (y > fBottom) {
-      s.bandSince = 0;
-      return; // over the beds: the sun stays where you left it
-    }
-    s.tx = Math.max(0.03, Math.min(0.97, x / r.width));
-    if (y < fTop) {
-      s.bandSince = 0;
-      s.te = elevation(y, r.height * 0.07, fTop);
-      return;
-    }
-    if (!s.bandSince) s.bandSince = e.timeStamp || performance.now();
-    if ((e.timeStamp || performance.now()) - s.bandSince >= SETTLE_MS) s.te = elevation(y, r.height * 0.07, fTop);
-  };
-
-  // ------------------------------------------------------------- drawing in the soil
-
-  const drawTrail = () => {
-    const st = stroke.current;
-    if (trailRef.current && st) trailRef.current.setAttribute('points', st.pts.map((p) => `${p.x.toFixed(0)},${p.y.toFixed(0)}`).join(' '));
-  };
-
-  const onBedsDown = (e: React.PointerEvent) => {
-    if (e.button !== 0) return;
-    e.preventDefault();
-    sceneRef.current?.setPointerCapture?.(e.pointerId);
-    const { x, y } = toLocal(e);
-    const n = ++strokeN.current;
-    stroke.current = { pts: [{ x, y }], n, where: 'soil' };
-    if (trailSvg.current) {
-      trailSvg.current.dataset.state = 'drawing';
-      trailSvg.current.dataset.where = 'soil';
-    }
-    drawTrail();
-  };
-
-  const onSceneDown = (e: React.PointerEvent) => {
-    if (stroke.current || e.button !== 0 || (e.target as Element).closest('button')) return;
-    const { x, y, r } = toLocal(e);
-    const fence = fenceRef.current?.getBoundingClientRect();
-    if (!fence || y > fence.top - r.top) return;
-    // pressing in the sky: draw (a curl makes a cloud) while the sun still follows
-    sceneRef.current?.setPointerCapture?.(e.pointerId);
-    const n = ++strokeN.current;
-    stroke.current = { pts: [{ x, y }], n, where: 'sky' };
-    if (trailSvg.current) {
-      trailSvg.current.dataset.state = 'drawing';
-      trailSvg.current.dataset.where = 'sky';
-    }
-    drawTrail();
-    aimSun(e);
-  };
-
-  const onMove = (e: React.PointerEvent) => {
-    const here = toLocal(e);
-    Object.assign(hand.current, { x: here.x, y: here.y, inside: true });
-    const st = stroke.current;
-    if (st?.where === 'sky') aimSun(e);
-    if (st) {
-      const { x, y } = toLocal(e);
-      const last = st.pts[st.pts.length - 1]!;
-      if (Math.hypot(x - last.x, y - last.y) >= 3) {
-        st.pts.push({ x, y });
-        drawTrail();
-      }
-      return;
-    }
-    if (e.pointerType === 'mouse' || e.buttons) aimSun(e);
-  };
-
-  /** Which plot a drawing belongs to: the one under the middle of it. */
-  const plotUnder = (pts: Pt[]) => {
-    const r = sceneRef.current!.getBoundingClientRect();
-    const cx = pts.reduce((a, p) => a + p.x, 0) / pts.length;
-    let best = -1;
-    let bestD = Infinity;
-    plotEls.current.forEach((el, i) => {
-      if (!el) return;
-      const b = el.getBoundingClientRect();
-      const d = Math.abs(b.left - r.left + b.width / 2 - cx);
-      if (d < bestD && d < b.width * 0.9) {
-        bestD = d;
-        best = i;
-      }
-    });
-    return best;
-  };
-
-  /** Plants a swipe went right across. */
-  const plantsCrossed = (pts: Pt[]) => {
-    const r = sceneRef.current!.getBoundingClientRect();
-    const hit: number[] = [];
-    plantEls.current.forEach((el, i) => {
-      if (!el || !plotsRef.current[i]) return;
-      const b = el.getBoundingClientRect();
-      const cx = b.left - r.left + b.width / 2;
-      const inBand = pts.filter((p) => p.y > b.top - r.top && p.y < b.bottom - r.top);
-      if (inBand.some((p) => p.x < cx - b.width * 0.15) && inBand.some((p) => p.x > cx + b.width * 0.15)) hit.push(i);
-    });
-    return hit;
-  };
-
-  /** A curl or a scribble in the sky becomes a raincloud there. */
-  const drawCloud = (pts: Pt[]) => {
-    if (pts.length < 6) return false;
-    const shape = classify(pts);
-    const f = features(pts);
-    if (!(shape === 'loop' || shape === 'spiral' || (f.openness < 0.35 && f.length > 140))) return false;
-    const fence = fenceRef.current!.getBoundingClientRect();
-    const r = sceneRef.current!.getBoundingClientRect();
-    const cx = pts.reduce((a, p) => a + p.x, 0) / pts.length;
-    const cy = Math.min(fence.top - r.top - 40, pts.reduce((a, p) => a + p.y, 0) / pts.length);
-    const c = newCloud(cloudId.current++, cx, Math.max(30, cy), f.width * 1.3);
-    clouds.current = [...clouds.current, c].slice(-MAX_CLOUDS);
-    setCloudViews(clouds.current.map((k) => ({ id: k.id, w: k.w })));
-    world.emit('OBJECT_STATE_CHANGED', { target: 'garden:cloud', key: 'rain', value: true });
-    world.effects.discover('make-it-rain');
+    setT(r.t);
+    progress();
     return true;
   };
 
-  const showMark = (text: string, at: Pt, ok: boolean) => {
-    const n = strokeN.current;
-    setMark({ text, x: at.x, y: at.y, ok, n });
-    window.setTimeout(() => setMark((m) => (m?.n === n ? null : m)), 1300);
-  };
-
-  const endStroke = (e: React.PointerEvent) => {
-    const st = stroke.current;
-    if (!st) return;
-    stroke.current = null;
-    const svg = trailSvg.current;
-    const finish = (ok: boolean) => {
-      if (svg) svg.dataset.state = ok ? 'ok' : 'miss';
-      window.setTimeout(() => {
-        if (strokeN.current === st.n && svg) {
-          svg.dataset.state = '';
-          trailRef.current?.setAttribute('points', '');
-        }
-      }, 650);
-    };
-    if (e.type === 'pointercancel') return finish(false);
-    const pts = st.pts;
-    const end = pts[pts.length - 1]!;
-    if (st.where === 'sky') return finish(drawCloud(pts));
-    if (pts.length < 3) {
-      finish(false);
-      say(setInchLine, pick(GARDEN_LINES.tap));
-      return;
-    }
-    const shape = classify(pts);
-    if (shape === 'slash') {
-      const crossed = plantsCrossed(pts);
-      const ripe = crossed.filter((i) => (plotsRef.current[i]?.growth ?? 0) >= 1);
-      if (ripe.length) {
-        finish(true);
-        ripe.forEach(harvest);
-        return;
+  const tapCell = (x: number, y: number) => {
+    const cell = cellAt(s, x, y)!;
+    setFocus([x, y]);
+    if (pour) {
+      if (doAct({ type: 'water', x })) {
+        world.effects.discover('make-it-rain');
+        world.emit('OBJECT_STATE_CHANGED', { target: 'garden:barrel', key: 'pour', value: x });
+        learn([{ rule: 'barrel', x, y: 0 }]);
       }
-      finish(false);
-      if (crossed.length) {
-        const p = plotsRef.current[crossed[0]!];
-        say(setInchLine, p?.kind === 'moonflower' && !night ? pick(GARDEN_LINES.moonWaiting) : pick(GARDEN_LINES.notRipe));
-      }
+      setPour(false);
       return;
     }
-    const kind = shape ? SHAPE_PLANT[shape] : undefined;
-    const i = plotUnder(pts);
-    if (!kind || i < 0) {
-      finish(false);
-      showMark('?', end, false);
-      say(setInchLine, pick(GARDEN_LINES.unclear));
-      return;
-    }
-    if (plotsRef.current[i]) {
-      finish(false);
-      say(setInchLine, pick(GARDEN_LINES.taken));
-      return;
-    }
-    finish(true);
-    showMark(PACKETS[kind].name.toLowerCase(), end, true);
-    sow(i, kind);
-  };
-
-  const onUp = (e: React.PointerEvent) => {
-    if (stroke.current) endStroke(e);
-  };
-
-  // ------------------------------------------------------------- Crumb
-
-  /** Where Crumb is, by what it's doing. */
-  const placeThief = (r: DOMRect, now: number) => {
-    const el = thiefEl.current;
-    const t = thief.current;
-    const plotEl = plotEls.current[t.plot];
-    const fence = fenceRef.current;
-    if (!el || !plotEl || !fence) return;
-    const pb = plotEl.getBoundingClientRect();
-    const fb = fence.getBoundingClientRect();
-    const px = pb.left - r.left + pb.width / 2;
-    const soil = pb.bottom - r.top - pb.height * 0.12;
-    const perch = fb.top - r.top - 2;
-    const age = now - t.since;
-    let x = px;
-    let y = perch;
-    if (t.phase === 'hopping') {
-      const k = Math.min(1, age / 900);
-      y = perch + (soil - perch) * k - Math.sin(k * Math.PI) * 40;
-    } else if (t.phase === 'pecking') y = soil;
-    else if (t.phase === 'leaving' || t.phase === 'startled') {
-      const k = Math.min(1, age / 1400);
-      x = px + k * r.width * 0.6;
-      y = (t.phase === 'startled' ? soil : perch) - k * r.height * 0.5;
-    }
-    el.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px)`;
-  };
-
-  /** Shoo it (before it has the seed) or follow it (after): it drops the seed into a free plot. */
-  const shooThief = () => {
-    const r = poke(thief.current, performance.now());
-    if (r.outcome === 'none') return;
-    thief.current = r.thief;
-    setThiefPhase(r.thief.phase);
-    if (r.outcome === 'shooed') {
-      world.effects.discover('seed-saver');
-      say(setInchLine, pick(GARDEN_LINES.thiefShooed));
-    } else if (r.outcome === 'dropped' && thiefSeed.current) {
-      const free = plotsRef.current.findIndex((p) => !p);
-      if (free >= 0) setPlot(free, plant(thiefSeed.current, Date.now()));
-      say(setInchLine, pick(GARDEN_LINES.thiefDropped));
-      thiefSeed.current = null;
-    }
-    world.emit('OBJECT_STATE_CHANGED', { target: 'garden:thief', key: 'outcome', value: r.outcome });
-  };
-
-  // ------------------------------------------------------------- keyboard
-
-  /** Keyboard and screen readers: choose a seed, then act on a plot. */
-  const onPlotKey = (i: number) => (e: React.MouseEvent) => {
-    if (e.detail !== 0) return;
-    const p = plotsRef.current[i];
+    const p = cell.plant;
     if (!p) {
-      if (keySeed) sow(i, keySeed);
-      else say(setInchLine, 'pick a seed first.');
-    } else if (p.growth >= 1 && isPlantKind(p.kind)) harvest(i);
-    else say(setInchLine, p.kind === 'moonflower' && !night ? pick(GARDEN_LINES.moonWaiting) : pick(GARDEN_LINES.notRipe));
+      if (cell.terrain !== 'soil') return setStatus(GARDEN_LINES.rock);
+      if (!seed) return setStatus('pick a seed from the tin first.');
+      if (doAct({ type: 'plant', x, y, kind: seed })) {
+        world.emit('OBJECT_STATE_CHANGED', { target: `garden:${seed}`, key: 'plant', value: `${x},${y}` });
+        setStatus(`${speciesName(seed)} planted.`);
+        if ((s.tin[seed] ?? 0) <= 1) setSeed(null);
+      }
+      return;
+    }
+    if (s.fresh.includes(p.id)) {
+      doAct({ type: 'dig', x, y });
+      setStatus(GARDEN_LINES.dug);
+      return;
+    }
+    if (p.stage === 3 && inBloom(s, p)) {
+      if (doAct({ type: 'pick', x, y })) harvest(p.kind);
+      return;
+    }
+    setStatus(describe(x, y));
   };
+
+  /** A picked thing goes indoors: flowers to the vase, radishes to the Playground. */
+  const harvest = (kind: Species) => {
+    world.effects.sound('pop');
+    setStatus(GARDEN_LINES.picked);
+    if (kind === 'radish') {
+      const o = useObjects.getState();
+      o.setSlice('playground', { radishes: Math.min(6, o.playground.radishes + 1) });
+      world.emit('OBJECT_STATE_CHANGED', { target: 'garden:radish', key: 'harvest', value: 'playground' });
+      return;
+    }
+    useKeepsakes.getState().addToVase(kind);
+    useObjects.getState().setLiving({ vaseNew: true });
+    if (isHybrid(kind)) {
+      world.emit('OBJECT_STATE_CHANGED', { target: 'garden:hybrid', key: 'harvest', value: kind });
+      world.effects.discover('hybrid-bloom');
+    } else world.emit('OBJECT_STATE_CHANGED', { target: `garden:${kind}`, key: 'harvest', value: 'house' });
+  };
+
+  const describe = (x: number, y: number) => {
+    const cell = cellAt(s, x, y)!;
+    const wet = ['dry', 'damp', 'wet', 'soaked'][cell.water] ?? 'wet';
+    if (cell.terrain === 'rock') return `Rock${cell.plant ? ', with a creeper over it' : ''}.`;
+    if (cell.terrain === 'shed') return 'The shed.';
+    const plant = cell.plant ? `${speciesName(cell.plant.kind)}, ${STAGE_WORDS[cell.plant.stage]}${cell.plant.facing ? `, facing ${cell.plant.facing}` : ''}` : 'empty soil';
+    const shaded = s.shade.length && s.shade[y * s.w + x] ? ', in shade yesterday' : '';
+    return `${plant}; soil ${wet}${cell.mark ? ', marked' : ''}${shaded}.`;
+  };
+
+  // ------------------------------------------------------------- the sun, by hand
+
+  const sunFromPointer = (e: React.PointerEvent): SunPos => {
+    const svg = skyRef.current!;
+    const r = svg.getBoundingClientRect();
+    const x = ((e.clientX - r.left) / r.width) * 1000;
+    const y = ((e.clientY - r.top) / r.height) * 340;
+    if (y > 292) return 'night';
+    const ang = (Math.atan2(ARC.cy - y, x - ARC.cx) * 180) / Math.PI;
+    return (Object.entries(STOPS) as Array<[SunPos, number]>).reduce((best, [k, a]) => (Math.abs(a - ang) < Math.abs(STOPS[best as Exclude<SunPos, 'night'>] - ang) ? k : best), 'noon' as SunPos);
+  };
+
+  const onSunDown = (e: React.PointerEvent) => {
+    if (e.button !== 0) return;
+    try {
+      (e.currentTarget as Element).setPointerCapture?.(e.pointerId);
+    } catch {
+      /* synthetic pointers have nothing to capture */
+    }
+    setDragging(true);
+    dragMoved.current = false;
+  };
+  const onSunMove = (e: React.PointerEvent) => {
+    if (!dragging) return;
+    const next = sunFromPointer(e);
+    if (next !== sun) {
+      dragMoved.current = true;
+      setSun(next);
+    }
+  };
+  const onSunUp = (e: React.PointerEvent) => {
+    if (!dragging) return;
+    setDragging(false);
+    const at = dragMoved.current ? sunFromPointer(e) : sun;
+    setSun(at);
+    letDayGo(at);
+  };
+
+  const onSunKey = (e: React.KeyboardEvent) => {
+    const i = SUN_ORDER.indexOf(sun);
+    let next: SunPos | null = null;
+    if (e.key === 'ArrowLeft') next = SUN_ORDER[Math.max(0, i - 1)]!;
+    else if (e.key === 'ArrowRight') next = SUN_ORDER[Math.min(2, i + 1)]!;
+    else if (e.key === 'ArrowDown') next = 'night';
+    else if (e.key === 'ArrowUp') next = 'noon';
+    else if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      letDayGo(sun);
+      return;
+    } else return;
+    e.preventDefault();
+    e.stopPropagation();
+    setSun(next);
+  };
+
+  // the room's own keys: ← yesterday, → another day with the same light
+  const onStageKey = (e: React.KeyboardEvent) => {
+    const el = e.target as HTMLElement;
+    if (el.closest('[data-own-keys]') || el.tagName === 'INPUT') return;
+    if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      back();
+    } else if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      letDayGo(sun);
+    }
+  };
+
+  // the bed is a grid: arrows move between cells
+  const onGridKey = (e: React.KeyboardEvent) => {
+    const [x, y] = focus;
+    const d: Record<string, [number, number]> = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] };
+    const v = d[e.key];
+    if (!v) return;
+    e.preventDefault();
+    e.stopPropagation();
+    const nx = Math.max(0, Math.min(s.w - 1, x + v[0]));
+    const ny = Math.max(0, Math.min(s.h - 1, y + v[1]));
+    setFocus([nx, ny]);
+    cellEls.current.get(`${nx},${ny}`)?.focus();
+  };
+
+  // ------------------------------------------------------------- drawing
+
+  const preview = useMemo(() => shadeMap(s, sun), [s, sun]);
+  const sp = stopPoint(sun);
+  const nightNow = s.night;
+  const glanceAt = c && rung >= 1 ? c.glance : null;
+  const tinKinds = Object.entries(s.tin).filter(([, n]) => n > 0) as Array<[Species, number]>;
+  const known = (k: string) => (HERBARIUM as Record<string, unknown>)[k] !== undefined;
+  const pages = herbarium.filter((h) => known(h) || isHybrid(h));
+  const dayMarks = c ? c.days : Math.max(6, t.days.length + 1);
+  const grade = nightNow ? 'rgb(30 40 110 / 0.28)' : sun === 'evening' ? 'rgb(255 150 60 / 0.12)' : sun === 'morning' ? 'rgb(255 220 150 / 0.08)' : 'transparent';
 
   return (
-    <section className={styles.room} data-phase={phase} aria-labelledby="garden-title">
-      <header className={styles.head}>
-        <LivingTitle id="garden-title" lines={['Gar', 'den']} label="Garden" size="room" />
-        <p className={styles.blurb}>You’re the sun. Move over the sky and the light follows; things grow where it falls. Sink it behind the fence for night. Draw shapes in the soil to plant, swipe across anything ripe to pick it, and if the beds dry out, draw them a cloud.</p>
-      </header>
+    <Stage
+      label="Garden"
+      id="garden-title"
+      className={styles.room}
+      note={c ? `job ${COMMISSIONS.findIndex((x) => x.id === c.id) + 1 || '·'} of ${COMMISSIONS.length}` : 'free play'}
+      light={{ x: sun === 'morning' ? 0.8 : sun === 'evening' ? -0.8 : 0, y: -0.8 }}
+      data={{ sun, night: String(nightNow), verdict }}
+      style={{ '--grade': grade } as React.CSSProperties}
+    >
+      <div className={styles.keyCatcher} onKeyDown={onStageKey}>
+        {/* far: sky and next door */}
+        <Layer depth="far" className={styles.far}>
+          <span className={styles.hills} aria-hidden="true" />
+          <span className={styles.roofNextDoor} aria-hidden="true" />
+        </Layer>
 
-      {/* keyboard and screen-reader controls (hidden until focused) */}
-      <div className={styles.keys} role="group" aria-label="Garden controls for the keyboard">
-        {PLANT_KINDS.map((k) => (
-          <button key={k} type="button" aria-pressed={keySeed === k} onClick={() => setKeySeed(keySeed === k ? null : k)}>
-            {PACKETS[k].name} seeds
-          </button>
-        ))}
-        <label>
-          Sun, across the garden
-          <input type="range" min={3} max={97} defaultValue={35} onChange={(e) => (sun.current.tx = Number(e.target.value) / 100)} />
-        </label>
-        <label>
-          Sun height (below zero is night)
-          <input type="range" min={-40} max={100} defaultValue={startNight ? -40 : 65} onChange={(e) => (sun.current.te = Number(e.target.value) / 100)} />
-        </label>
-      </div>
-
-      <div
-        ref={sceneRef}
-        className={styles.scene}
-        data-weather={weather}
-        onPointerDown={onSceneDown}
-        onPointerMove={onMove}
-        onPointerUp={onUp}
-        onPointerCancel={onUp}
-        onPointerLeave={() => (hand.current.inside = false)}
-      >
+        {/* the sky, with the sun on its arc */}
         <div className={styles.sky}>
-          <span className={styles.stars} aria-hidden="true" />
-          <span className={styles.moonDisc} aria-hidden="true" />
-          <WeatherLayer />
-        </div>
-        <div className={styles.sun} aria-hidden="true" />
-        {cloudViews.map((c) => (
-          <div
-            key={c.id}
-            className={styles.cloud}
-            aria-hidden="true"
-            style={{ width: c.w, height: c.w * 0.5 }}
-            ref={(el) => {
-              if (el) cloudEls.current.set(c.id, el);
-              else cloudEls.current.delete(c.id);
-            }}
+          <svg ref={skyRef} viewBox="0 0 1000 340" className={styles.arc} preserveAspectRatio="xMidYMax meet" aria-hidden="true">
+            <path d={`M ${ARC.cx - ARC.r} ${ARC.cy} A ${ARC.r} ${ARC.r} 0 0 1 ${ARC.cx + ARC.r} ${ARC.cy}`} className={styles.arcPath} />
+            {(['evening', 'noon', 'morning'] as const).map((k) => {
+              const p = stopPoint(k);
+              return <circle key={k} cx={p.x} cy={p.y} r="9" className={styles.stop} data-on={sun === k} />;
+            })}
+            <text x={ARC.cx - ARC.r - 10} y={ARC.cy + 26} className={styles.compass} textAnchor="middle">
+              W · house
+            </text>
+            <text x={ARC.cx + ARC.r + 10} y={ARC.cy + 26} className={styles.compass} textAnchor="middle">
+              E
+            </text>
+          </svg>
+          <button
+            type="button"
+            role="slider"
+            data-own-keys
+            className={styles.sun}
+            data-night={sun === 'night'}
+            data-drag={dragging}
+            data-glance={glanceAt === 'sun'}
+            style={{ left: `${(sp.x / 1000) * 100}%`, top: `${(sp.y / 340) * 100}%` }}
+            aria-label="The sun. Drag along the sky and let go for a day; arrow keys move it, Enter lets a day go."
+            aria-valuemin={0}
+            aria-valuemax={3}
+            aria-valuenow={SUN_ORDER.indexOf(sun)}
+            aria-valuetext={SUN_WORDS[sun]}
+            onPointerDown={onSunDown}
+            onPointerMove={onSunMove}
+            onPointerUp={onSunUp}
+            onPointerCancel={() => setDragging(false)}
+            onKeyDown={onSunKey}
           >
-            <span className={styles.bow} />
-            <span className={styles.rain} />
-            <span className={styles.puff} />
-          </div>
-        ))}
-        <div ref={fenceRef} className={styles.fence} aria-hidden="true" />
-        <div className={styles.pool} aria-hidden="true" />
-        <div className={styles.house} aria-hidden="true">
-          <span className={styles.houseDoor} />
-        </div>
-        <div className={styles.bip}>
-          <ThoughtBubble text={bipLine} side="left" />
-          <button type="button" className={`prop-btn ${styles.bipHit}`} aria-label="Bip, leaning on the fence" onClick={() => say(setBipLine, pick(BIP_FENCE))}>
-            <svg viewBox="0 0 80 50" aria-hidden="true">
-              <rect x="8" y="8" width="64" height="40" rx="12" fill="var(--blue)" stroke="var(--char-ink)" strokeWidth="2.5" />
-              <rect x="16" y="15" width="48" height="26" rx="8" fill="#24232b" />
-              <rect x="25" y="21" width="6" height="9" rx="3" fill="#a6f0c6" />
-              <rect x="49" y="21" width="6" height="9" rx="3" fill="#a6f0c6" />
-              <path d="M34 34 q 6 4 12 0" fill="none" stroke="#a6f0c6" strokeWidth="2" strokeLinecap="round" />
-              <path d="M40 8 V 1" stroke="var(--char-ink)" strokeWidth="2.5" />
-              <circle cx="40" cy="1" r="3.5" fill="var(--coral)" stroke="var(--char-ink)" strokeWidth="2" />
-            </svg>
+            <span className={styles.sunDisc} />
           </button>
         </div>
 
-        {/* Pim's planting card, propped on the lawn */}
-        <div className={styles.card} aria-hidden="true">
-          <span className={styles.cardTitle}>{CARD_TITLE}</span>
-          <ul>
-            {PLANT_KINDS.map((k) => (
-              <li key={k} title={PACKETS[k].note}>
-                <svg viewBox="0 0 24 24">
-                  <path d={SHAPE_GLYPH[k]} />
-                </svg>
-                {PACKETS[k].name}
-              </li>
-            ))}
-            <li className={styles.cardSky}>
-              <svg viewBox="0 0 24 24">
-                <path d={CLOUD_GLYPH} />
-              </svg>
-              {CARD_SKY}
-            </li>
-          </ul>
-        </div>
-
-        <ol className={styles.beds} aria-label="Garden plots" onPointerDown={onBedsDown}>
-          {plotsRef.current.map((p, i) => {
-            const kind = p && isPlantKind(p.kind) ? p.kind : null;
-            const st: Stage = p ? stage(p.growth) : 0;
-            const label = !p || !kind ? `Plot ${i + 1}: empty` : `Plot ${i + 1}: ${PACKETS[kind].name.toLowerCase()}, ${STAGE_NAMES[st]}${st === 4 ? ' (ready to pick)' : ''}`;
+        {/* the day track: where you are in time; tap a day to go back to it */}
+        <div className={styles.days} role="group" aria-label="Days" data-own-keys>
+          {Array.from({ length: dayMarks }, (_, d) => {
+            const past = d < t.days.length;
+            const now = d === t.days.length;
             return (
-              <li
-                key={i}
-                className={styles.plotWrap}
-                data-bed={Math.floor(i / 2)}
-                ref={(el) => {
-                  plotEls.current[i] = el;
-                }}
-              >
-                <button type="button" className={styles.plot} data-stage={kind ? st : 'empty'} data-kind={kind ?? undefined} data-crossed={p && crossings.has(crossKey(i, p)) ? 'true' : undefined} aria-label={label} onClick={onPlotKey(i)}>
-                  {kind && st > 0 ? <span className={styles.shadow} aria-hidden="true" /> : null}
-                  <span
-                    className={styles.plant}
-                    ref={(el) => {
-                      plantEls.current[i] = el;
-                    }}
-                  >
-                    {kind ? <PlantView kind={kind} stage={st} /> : null}
-                  </span>
-                  <span className={styles.soil} aria-hidden="true" />
-                </button>
-              </li>
+              <button
+                key={d}
+                type="button"
+                className={styles.day}
+                data-state={past ? 'past' : now ? 'now' : 'future'}
+                data-sun={past ? t.suns[d] : undefined}
+                disabled={!past}
+                aria-label={past ? `Go back to the start of day ${d + 1} (${t.suns[d]})` : now ? `Day ${d + 1}, today` : `Day ${d + 1}`}
+                onClick={() => back(d)}
+              />
             );
           })}
-        </ol>
+          <button type="button" className={styles.yesterday} disabled={!t.days.length} onClick={() => back()} aria-label="Take the sun back one day" data-wiggle={verdict === 'failed'}>
+            ↶
+          </button>
+        </div>
 
-        {night
-          ? Array.from({ length: FIREFLIES }, (_, i) => (
-              <span
-                key={i}
-                className={styles.firefly}
-                aria-hidden="true"
-                style={{ animationDelay: `${-i * 0.37}s` }}
-                ref={(el) => {
-                  flyEls.current[i] = el;
-                }}
-              />
-            ))
-          : null}
+        {/* mid: the fence, the house wall, Bip */}
+        <Layer depth="mid" className={styles.mid}>
+          <span className={styles.fence} aria-hidden="true" />
+          <span className={styles.houseWall} aria-hidden="true">
+            <span className={styles.door} />
+          </span>
+          <div className={styles.bip}>
+            <ThoughtBubble text={bipLine} side="left" />
+            <button type="button" className={`prop-btn ${styles.bipHit}`} aria-label="Bip, leaning on the fence" onClick={() => {
+              const l = pick(BIP_FENCE);
+              setBipLine(l);
+              window.setTimeout(() => setBipLine((cur) => (cur === l ? null : cur)), 2600);
+            }}>
+              <svg viewBox="0 0 80 50" aria-hidden="true">
+                <rect x="8" y="8" width="64" height="40" rx="12" fill="var(--blue)" stroke="var(--char-ink)" strokeWidth="2.5" />
+                <rect x="16" y="15" width="48" height="26" rx="8" fill="#24232b" />
+                <rect x="25" y="21" width="6" height="9" rx="3" fill="#a6f0c6" />
+                <rect x="49" y="21" width="6" height="9" rx="3" fill="#a6f0c6" />
+                <path d="M34 34 q 6 4 12 0" fill="none" stroke="#a6f0c6" strokeWidth="2" strokeLinecap="round" />
+              </svg>
+            </button>
+          </div>
+        </Layer>
 
-        {[0, 1, 2].map((i) => (
-          <span
-            key={i}
-            className={styles.bug}
-            data-kind={i < 2 ? 'bee' : 'butterfly'}
-            aria-hidden="true"
-            ref={(el) => {
-              bugEls.current[i] = el;
-            }}
-          />
-        ))}
-        {thiefPhase !== 'away' ? (
-          <button ref={thiefEl} type="button" className={styles.thief} data-phase={thiefPhase} aria-label={GARDEN_LINES.thiefLabel} onClick={shooThief}>
-            <svg viewBox="0 0 44 34" aria-hidden="true">
-              <path d="M6 20 C 6 8 26 4 34 14 L 42 12 L 36 20 C 34 28 14 30 6 20 Z" fill="#a07a5c" stroke="var(--char-ink)" strokeWidth="2.5" strokeLinejoin="round" />
-              <path className={styles.wing} d="M14 16 C 18 8 28 10 28 18 C 22 20 16 20 14 16 Z" fill="#7a5a42" stroke="var(--char-ink)" strokeWidth="2" />
-              <circle cx="31" cy="14" r="1.8" fill="var(--char-ink)" />
-              <path d="M16 28 v 5 M22 28 v 5" stroke="var(--char-ink)" strokeWidth="2" />
-              {thiefPhase === 'carrying' ? <ellipse cx="42" cy="16" rx="3" ry="2" fill="#6b4f3a" stroke="var(--char-ink)" strokeWidth="1.2" /> : null}
-            </svg>
+        {/* play: the asker, the bed, the tin and the barrel */}
+        <div className={styles.play}>
+          <div className={styles.asker} data-verdict={verdict}>
+            <Portrait who={c?.asker ?? 'inch'} mood={verdict} />
+            <p className={styles.say} aria-live="polite" data-empty={!line || undefined}>
+              {line}
+            </p>
+            {c ? (
+              <p className={styles.card}>
+                <span className="visually-hidden">The job: </span>
+                {c.card}
+                {c.check === 'end' ? ` (checked after day ${c.days})` : ` (${c.days} days)`}
+              </p>
+            ) : null}
+          </div>
+
+          <div className={styles.bedWrap}>
+            <div className={styles.bed} role="grid" aria-label={`The bed, ${s.w} by ${s.h}. Day ${s.day}.`} data-own-keys onKeyDown={onGridKey} style={{ '--cols': s.w } as React.CSSProperties}>
+              {Array.from({ length: s.h }, (_, y) => (
+                <div key={y} role="row" className={styles.row}>
+                  {Array.from({ length: s.w }, (_, x) => {
+                    const cell = s.cells[y * s.w + x]!;
+                    const p = cell.plant;
+                    const shadedNext = preview[y * s.w + x];
+                    const ev = s.events.filter((e) => Math.round(e.x) === x && Math.round(e.y) === y && e.rule !== 'dry-sun' && e.rule !== 'damp-shade');
+                    const glance = Array.isArray(glanceAt) && glanceAt[0] === x && glanceAt[1] === y;
+                    const isFocus = focus[0] === x && focus[1] === y;
+                    return (
+                      <button
+                        key={x}
+                        role="gridcell"
+                        type="button"
+                        tabIndex={isFocus ? 0 : -1}
+                        ref={(el) => {
+                          if (el) cellEls.current.set(`${x},${y}`, el);
+                          else cellEls.current.delete(`${x},${y}`);
+                        }}
+                        className={styles.cell}
+                        data-terrain={cell.terrain}
+                        data-water={cell.water}
+                        data-mark={cell.mark || undefined}
+                        data-shade-next={shadedNext && !nightNow ? true : undefined}
+                        data-pour={pour || undefined}
+                        data-glance={glance || undefined}
+                        data-fresh={p && s.fresh.includes(p.id) ? true : undefined}
+                        aria-label={`${x + 1}, ${y + 1}: ${describe(x, y)}`}
+                        onClick={() => tapCell(x, y)}
+                      >
+                        <span className={styles.soil} aria-hidden="true">
+                          {cell.water > 0 && cell.terrain === 'soil' ? <span className={styles.drops} data-n={cell.water} /> : null}
+                        </span>
+                        {p ? (
+                          <span className={styles.plant} data-stage={p.stage} data-kind={p.kind} data-tall={p.stage >= 2 && traits(p.kind).tall} aria-hidden="true" key={`${p.id}`}>
+                            <svg viewBox="0 0 60 100">
+                              <PlantArt kind={p.kind} stage={p.stage} facing={p.facing} night={nightNow} onRock={cell.terrain === 'rock'} vine={traits(p.kind).climbs && p.id !== p.root} />
+                            </svg>
+                            {p.stage >= 2 ? <ContactShadow width={70} /> : null}
+                          </span>
+                        ) : null}
+                        {ev.map((e, i) => (
+                          <span key={`${s.day}-${i}`} className={styles.event} data-rule={e.rule} aria-hidden="true" />
+                        ))}
+                      </button>
+                    );
+                  })}
+                </div>
+              ))}
+            </div>
+            {s.events.some((e) => e.rule === 'crumb') && !reduced ? <span key={`crumb-${s.day}`} className={styles.crumb} aria-hidden="true" /> : null}
+            {s.events.some((e) => e.rule === 'bee-cross') ? <span key={`bee-${s.day}`} className={styles.beeCross} aria-hidden="true" /> : null}
+            <span className={styles.bee} aria-hidden="true" />
+            <span className={`${styles.bee} ${styles.bee2}`} aria-hidden="true" />
+          </div>
+
+          <div className={styles.tools}>
+            <div className={styles.tin} role="group" aria-label="The seed tin" data-glance={glanceAt === 'tin' || undefined}>
+              {tinKinds.length ? (
+                tinKinds.map(([k, n]) => (
+                  <button key={k} type="button" className={styles.packet} aria-pressed={seed === k} onClick={() => {
+                    setSeed(seed === k ? null : k);
+                    setPour(false);
+                  }} aria-label={`${displayName(k)} seeds, ${n} left`}>
+                    <PacketArt kind={k} />
+                    <span className={styles.packetName}>{displayName(k)}</span>
+                    <span className={styles.count}>{n}</span>
+                  </button>
+                ))
+              ) : (
+                <span className={styles.empty}>the tin’s empty</span>
+              )}
+            </div>
+            <button type="button" className={styles.barrel} aria-pressed={pour} data-glance={glanceAt === 'barrel' || undefined} disabled={s.barrel <= 0} onClick={() => {
+              setPour(!pour);
+              setSeed(null);
+            }} aria-label={`The rain barrel, ${s.barrel} tips left${pour ? '. Now tap a column to pour.' : ''}`}>
+              <svg viewBox="0 0 50 60" aria-hidden="true">
+                <path d="M8 10 C 6 30 6 44 10 56 L 40 56 C 44 44 44 30 42 10 Z" fill="var(--earth-l1)" stroke="var(--char-ink)" strokeWidth="2.4" />
+                <path d="M7 22 H 43 M7 44 H 43" stroke="var(--char-ink)" strokeWidth="2" />
+                <ellipse cx="25" cy="10" rx="17" ry="4.5" fill={s.barrel > 0 ? 'var(--blue-l1)' : 'var(--earth-d1)'} stroke="var(--char-ink)" strokeWidth="2.2" />
+              </svg>
+              <span className={styles.count}>{s.barrel}</span>
+            </button>
+            <button type="button" className={styles.bookBtn} data-new={newPage || undefined} onClick={() => {
+              setBook(!book);
+              setNewPage(false);
+            }} aria-expanded={book} aria-label={`The Herbarium, ${pages.length} pages`}>
+              <svg viewBox="0 0 50 44" aria-hidden="true">
+                <path d="M4 6 Q 14 2 25 8 Q 36 2 46 6 V 40 Q 36 36 25 42 Q 14 36 4 40 Z" fill="var(--mint-l2)" stroke="var(--char-ink)" strokeWidth="2.2" strokeLinejoin="round" />
+                <path d="M25 8 V 42" stroke="var(--char-ink)" strokeWidth="2" />
+                <path d="M12 18 q 4 -6 7 2 M33 16 q 3 6 7 0" stroke="var(--mint-d2)" strokeWidth="2" fill="none" />
+              </svg>
+              <span className={styles.count}>{pages.length}</span>
+            </button>
+          </div>
+        </div>
+
+        {/* the jobs, pinned along the fence */}
+        <nav className={styles.jobs} aria-label="Garden jobs">
+          {COMMISSIONS.map((cm, i) => {
+            const done = solved.includes(cm.id);
+            const open = done || i === 0 || solved.includes(COMMISSIONS[i - 1]!.id);
+            return (
+              <button key={cm.id} type="button" className={styles.job} data-done={done} aria-current={job.id === cm.id} disabled={!open} onClick={() => switchJob(cm.id)} aria-label={`Job ${i + 1}${open ? `, from ${ASKER_NAMES[cm.asker]}` : ' (not yet)'}${done ? ', done' : ''}`}>
+                {i + 1}
+              </button>
+            );
+          })}
+          <button type="button" className={`${styles.job} ${styles.free}`} aria-current={job.id === FREE} onClick={() => switchJob(FREE)} aria-label="Free play: the whole tin, no job">
+            ∞
+          </button>
+          {solved.length >= COMMISSIONS.length ? (
+            <button type="button" className={`${styles.job} ${styles.free}`} onClick={askMe} aria-label="Ask me something: a small new job">
+              ?
+            </button>
+          ) : null}
+        </nav>
+
+        {verdict === 'solved' && c ? (
+          <button type="button" className={`paper-btn ${styles.next}`} onClick={() => {
+            const next = COMMISSIONS.find((x) => !useKeepsakes.getState().garden2.solved.includes(x.id));
+            switchJob(next?.id ?? FREE);
+          }}>
+            next job →
           </button>
         ) : null}
-        <svg ref={trailSvg} className={styles.trail} aria-hidden="true">
-          <polyline ref={trailRef} points="" />
-        </svg>
-        {mark ? (
-          <span key={mark.n} className={styles.mark} data-ok={mark.ok} style={{ left: mark.x, top: mark.y }} aria-hidden="true">
-            {mark.text}
-          </span>
-        ) : null}
-        {flying.map((f) => (
-          <div key={f.id} className={styles.fly} aria-hidden="true" style={{ '--x': `${f.x}px`, '--y': `${f.y}px`, '--hx': `${f.hx}px`, '--hy': `${f.hy}px` } as React.CSSProperties}>
-            <CropIcon kind={f.kind} />
-          </div>
-        ))}
+        <button type="button" className={styles.reset} onClick={resetBed}>
+          start this bed again
+        </button>
 
-        <div className={styles.inch}>
-          <Inch thought={inchLine} rootRef={inchRef} label="Inch, who lives along the beds" onActivate={() => say(setInchLine, pick(INCH_GARDEN))} />
-        </div>
+        {book ? (
+          <aside className={styles.book} aria-label="The Herbarium">
+            <h2>Herbarium</h2>
+            {pages.length ? (
+              <ul>
+                {pages.map((id) => {
+                  const pg = (HERBARIUM as Record<string, { title: string; note: string }>)[id];
+                  return (
+                    <li key={id}>
+                      <strong>{pg ? pg.title : `New: ${HYBRID_NAMES[id] ?? speciesName(id as Species)}`}</strong>
+                      <span>{pg ? pg.note : 'Made by the bees. Plant it and see what it does.'}</span>
+                    </li>
+                  );
+                })}
+              </ul>
+            ) : (
+              <p>Empty. Pages fill in when something happens in the bed.</p>
+            )}
+            <button type="button" className="paper-btn" onClick={() => setBook(false)}>
+              close
+            </button>
+          </aside>
+        ) : null}
+
+        <p className={styles.status} role="status" aria-live="polite">
+          {status}
+        </p>
       </div>
-    </section>
+    </Stage>
   );
 }
