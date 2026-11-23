@@ -147,3 +147,20 @@ implementation:
 Behavior files: `character.ts` (moods, idle, tab return), `living.ts`,
 `playground.ts`, `mood.ts`, `secret.ts`, `rare.ts`, `memory.ts`,
 `night.ts`, `combos.ts` (cross-room chains and multi-character gags).
+
+## Phase 4 additions
+
+Three rooms became small games, each built on one pure, seeded simulation
+(no React, no DOM; React only renders state). See `PHASE_4_REFINED_PLAN.md`.
+
+| Area | Module | Notes |
+| --- | --- | --- |
+| Garden sim | `rooms/Garden/sim/{types,species,core,history,replay,ask}.ts` | `step(state, sun)` is one day, `act(state, action)` is a hand in the soil; `Timeline` keeps the bed before each day, so rewind is an exact restore. `replay` runs stored solutions; `randomRuns` measures how much luck can solve a level. |
+| Garden content | `content/garden.ts` | Twelve commissions as data (asker, goal predicate, layout, seeds, days, solution, naive attempt, hint ladder), the Herbarium pages. |
+| Weather sim | `rooms/Weather/sim/{valley,run,read}.ts` | 24×12 cells of temperature, vapour, cloud, wind; tools; rainbows from lamp geometry; lightning to the highest conductor; postcard progress with hold times; barometer forecast by stepping a copy; a compact save string. |
+| House weather | `app/valley.ts`, `app/weatherSync.ts` | One shared valley; idle mode at 1 Hz; mood tools fill an empty valley; `valleyWeather` in the store beats the mood map unless a pin is live. |
+| Attic mystery | `rooms/Attic/mystery/{board,playthrough}.ts`, `content/attic.ts` | Residents, things, clues (each answer lists its supporting clues), group-of-three confirmation, acts, trunk, save/restore. |
+| Attic room | `rooms/Attic/{Attic,MemoryBoard,EvidenceArt,spots}.tsx` | Dust grid (Phase 2) now hides evidence; the shadow theatre (Phase 3) reports creatures as memory scenes. |
+| Art kit | `art/{Stage,Ink,ContactShadow,tween,particles,power}.ts(x)`, `styles/tokens.css` | Ramps, grain, a full-viewport `Stage` with depth layers and a compact `RoomTag`, one tween helper, one capped particle helper, a low-power switch. |
+| Hints | `app/hints.ts` | `useHintLadder(key, active)`; opt-out in the Memory Room (`settings.hints`, persisted). |
+| Memory | `engine/memory.ts`, `state/keepsakes.ts` | v3, additive: `garden2`, `workshop`, `board`, `settings.hints`. |

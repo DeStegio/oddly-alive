@@ -14,15 +14,27 @@ npm run e2e         # playwright: builds, serves the production build, runs desk
 npm run check       # typecheck + lint + unit tests
 ```
 
-## Results (last run)
+## Results (last run: Phase 4 release, 2026-11-23)
 
 | Suite | Result |
 | --- | --- |
 | TypeScript (strict, `noUncheckedIndexedAccess`) | 0 errors |
-| ESLint | 0 errors, 0 warnings |
-| Vitest | 142 tests, all passing |
-| Playwright (Desktop Chrome 1440×900 + Pixel 7) | 35 passed; 3 skipped by design (desktop-only keyboard and pointer probes don't run on the mobile project) |
-| axe-core (WCAG 2 A/AA, serious and critical) | 0 violations in all six rooms, on desktop and on mobile |
+| ESLint | 0 errors, 7 warnings (fast-refresh export notes, one hook-deps note) |
+| Vitest | 394 tests in 43 files, all passing |
+| Playwright (Desktop Chrome 1440×900 + Pixel 7) | 112 passed, 10 skipped by design (desktop-only probes, the opt-in screenshot spec), 0 failed; one retry is configured and none was needed in the last run |
+| axe-core (WCAG 2 A/AA, serious and critical) | 0 violations in all eight rooms, desktop and mobile |
+
+Phase 4 added (and is covered by): the garden simulation and all twelve
+commissions (`rooms/Garden/sim/sim.test.ts`: rules one at a time,
+determinism, rewind = restore, stored solutions, idling and naive attempts
+fail, blind random play < 8 %); the valley (`rooms/Weather/sim/valley.test.ts`:
+rules one at a time, 10 000 random steps stay finite and bounded, every
+postcard script works, idling and naive scripts don't); the attic mystery
+(`rooms/Attic/mystery/mystery.test.ts`: fairness of the clue graph, group
+confirmation, nothing names a wrong pin, a full headless playthrough);
+cross-room links and memory (`app/links.test.tsx`); e2e that plays the
+rooms through the UI (`e2e/garden.spec.ts`, `weather.spec.ts`,
+`attic.spec.ts`) and the L8 first-minute timings (`e2e/firstminute.spec.ts`).
 
 ## What the unit and integration tests cover
 
@@ -58,11 +70,11 @@ frame rate in an earlier run.
 | Measurement (headless Chromium, this machine) | Result |
 | --- | --- |
 | Blank page median frame | 16.7 ms |
-| Living Room median frame while the pointer moves | 16.7 ms |
+| Living Room median frame while the pointer moves | 16.7 ms (Phase 4 release run) |
 | Living Room p95 frame | 16.8–33.4 ms across runs (noisier when other workers run in parallel) |
 | Long tasks (> 50 ms) during interaction | 0–2 |
-| DOM nodes after visiting all rooms three times | 408 → 408 → 408 (no growth) |
-| Main JS bundle | 279 kB (91 kB gzip); Matter.js separate, 86 kB (28 kB gzip), loaded only by the Playground |
+| DOM nodes after visiting all rooms three times | 480 → 479 → 474 (no growth) |
+| Main JS bundle | 344 kB (114.5 kB gzip); Phase 3 was 335 kB (111.0 kB gzip), measured by building 053f5c9. Phase 4 adds the shared valley simulation to main (idle mode needs it); everything else is in the room chunks: Garden 55 kB (18.5 gzip), Weather Workshop 25 kB (9.8), Attic 47 kB (16.9). Matter.js separate, 86 kB (28 kB gzip), Playground only |
 
 **Limitations.** This is not a device benchmark. Headless Chromium on a
 laptop is neither a low-end phone nor a real GPU pipeline. Before claiming

@@ -273,15 +273,131 @@ The final count goes in the README and the toast ("n of N").
 
 ## 9. Log
 
-- 4.0 ◐ Audit done (this document). Baseline: 306 unit tests green; before
+- 4.0 ☑ Audit (this document). Baseline: 306 unit tests green; before
   screenshots captured and looked at (Garden: first 280 px are title and
   paragraph; Mood Room: a settings panel; Attic on Pixel 7: stage starts at
-  y≈760 of 2400 device px).
+  y≈760 of 2400 device px). Art kit in `src/art`, tokens ramps, paper-wipe
+  transition, memory additions, hint ladder. Merged.
+- 4.1 ☑ Garden. Sim + 56 sim tests. Tuning with a scratch evaluator found
+  and fixed: nights froze mint (mint now spreads at night too), the mint
+  itself counted as a radish's company (company now counted at dawn), a
+  night counted as "all in shade" for the long-shadows job, creeper water
+  loss made the creeper job unsolvable. Final: every stored solution works,
+  idling and naive attempts fail, blind random play 0–3.8 % (tutorial
+  19.7 %). Played through the UI on desktop and Pixel 7 (jobs 1, 2, 5, 12 +
+  a wrong answer then rewind). Merged.
+- 4.2 ☑ Weather Workshop. Valley sim, ten postcards tuned with a position
+  sweep; added a slow exchange with "outside" (storms never cleared), a
+  per-postcard breeze (the roof postcard was solvable by putting the teacup
+  on the roof), taller-cloud requirement for lightning (a teacup alone made
+  18 strikes a minute). 45 sim tests, 4 component tests, e2e by mouse and
+  touch. Merged.
+- 4.3 ☑ Attic. Story, clue graph, board, three acts, trunk, twist. Found
+  while testing: stepping the decade dial passed through the right answer
+  and confirmed it (fixed: the board looks after a pin settles); the trunk's
+  dials never received clicks (pointer capture); rubbing that started over a
+  dusty thing did nothing (disabled buttons swallow pointers). Full
+  playthrough in e2e on desktop, act 1 by touch on Pixel 7. Merged.
+- 4.4 ☑ Links + memory tests (the pressed flower could appear but never be
+  uncovered: fixed). Merged.
+- 4.5 ◐ Art pass on the other rooms: compact tags, weather grading, grain
+  on toasts and the share sheet, contact shadows for Pim, Lumen, Ferdinand.
+  The perf probe caught a full-screen blend mode doubling frame time
+  (removed, decision 42).
+- 4.6 ☑ Hints opt-out in the Memory Room, L8 measurements, docs, full e2e
+  (112 passed, 0 failed), bundle split (room content out of main).
+
+### L8, measured (`e2e/firstminute.spec.ts`, ms from navigation)
+
+A scripted player who acts as soon as the page allows. Single worker / full
+parallel suite:
+
+| Room | Affordance on screen | First action landed | First surprise | First goal solved |
+| --- | --- | --- | --- | --- |
+| Garden, desktop | 610 / 1120 | 854 / 1410 | 923 / 1485 (a sprout, a Herbarium page) | 1128 / 1673 (job 1) |
+| Garden, Pixel 7 | 414 / 667 | 645 / 1668 | 737 / 1819 | 1128 / 2151 |
+| Workshop, desktop | 769 / 1069 | 1288 / 1472 | 4269 / 4939 (it rains; house weather = rain) | 7213 / 7528 (postcard 1) |
+| Workshop, Pixel 7 | 579 / 748 | 812 / 1556 | 2803 / 3611 | 6712 / 7655 |
+| Attic, desktop | 2289 / 1520 (Marguerite speaks at 1.1 s) | 6142 / 18089 (rubbing a photo clean) | 7052 / 20578 (a name and a face) | 9657 / 23253 (first group of three) |
+| Attic, Pixel 7 | 2249 / 1974 | 5110 / 8310 | 12951 / 18683 | 14596 / 22284 |
+
+Against L8: affordance ≤ 5 s and goal ≤ 60 s are met everywhere; surprise
+≤ 15 s is met for the Garden and the Workshop, and missed for the Attic
+under parallel load (its "surprise" needs several things dusted, and the
+script dusts one at a time). These are machine times: a person has to read
+Pim's request, find the sun, think. The Attic's honest human estimate for the
+first group is the brief's 3–5 minutes; nothing here proves it.
+
+### Self-critique per room
+
+**Garden.** At 10 s you know seeds go in cells and the sun moves; at 60 s
+that a sunflower faces where the sun was on its last day; at 5 min shade,
+night, mint, wet and dry soil. Solvable without the rule: job 1 (~20 %
+blind) is the tutorial and accepted; nothing else is above 4 %. Reasonable
+tries the sim ignores: dragging a grown plant to move it (only today's seeds
+dig up), watering one cell (the barrel does a column; it says so by doing
+it), dragging the sun backwards to rewind (decision 37). Best moment: the
+sunflower's head turning to the house, inside the first minute. Still
+click → reaction: Bip on the fence (a line, no purpose).
+
+**Weather Workshop.** At 10 s you know the tools go into the valley; at
+60 s that warm wet air low down makes cloud and then rain; at 5 min wind,
+cold → snow and fog, lightning wants a tall cloud. Solvable without the
+rule: postcard 1 works with the teacup anywhere low (deliberately easy); the
+rest need their rule (naive attempts fail), but blind random play was not
+measured for postcards. Ignored tries: the ice on the pond doesn't make a
+frozen pond unless the air is cold enough (it follows temperature, which
+is honest but may surprise). Best moment: rain falling from a cloud you
+made, at ~6 s. Still click → reaction: the almanac.
+
+**Attic.** At 10 s you know dust rubs off and things are under it; at 60 s
+that evidence names people and the board wants a person and a decade; at
+5 min that three right at once lock and wrong ones are never named. Solvable
+without understanding: act 1 has two people, so owners are a coin toss;
+decades still need clues, and the board only speaks in groups. Ignored
+tries: dragging a thing onto a portrait (the board uses taps; there are no
+drawn threads), rubbing Marguerite. Best moment: the first group locking,
+Marguerite's memory and a hat; the twist at the end. Still click →
+reaction: the gramophone (a toy kept from Phase 3).
+
+### Art critiques (after screenshots in `docs/phase4/after/`)
+
+- Garden: reads as a game board under a real sky; the sun arc and day track
+  are clear. Still flat: the bed is one brown slab, cells are plain tiles,
+  plants are small on desktop.
+- Weather Workshop: the glass box is the hero; clouds now look like clouds.
+  Still flat: the ground is one green shape, the village is tiny, the room
+  around the box is a dotted wall.
+- Attic: dust and the beam give it mood; the board reads as a corkboard.
+  Still flat: evidence icons are simple, the closed parts are dark stripes.
+- Living Room, Playground, After Hours, Secret Space, Memory Room: compact
+  tags free the first screen; otherwise unchanged. Infinite Rooms: untouched.
+- Night theme: checked for every room; the new rooms' paper art was dark on
+  dark at first and now stays light.
 
 ---
 
-## 10. Honest limits (filled in as we go)
+## 10. Honest limits
 
-- Fun cannot be measured directly. §9 reports L8 timings from Playwright
-  "first minute" scripts and a written self-critique per room; neither is a
-  usability test with real people.
+- No playtests with people. L8 numbers are a script's, not a person's.
+- Garden: 7×4 on phones instead of 5×5 (decision 36); rewind is the day
+  track, not dragging the sun back (decision 37); "ask me something" has
+  four templates.
+- Weather: the sim is tuned, not physical (decision 40). The finale has one
+  stored strategy; "several strategies must work" was not tested. Postcards
+  are in `src/content/postcards.ts`, not `weather.ts` as the brief said:
+  keeping them out of the main bundle (the Living Room imports weather lines).
+- Attic: "strings" are coloured owner chips, not threads you drag; the
+  shadow scenes reuse Phase 3's five shapes; evidence art is simple icons;
+  act 1 owners can be guessed (two people).
+- Art pass (4.5) is partial for the older rooms: no new illustration,
+  parallax layers or squash-and-stretch there; the nav and letters are
+  unchanged apart from grain. The Ink and ShadeSide helpers exist but are
+  barely used yet.
+- Hint ladder exists only in the three Phase 4 rooms; its 30 s "glance" is a
+  highlight on the relevant thing, not character acting.
+- Sound: nothing new beyond existing effects (opt-in, as before).
+- Only Chromium was tested; no screen-reader walkthrough.
+- An accident during the release: a failed `git worktree remove` deleted
+  part of `node_modules` through a junction; it was restored with
+  `npm install` (lockfile unchanged). No source or git history was affected.

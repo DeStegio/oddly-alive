@@ -61,7 +61,7 @@ test.describe('Phase 3 baseline: what every room already has', () => {
     await visit(page, 'attic');
     await expect(page.getByRole('group', { name: /The attic, under the dust/ })).toBeVisible();
     await expect(page.getByRole('button', { name: /Marguerite the dress form/ })).toBeAttached();
-    await expect(page.getByRole('heading', { name: /^Memory Board/ })).toBeAttached();
+    await expect(page.getByRole('tab', { name: /the board/ }).or(page.getByRole('heading', { name: /^Memory Board/ }))).toBeVisible();
     await expect(page.getByRole('img', { name: /gramophone/i })).toBeAttached();
     await expect(page.getByRole('button', { name: /shadow theatre/ })).toBeAttached();
   });

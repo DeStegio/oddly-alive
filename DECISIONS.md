@@ -121,3 +121,51 @@ Short architecture/design decision log. Newest at the bottom.
     timing-sensitive under parallel load; a pass on retry is reported as
     flaky, not hidden. Chasing those flakes found two real bugs (incident
     priority, the sparrow's trigger).
+
+## Phase 4
+
+34. **Three rooms rebuilt around one pure simulation each.** The Garden
+    (`rooms/Garden/sim`), the Weather Workshop (`rooms/Weather/sim`) and the
+    attic mystery (`rooms/Attic/mystery`) are plain TypeScript with no React
+    or DOM: seeded, deterministic, JSON-able state. React only renders. This
+    is what makes rewind an exact restore and every level checkable.
+35. **Memory stays v3, additively** (as in Phase 3). `garden2`, `workshop`
+    and `board` are validated with defaults, and `settings.hints` defaults
+    to on, so Phase 3 saves load unchanged (tested). No v4 migration was
+    needed.
+36. **The garden bed is 7×4 on phones too.** The brief asked for 5×5 on
+    mobile with a per-level layout. One layout per level means one verified
+    solution per level, and east/west stay where the sun is; 7 columns fit a
+    Pixel 7 at ≥ 48 px cells.
+37. **Rewind is the day track, not dragging the sun east.** Dragging the sun
+    chooses the light for the next day (and previews its shadows); letting go
+    commits a day. If dragging back also meant "rewind", the same gesture
+    would mean both "morning light" and "yesterday". Rewind is the row of
+    day markers under the sky (tap a past day, ↶, or ←).
+38. **The valley is the house weather.** Every page keeps the shared valley
+    running slowly (1 Hz × 10 steps, paused in hidden tabs). An empty sill
+    lets the mood put its own things in the valley (the old "let the mood
+    decide", now caused). A calm valley reports nothing and the mood's old
+    weather map applies, so the rest of the house keeps working.
+39. **Levels are checked against luck, not just for solvability.** Each
+    garden commission's stored solution must work; idling and a written
+    naive attempt must fail; and blind random play must succeed < 8 % of
+    the time (< 30 % for the tutorial). Postcards: stored timed script works,
+    idling and the naive script don't.
+40. **The weather sim is tuned, not physical.** 24×12 cells, exaggerated
+    rules (heat rises, saturation, gradient wind, precipitation by ground
+    temperature, a slow exchange with "outside" so storms clear). Numbers
+    were tuned with a sweep script until each postcard needed its rule.
+    A per-postcard breeze exists so "steer with the fan" needs the fan.
+41. **The Memory Board checks only in groups, and only once a pin
+    settles.** Three correct lock together; the last group of an act may be
+    smaller if it finishes the act; wrong pins are never named. The check
+    waits 0.9 s after the last change, so flicking the decade dial through
+    the right answer doesn't confirm it by accident.
+42. **One full-screen blend mode is one too many.** The perf probe caught a
+    `mix-blend-mode: multiply` weather wash over the whole page doubling the
+    Living Room's frame time. Grading is a plain alpha wash, present only
+    when there is weather to show.
+43. **No new dependencies.** The art kit (tween, particles, grain, ink,
+    contact shadow, stage, tag) is ~400 lines of our own code; Matter.js
+    stays in the Playground chunk; the new attic does not use it.

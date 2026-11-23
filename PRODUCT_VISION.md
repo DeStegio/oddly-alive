@@ -48,9 +48,19 @@ website itself.
 | 2 min | A chain reaction (lamp → Pim → plant), a mood shift, one surprise, and a door into another room. |
 | 5 min | Rare events, secrets that point to other rooms, After Hours, the Memory Room reflecting what you did. |
 
+## Phase 4 amendment (2026-11-23)
+
+After Phase 3 the owner found three rooms boring: click something, watch a
+reaction. The Garden, the Weather Workshop (was the Mood Room) and the Attic
+are now small games with rules you discover, goals with wrong answers,
+cheap rewind, and a sandbox beside the goals. The rest of the house keeps
+its no-goal character. See `PHASE_4_REFINED_PLAN.md`.
+
 ## Non-goals
 
-- Levels, quests, achievements framed as a checklist, mandatory puzzles.
+- Achievements framed as a checklist, or puzzles you must solve to get
+  anywhere. (The Phase 4 rooms have jobs, postcards and a mystery, but every
+  room still opens, and each has free play beside them.)
 - A mascot doing all the work. Personality is distributed across objects, text,
   shapes and space.
 - 3D, accounts, server, LLM-generated reactions.

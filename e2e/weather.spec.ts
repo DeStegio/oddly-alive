@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { POSTCARDS } from '../src/content/weather';
+import { POSTCARDS } from '../src/content/postcards';
 
 /**
  * Phase 4 Weather Workshop, played for real: drag a tool off the sill into
