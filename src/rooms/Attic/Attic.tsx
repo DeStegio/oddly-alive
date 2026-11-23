@@ -66,6 +66,10 @@ export default function Attic() {
   const hand = useRef({ x: -999, y: -999, down: false });
   const lastFilled = useRef(0);
   const intro = board.found.length === 0;
+  // the garden's bees reach the attic: a pressed flower turns up once the Garden has made a hybrid
+  const items = useMemo(() => [...DUSTY, ...(gardenHybrid ? ['pressed-flower'] : [])], [gardenHybrid]);
+  const itemsRef = useRef(items);
+  itemsRef.current = items;
   const { rung, progress } = useHintLadder(`attic-${board.act}-${board.locked.length}`, !solvedAll(board));
 
   const say = useCallback((text: string, ms = 4200) => {
@@ -225,7 +229,7 @@ export default function Attic() {
       checkIn -= dt;
       if (checkIn > 0) return;
       checkIn = 220;
-      for (const id of [...DUSTY, 'letter', 'diary']) {
+      for (const id of [...itemsRef.current, 'letter', 'diary']) {
         const r = SPOTS[id];
         if (!r || !visible(id)) continue;
         if (g.coverage(r) < CLEAN) uncover(id);
@@ -267,7 +271,7 @@ export default function Attic() {
   /** Keyboard: dust the next thing completely. */
   const dustNext = () => {
     const g = dust.current;
-    const id = [...DUSTY, 'letter'].find((x) => visible(x) && SPOTS[x] && !uncovered.has(x));
+    const id = [...itemsRef.current, 'letter'].find((x) => visible(x) && SPOTS[x] && !uncovered.has(x));
     if (!g || !id) return;
     g.clear(SPOTS[id]!);
     dustDirty.current = true;
@@ -314,7 +318,6 @@ export default function Attic() {
   // ------------------------------------------------------------- drawing
 
   const box = (r: { x: number; y: number; w: number; h: number }): React.CSSProperties => ({ left: r.x, top: r.y, width: r.w, height: r.h });
-  const items = useMemo(() => [...DUSTY, ...(gardenHybrid ? ['pressed-flower'] : [])], [gardenHybrid]);
   const readingClue = reading ? clueById(reading) : null;
   const readingThing = reading ? thingById(reading) : null;
 
