@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { clearMemory, composeMemory, getMemoryManager, resetSession, resetWorld, setMemoryEnabled } from '../../app/memorySync';
 import { ROOMS } from '../../app/rooms';
 import { useWorld } from '../../app/worldInstance';
-import { LivingTitle } from '../../components/LivingTitle';
+import { RoomTag } from '../../art/Stage';
 import { favoriteOf, nickname } from '../../content/nickname';
 import { SECRETS } from '../../content/secrets';
 import { mergeCounts } from '../../engine/world';
@@ -94,8 +94,8 @@ export default function MemoryRoom() {
   return (
     <section className={styles.room} aria-labelledby="memory-title">
       <header className={styles.head}>
-        <LivingTitle id="memory-title" lines={['Memory', 'Room']} label="Memory Room" size="room" />
-        <p className={styles.blurb}>What the house remembers, and how to make it forget. All of it lives in this browser only — nothing is ever sent anywhere.</p>
+        <RoomTag id="memory-title" label="Memory Room" />
+        <p className={styles.blurb}>All of this lives in this browser only. Nothing is ever sent anywhere.</p>
       </header>
 
       <div className={styles.board}>

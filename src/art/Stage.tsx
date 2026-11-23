@@ -80,3 +80,17 @@ export function Layer({ depth, className, children, style }: { depth: 'far' | 'm
     </div>
   );
 }
+
+/**
+ * The compact room label on its own (for rooms that keep their own layout):
+ * a small paper tag carrying the room's h1, where the giant split title used
+ * to be (Phase 4, L8: the first screen is for playing, not reading).
+ */
+export function RoomTag({ id, label, note, lines, actorId, onShove }: { id: string; label: string; note?: ReactNode; lines?: string[]; actorId?: Parameters<typeof LivingTitle>[0]['actorId']; onShove?: () => void }) {
+  return (
+    <div className={`${styles.tag} ${styles.tagInline}`}>
+      <LivingTitle id={id} lines={lines ?? [label]} label={label} size="tag" radius={90} actorId={actorId} onShove={onShove} />
+      {note ? <span className={styles.tagNote}>{note}</span> : null}
+    </div>
+  );
+}

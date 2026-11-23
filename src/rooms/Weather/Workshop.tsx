@@ -420,7 +420,7 @@ export default function Workshop() {
         {/* the barometer: a gauge now, not a switch */}
         <section className={styles.baro} aria-label="Barometer">
           <svg viewBox="0 0 120 70" aria-hidden="true">
-            <path d="M10 64 A 50 50 0 0 1 110 64" fill="var(--paper)" stroke="var(--char-ink)" strokeWidth="3" />
+            <path d="M10 64 A 50 50 0 0 1 110 64" fill="var(--cut-paper)" stroke="var(--char-ink)" strokeWidth="3" />
             <path d="M18 64 A 42 42 0 0 1 40 28" stroke="var(--blue-l1)" strokeWidth="6" fill="none" />
             <path d="M80 28 A 42 42 0 0 1 102 64" stroke="var(--yellow)" strokeWidth="6" fill="none" />
             <g style={{ transform: `rotate(${reading ? Math.max(-80, Math.min(80, (reading.pressure - 1013) * 6)) : 0}deg)`, transformOrigin: '60px 64px', transition: 'transform 900ms var(--ease-spring)' }}>
@@ -508,7 +508,7 @@ function Scenery({ v }: { v: Valley }) {
       <rect x={PLACES.pond[0] * cw} y={top(PLACES.pond[0])} width={PLACES.pond.length * cw} height={ch * 0.55} fill={frozen ? '#dfeefe' : 'var(--blue-l1)'} stroke="var(--char-ink)" strokeWidth="0.5" vectorEffect="non-scaling-stroke" />
       {/* the village and Ferdinand's house */}
       {[0, 1, 2].map((x) => (
-        <path key={x} d={`M${x * cw + 0.6} ${top(x)} v -${ch * 0.6} l ${cw * 0.35} -${ch * 0.35} l ${cw * 0.35} ${ch * 0.35} v ${ch * 0.6} Z`} fill="var(--paper)" stroke="var(--char-ink)" strokeWidth="0.5" vectorEffect="non-scaling-stroke" />
+        <path key={x} d={`M${x * cw + 0.6} ${top(x)} v -${ch * 0.6} l ${cw * 0.35} -${ch * 0.35} l ${cw * 0.35} ${ch * 0.35} v ${ch * 0.6} Z`} fill="var(--cut-paper)" stroke="var(--char-ink)" strokeWidth="0.5" vectorEffect="non-scaling-stroke" />
       ))}
       <path d={`M${3 * cw + 0.3} ${top(3)} v -${ch * 0.75} l ${cw * 0.45} -${ch * 0.45} l ${cw * 0.45} ${ch * 0.45} v ${ch * 0.75} Z`} fill="var(--yellow)" stroke="var(--char-ink)" strokeWidth="0.5" vectorEffect="non-scaling-stroke" />
       {/* the washing line */}

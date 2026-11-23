@@ -38,6 +38,7 @@
   width: min(360px, calc(100vw - 32px));
   padding: var(--sp-5);
   background: var(--cut-paper);
+  background-image: var(--grain);
   color: #24232b;
   border: var(--stroke) solid var(--char-ink);
   border-radius: var(--radius-md);

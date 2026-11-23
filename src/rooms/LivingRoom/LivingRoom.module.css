@@ -9,7 +9,7 @@
 .intro {
   position: relative;
   z-index: 2;
-  padding: calc(var(--nav-h) + 3vh) var(--gutter) 0;
+  padding: calc(var(--nav-h) + 8px) clamp(10px, 2vw, 28px) 0;
   max-width: var(--content-max);
   pointer-events: none;
 }
@@ -20,9 +20,9 @@
   pointer-events: auto;
 }
 .tagline {
-  margin-top: var(--sp-4);
+  margin-top: var(--sp-2);
   margin-left: 0.4em;
-  font-size: var(--fs-lg);
+  font-size: var(--fs-sm);
   color: var(--ink-soft);
   max-width: 26ch;
 }

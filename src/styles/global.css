@@ -244,3 +244,35 @@ main button {
       drop-shadow(0 0 7px color-mix(in srgb, var(--blue) 60%, transparent));
   }
 }
+
+/* Phase 4 light grading: the whole house is tinted by the weather outside
+   (which is the Weather Workshop valley's weather) and by the night. Flat,
+   multiplied, a few percent: the air changes, the colours don't. */
+html[data-weather='sunny'] {
+  --grade: rgb(255 214 140 / 0.1);
+}
+html[data-weather='rain'] {
+  --grade: rgb(90 110 160 / 0.1);
+}
+html[data-weather='storm'] {
+  --grade: rgb(60 70 120 / 0.16);
+}
+html[data-weather='fog'] {
+  --grade: rgb(205 208 220 / 0.2);
+}
+html[data-weather='snow'] {
+  --grade: rgb(205 222 255 / 0.12);
+}
+html[data-weather='night'] {
+  --grade: rgb(50 60 120 / 0.14);
+}
+#scene::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 50;
+  background: var(--grade);
+  mix-blend-mode: multiply;
+  transition: background var(--dur-scene) var(--ease-in-out);
+}
