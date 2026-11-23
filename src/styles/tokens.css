@@ -21,6 +21,44 @@
   /* the paper props are cut from stays light at night */
   --cut-paper: #fffaf1;
 
+  /* Phase 4 art kit: 5-step ramps (shade 2, shade 1, base, light 1, light 2).
+     Shading uses these flat steps, never opacity. */
+  --coral-d2: #c24a37;
+  --coral-d1: #e0604b;
+  --coral-l1: #f89a88;
+  --coral-l2: #fcc6ba;
+  --blue-d2: #3f55c4;
+  --blue-d1: #5068d6;
+  --blue-l1: #8c9cf0;
+  --blue-l2: #bcc6f7;
+  --yellow-d2: #c4a23a;
+  --yellow-d1: #e2c254;
+  --yellow-l1: #f8e49b;
+  --yellow-l2: #fcf0c6;
+  --mint-d2: #5f9c71;
+  --mint-d1: #85bd95;
+  --mint-l1: #c2e5cc;
+  --mint-l2: #def2e3;
+  --lavender-d2: #8670b4;
+  --lavender-d1: #a18bcb;
+  --lavender-l1: #cfc1e7;
+  --lavender-l2: #e4dbf2;
+  --earth-d2: #4a3426;
+  --earth-d1: #5e4332;
+  --earth: #74553f;
+  --earth-l1: #93735a;
+  --earth-l2: #b89a7e;
+  --paper-d2: #e3d6be;
+  --paper-d1: #efe5d2;
+  --paper-l1: #fffdf8;
+  /* scene light direction (−1..1) and a whole-stage grade; rooms set these */
+  --light-x: -0.6;
+  --light-y: -0.8;
+  --grade: transparent;
+  --contact: rgb(36 35 43 / 0.22);
+  /* paper grain, defined once; html[data-power='low'] turns it off */
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.14 0 0 0 0 0.12 0 0 0 0 0.1 0 0 0 0.5 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+
   /* type */
   --font-display: 'Fraunces Variable', 'Fraunces', Georgia, 'Times New Roman', serif;
   --font-ui: 'Instrument Sans Variable', 'Instrument Sans', system-ui, -apple-system, 'Segoe UI',
@@ -100,6 +138,36 @@
   --shadow-ink: #07060b;
   --wall: #22202d;
   --floor: #171620;
+  --coral-d2: #c9533f;
+  --coral-d1: #e56f59;
+  --coral-l1: #ffab99;
+  --coral-l2: #ffcabd;
+  --blue-d2: #5267d6;
+  --blue-d1: #6f82ec;
+  --blue-l1: #aab6ff;
+  --blue-l2: #cdd4ff;
+  --yellow-d2: #b8972f;
+  --yellow-d1: #d6b64b;
+  --yellow-l1: #f6e193;
+  --yellow-l2: #fbecbd;
+  --mint-d2: #4c8662;
+  --mint-d1: #65a37c;
+  --mint-l1: #9fd2b1;
+  --mint-l2: #c3e4cf;
+  --lavender-d2: #6f5aa0;
+  --lavender-d1: #8672b5;
+  --lavender-l1: #b6a5da;
+  --lavender-l2: #d0c4ea;
+  --earth-d2: #2e2119;
+  --earth-d1: #3d2c21;
+  --earth: #4f3a2b;
+  --earth-l1: #6a5040;
+  --earth-l2: #8a6e58;
+  --paper-d2: #1f1d2a;
+  --paper-d1: #252331;
+  --paper-l1: #34324a;
+  --contact: rgb(0 0 0 / 0.38);
+  --grade: rgb(40 50 110 / 0.16);
   color-scheme: dark;
 }
 

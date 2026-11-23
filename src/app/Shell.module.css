@@ -38,7 +38,54 @@
 
 /* room entrance, tuned by mood (INT-040); navigation itself never waits for it */
 .enter {
-  animation: enter-default 520ms var(--ease-out) backwards;
+  position: relative;
+  /* Phase 4: rooms arrive as a paper wipe (a page turned left to right).
+     Only clip-path and a decorative edge move, so input is never blocked. */
+  animation: enter-wipe 380ms var(--ease-in-out) backwards;
+}
+.wipeEdge {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 18px;
+  pointer-events: none;
+  z-index: var(--z-overlay);
+  background: var(--paper);
+  background-image: var(--grain);
+  border-right: var(--stroke) solid var(--ink);
+  box-shadow: 6px 0 0 var(--shadow-ink);
+  opacity: 0;
+  animation: wipe-edge 380ms var(--ease-in-out);
+}
+@keyframes enter-wipe {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+@keyframes wipe-edge {
+  0% {
+    opacity: 1;
+    transform: translateX(-20px);
+  }
+  95% {
+    opacity: 1;
+    transform: translateX(100vw);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(100vw);
+  }
+}
+:global([data-motion='reduced']) .enter,
+:global([data-motion='reduced']) .enter[data-mood] {
+  animation: enter-fade 200ms linear backwards;
+}
+:global([data-motion='reduced']) .wipeEdge {
+  display: none;
 }
 .enter[data-mood='excited'],
 .enter[data-mood='playful'] {
