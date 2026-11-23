@@ -5,6 +5,7 @@
 /* an envelope, not a sticky note */
 .letter {
   background: #fffaf1;
+  background-image: var(--grain);
   rotate: 1.5deg;
   border-style: solid;
 }

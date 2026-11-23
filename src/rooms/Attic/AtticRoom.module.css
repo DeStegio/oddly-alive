@@ -147,8 +147,11 @@
   width: 100%;
   height: 100%;
 }
-.item:disabled {
+/* still under the dust: the pointer goes through to the dust (disabled buttons swallow it) */
+.item:disabled,
+.houseDiary:disabled {
   cursor: inherit;
+  pointer-events: none;
 }
 .item[data-up='true']:hover {
   scale: 1.08;

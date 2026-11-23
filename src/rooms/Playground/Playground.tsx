@@ -3,7 +3,7 @@ import { findLetter } from '../../app/letters';
 import { useWorld } from '../../app/worldInstance';
 import { Dot, type DotMotion } from '../../characters/Dot';
 import { useActor } from '../../characters/useActor';
-import { LivingTitle } from '../../components/LivingTitle';
+import { RoomTag } from '../../art/Stage';
 import { WeatherLayer } from '../../components/WeatherLayer';
 import { useWeather } from '../../components/useWeather';
 import { BIP_WEATHER } from '../../content/weather';
@@ -749,10 +749,7 @@ export default function Playground() {
   return (
     <section ref={roomRef} className={styles.room} aria-labelledby="pg-title">
       <header className={styles.head}>
-        <LivingTitle id="pg-title" lines={['Play', 'ground']} label="Playground" size="room" />
-        <p className={styles.blurb}>
-          Put things down. They won’t stay there. Drag, throw, stack, poke the floor, and throw hard over the fence: Bip next door hits everything back.
-        </p>
+        <RoomTag id="pg-title" label="Playground" note="put things down. they won’t stay there." />
       </header>
 
       <div className={styles.toolbar} role="toolbar" aria-label="Playground tools">

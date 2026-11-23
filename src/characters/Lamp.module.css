@@ -88,3 +88,17 @@
     transform: translateY(0) rotate(2deg);
   }
 }
+
+/* Phase 4 art kit: a soft contact shadow, so the character sits IN the room */
+.root::after {
+  content: '';
+  position: absolute;
+  left: 18%;
+  right: 18%;
+  bottom: -3px;
+  height: 10px;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, var(--contact), transparent);
+  pointer-events: none;
+  z-index: -1;
+}

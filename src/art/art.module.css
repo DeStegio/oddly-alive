@@ -39,8 +39,7 @@
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: var(--grade);
-  mix-blend-mode: multiply;
+  background: var(--stage-grade, transparent);
   z-index: 60;
   transition: background 900ms var(--ease-in-out);
 }
@@ -115,4 +114,13 @@
 }
 :global(html[data-power='low']) .tag {
   background-image: none;
+}
+
+/* the tag in a room's own header (in the flow, not over a stage) */
+.tagInline {
+  position: relative;
+  top: auto;
+  left: auto;
+  align-self: flex-start;
+  width: fit-content;
 }

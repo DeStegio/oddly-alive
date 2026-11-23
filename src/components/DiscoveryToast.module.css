@@ -11,6 +11,7 @@
   width: min(320px, calc(100vw - 32px));
   padding: 14px 40px 14px 18px;
   background: var(--yellow);
+  background-image: var(--grain), linear-gradient(160deg, var(--yellow-l1), var(--yellow) 40%);
   color: #24232b;
   border: var(--stroke) solid var(--char-ink);
   border-radius: var(--radius-md);

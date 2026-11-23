@@ -56,7 +56,7 @@ function Seed() {
   return (
     <g>
       <ellipse cx="30" cy="88" rx="11" ry="4" fill="var(--earth-d1)" stroke={INK} strokeWidth="2" />
-      <ellipse cx="30" cy="85.5" rx="3.6" ry="2.6" fill="var(--paper)" stroke={INK} strokeWidth="1.5" />
+      <ellipse cx="30" cy="85.5" rx="3.6" ry="2.6" fill="var(--cut-paper)" stroke={INK} strokeWidth="1.5" />
     </g>
   );
 }
@@ -247,9 +247,9 @@ export function PacketArt({ kind }: { kind: Species }) {
   const { shape, c } = paletteOf(kind);
   return (
     <svg viewBox="0 0 44 56" aria-hidden="true">
-      <path d="M4 8 L 40 8 L 38 52 L 6 52 Z" fill="var(--paper)" stroke={INK} strokeWidth="2.2" strokeLinejoin="round" />
+      <path d="M4 8 L 40 8 L 38 52 L 6 52 Z" fill="var(--cut-paper)" stroke={INK} strokeWidth="2.2" strokeLinejoin="round" />
       <path d="M4 8 L 40 8 L 39 16 L 5 16 Z" fill={c.petalShade} stroke={INK} strokeWidth="2" strokeLinejoin="round" />
-      <path d="M8 8 l 2 -4 l 3 4 l 3 -4 l 3 4 l 3 -4 l 3 4 l 3 -4 l 3 4 l 3 -4 l 2 4" fill="var(--paper)" stroke={INK} strokeWidth="1.6" strokeLinejoin="round" />
+      <path d="M8 8 l 2 -4 l 3 4 l 3 -4 l 3 4 l 3 -4 l 3 4 l 3 -4 l 3 4 l 3 -4 l 2 4" fill="var(--cut-paper)" stroke={INK} strokeWidth="1.6" strokeLinejoin="round" />
       <circle cx="22" cy="33" r="11" fill={shape === 'radish' ? c.petal : c.petal} stroke={INK} strokeWidth="2" />
       <Face x={22} y={32} s={0.9} mood={shape === 'snapdragon' ? 'grumpy' : shape === 'moonflower' ? 'sleepy' : 'happy'} />
       {parents(kind).length === 2 ? <path d="M30 44 l 4 -4 l 4 4 l -4 4 Z" fill="var(--yellow)" stroke={INK} strokeWidth="1.4" /> : null}

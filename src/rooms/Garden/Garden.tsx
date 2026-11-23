@@ -417,7 +417,7 @@ export default function Garden() {
       note={c ? `job ${COMMISSIONS.findIndex((x) => x.id === c.id) + 1 || '·'} of ${COMMISSIONS.length}` : 'free play'}
       light={{ x: sun === 'morning' ? 0.8 : sun === 'evening' ? -0.8 : 0, y: -0.8 }}
       data={{ sun, night: String(nightNow), verdict }}
-      style={{ '--grade': grade } as React.CSSProperties}
+      style={{ '--stage-grade': grade } as React.CSSProperties}
     >
       <div className={styles.keyCatcher} onKeyDown={onStageKey}>
         {/* far: sky and next door */}

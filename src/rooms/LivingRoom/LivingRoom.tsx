@@ -12,7 +12,7 @@ import { Plant } from '../../characters/Plant';
 import { useActor } from '../../characters/useActor';
 import { useCharacter } from '../../characters/useCharacter';
 import { useCircleDetector, useSense } from '../../characters/useSense';
-import { LivingTitle } from '../../components/LivingTitle';
+import { RoomTag } from '../../art/Stage';
 import { ScrollThread } from '../../components/ScrollThread';
 import { useSettings } from '../../state/settings';
 import { useObjects } from '../../state/world';
@@ -261,9 +261,8 @@ export default function LivingRoom() {
       >
         <PullCord />
         <div className={styles.intro}>
-          <LivingTitle
+          <RoomTag
             id="living-title"
-            lines={['Oddly', 'Alive']}
             label="Oddly Alive"
             actorId="title"
             onShove={() => world.emit('OBJECT_STATE_CHANGED', { target: 'title', key: 'shoved', value: true })}

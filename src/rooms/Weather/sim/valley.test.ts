@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { POSTCARDS } from '../../../content/weather';
+import { POSTCARDS } from '../../../content/postcards';
 import { runScript } from './run';
 import { H, PLACES, W, actOn, baseTemp, columnCloud, idx, isAir, lowAir, makeValley, pondFrozen, qsat, rainbows, stepValley, totalCloud, valleyStats, vaneStrikes, type Valley, type ValleyAction } from './valley';
 

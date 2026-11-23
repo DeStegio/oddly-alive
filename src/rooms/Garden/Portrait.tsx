@@ -48,7 +48,7 @@ export function Portrait({ who, mood = 'open' }: { who: Asker | 'nimbus' | 'fox'
       case 'tick':
         return (
           <g>
-            <circle r="25" fill="var(--paper)" stroke={INK} strokeWidth="2.5" />
+            <circle r="25" fill="var(--cut-paper)" stroke={INK} strokeWidth="2.5" />
             <circle r="20" fill="none" stroke="var(--yellow-d1)" strokeWidth="2" />
             <path d="M0 0 V -14 M0 0 L 9 5" stroke={INK} strokeWidth="2.5" strokeLinecap="round" />
             {eyes(-4, 9, 2)}
@@ -59,7 +59,7 @@ export function Portrait({ who, mood = 'open' }: { who: Asker | 'nimbus' | 'fox'
         return (
           <g>
             <circle r="22" fill="var(--blue)" stroke={INK} strokeWidth="2.5" />
-            <circle cx="0" cy="-4" r="8" fill="var(--paper)" stroke={INK} strokeWidth="2" />
+            <circle cx="0" cy="-4" r="8" fill="var(--cut-paper)" stroke={INK} strokeWidth="2" />
             <circle cx="1" cy="-3" r="3.5" fill={INK} />
             <path d={mouth} transform="translate(0 9) scale(0.8)" stroke={INK} strokeWidth="2" fill="none" strokeLinecap="round" />
           </g>
@@ -99,7 +99,7 @@ export function Portrait({ who, mood = 'open' }: { who: Asker | 'nimbus' | 'fox'
             <rect x="-24" y="-28" width="48" height="56" rx="4" fill="var(--yellow-d1)" stroke={INK} strokeWidth="2.5" />
             <rect x="-18" y="-22" width="36" height="44" fill="var(--lavender-l2)" stroke={INK} strokeWidth="1.8" />
             <circle cy="-4" r="11" fill="var(--coral-l2)" stroke={INK} strokeWidth="1.8" />
-            <path d="M-12 -10 C -10 -20 10 -20 12 -10" fill="var(--paper)" stroke={INK} strokeWidth="1.6" />
+            <path d="M-12 -10 C -10 -20 10 -20 12 -10" fill="var(--cut-paper)" stroke={INK} strokeWidth="1.6" />
             <path d="M-14 22 C -12 10 12 10 14 22" fill="var(--lavender-d1)" stroke={INK} strokeWidth="1.6" />
             {eyes(-4, 4, 1.4)}
           </g>
@@ -107,7 +107,7 @@ export function Portrait({ who, mood = 'open' }: { who: Asker | 'nimbus' | 'fox'
       case 'nimbus':
         return (
           <g>
-            <path d="M-26 12 C -34 12 -32 -4 -22 -4 C -22 -18 -2 -22 2 -10 C 8 -20 26 -14 22 -2 C 32 -2 32 12 24 12 Z" fill="var(--paper)" stroke={INK} strokeWidth="2.5" strokeLinejoin="round" />
+            <path d="M-26 12 C -34 12 -32 -4 -22 -4 C -22 -18 -2 -22 2 -10 C 8 -20 26 -14 22 -2 C 32 -2 32 12 24 12 Z" fill="var(--cut-paper)" stroke={INK} strokeWidth="2.5" strokeLinejoin="round" />
             {eyes(0, 7, 2.4)}
             <path d={mouth} transform="translate(0 4) scale(0.7)" stroke={INK} strokeWidth="2" fill="none" strokeLinecap="round" />
           </g>
@@ -116,7 +116,7 @@ export function Portrait({ who, mood = 'open' }: { who: Asker | 'nimbus' | 'fox'
         return (
           <g>
             <path d="M-22 -20 L -10 -6 L 10 -6 L 22 -20 L 20 4 C 14 20 -14 20 -20 4 Z" fill="var(--coral-d1)" stroke={INK} strokeWidth="2.5" strokeLinejoin="round" />
-            <path d="M-10 8 C -4 18 4 18 10 8 C 4 4 -4 4 -10 8 Z" fill="var(--paper)" stroke={INK} strokeWidth="1.8" />
+            <path d="M-10 8 C -4 18 4 18 10 8 C 4 4 -4 4 -10 8 Z" fill="var(--cut-paper)" stroke={INK} strokeWidth="1.8" />
             <circle cx="0" cy="10" r="2" fill={INK} />
             {eyes(-2, 8, 2)}
           </g>
@@ -125,7 +125,7 @@ export function Portrait({ who, mood = 'open' }: { who: Asker | 'nimbus' | 'fox'
   })();
   return (
     <svg className="portrait" viewBox="-36 -36 72 72" width="72" height="72" aria-hidden="true" data-mood={mood}>
-      <circle r="34" fill="var(--paper-d1)" stroke={INK} strokeWidth="2.5" />
+      <circle r="34" fill="#efe5d2" stroke={INK} strokeWidth="2.5" />
       {body}
     </svg>
   );

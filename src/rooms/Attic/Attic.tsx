@@ -243,7 +243,8 @@ export default function Attic() {
     return { x: (e.clientX - r.left - offset.current) / scale.current, y: (e.clientY - r.top) / scale.current };
   };
   const onDown = (e: React.PointerEvent) => {
-    if (e.button !== 0 || (e.target as Element).closest('button, [role=spinbutton]')) return;
+    // rubbing starts anywhere, also over things still under the dust (only live controls are left alone)
+    if (e.button !== 0 || (e.target as Element).closest('button:not(:disabled), [role=spinbutton]')) return;
     try {
       stageRef.current?.setPointerCapture?.(e.pointerId);
     } catch {

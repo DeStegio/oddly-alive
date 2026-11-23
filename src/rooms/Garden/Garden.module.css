@@ -642,6 +642,7 @@
   transition: translate var(--dur-ui) var(--ease-spring);
 }
 .packet svg {
+  /* packets are paper: light in every theme */
   width: 44px;
   height: 56px;
   display: block;

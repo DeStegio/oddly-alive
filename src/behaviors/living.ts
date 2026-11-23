@@ -1,4 +1,4 @@
-import { LADDER_LINES } from '../content/attic';
+import { LADDER_LINES } from '../content/ladder';
 import { LINES } from '../content/lines';
 import { defineBehavior } from '../engine/behaviorEngine';
 import { Priority } from '../engine/scheduler';

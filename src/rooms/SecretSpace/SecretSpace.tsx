@@ -3,7 +3,7 @@ import { findLetter } from '../../app/letters';
 import { useWorld } from '../../app/worldInstance';
 import { ThoughtBubble } from '../../characters/ThoughtBubble';
 import { useCharacter } from '../../characters/useCharacter';
-import { LivingTitle } from '../../components/LivingTitle';
+import { RoomTag } from '../../art/Stage';
 import { ROOM_LIST } from '../../app/rooms';
 import { SECRETS, type SecretDef } from '../../content/secrets';
 import { onFrame } from '../../engine/frameLoop';
@@ -64,8 +64,7 @@ export default function SecretSpace() {
     <section ref={roomRef} className={styles.room} data-candle={secret.candleLit} aria-labelledby="secret-title">
       <div className={styles.dark} aria-hidden="true" />
       <header className={styles.head}>
-        <LivingTitle id="secret-title" lines={['Secret', 'Space']} label="Secret Space" size="room" />
-        <p className={styles.blurb}>You were never here. Everything the house has been hiding ends up on these shelves.</p>
+        <RoomTag id="secret-title" label="Secret Space" note="you were never here." />
       </header>
 
       <div className={styles.grid}>

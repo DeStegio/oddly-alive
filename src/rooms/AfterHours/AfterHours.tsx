@@ -8,7 +8,7 @@ import { Pim } from '../../characters/Pim';
 import { ThoughtBubble } from '../../characters/ThoughtBubble';
 import { useActor } from '../../characters/useActor';
 import { useCharacter } from '../../characters/useCharacter';
-import { LivingTitle } from '../../components/LivingTitle';
+import { RoomTag } from '../../art/Stage';
 import { StarTrail } from '../../components/StarTrail';
 import { onFrame } from '../../engine/frameLoop';
 import { pointer } from '../../engine/pointer';
@@ -173,8 +173,7 @@ export default function AfterHours() {
       </div>
 
       <header className={styles.head}>
-        <LivingTitle id="ah-title" lines={['After', 'Hours']} label="After Hours" size="room" />
-        <p className={styles.blurb}>The house after everyone pretends to sleep. Connect the stars. Mind the moon; it’s closer than it looks.</p>
+        <RoomTag id="ah-title" label="After Hours" note="mind the moon. it’s closer than it looks." />
         <p className={styles.constellation} aria-live="polite">
           {named ? `You drew “${named}.” Every star has a note; listen, or watch them light up.` : links.length ? `${links.length} line${links.length > 1 ? 's' : ''} so far. Five stars make a constellation.` : 'Tap a star, then another, to draw a line.'}
         </p>
