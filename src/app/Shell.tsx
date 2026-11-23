@@ -30,9 +30,12 @@ export function SceneFallback() {
 function RoomEntrance({ mood, children }: { mood: string; children: ReactNode }) {
   const [entranceMood] = useState(mood);
   return (
-    <div className={styles.enter} data-mood={entranceMood}>
-      {children}
-    </div>
+    <>
+      <div className={styles.enter} data-mood={entranceMood}>
+        {children}
+      </div>
+      <span className={styles.wipeEdge} aria-hidden="true" />
+    </>
   );
 }
 

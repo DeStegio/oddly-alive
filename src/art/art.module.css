@@ -1,0 +1,118 @@
+/* Shared art-kit pieces (Phase 4). */
+
+.contact {
+  position: absolute;
+  left: 50%;
+  bottom: -4px;
+  width: var(--cw, 80%);
+  height: 12px;
+  translate: -50% 0;
+  scale: calc(1 - var(--lift, 0) * 0.45) calc(1 - var(--lift, 0) * 0.3);
+  opacity: calc(1 - var(--lift, 0) * 0.7);
+  border-radius: 50%;
+  background: radial-gradient(closest-side, var(--contact), transparent);
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* ---------- the stage: a full-viewport room ---------- */
+.stage {
+  --px: 0;
+  --py: 0;
+  position: relative;
+  isolation: isolate;
+  height: 100vh;
+  height: 100svh;
+  min-height: 540px;
+  overflow: hidden;
+}
+@media (max-width: 720px) {
+  .stage {
+    /* the room dock sits at the bottom on phones */
+    height: calc(100svh - 62px);
+    min-height: 560px;
+  }
+}
+.stage::after {
+  /* the light grade: time of day and weather tint the whole stage */
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: var(--grade);
+  mix-blend-mode: multiply;
+  z-index: 60;
+  transition: background 900ms var(--ease-in-out);
+}
+.layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.layer > * {
+  pointer-events: auto;
+}
+.layer[data-depth='far'] {
+  transform: translate3d(calc(var(--px) * -6px), calc(var(--py) * -4px), 0);
+}
+.layer[data-depth='mid'] {
+  transform: translate3d(calc(var(--px) * -3px), calc(var(--py) * -2px), 0);
+}
+.layer[data-depth='near'] {
+  transform: translate3d(calc(var(--px) * 8px), calc(var(--py) * 5px), 0);
+  z-index: 30;
+}
+:global([data-motion='reduced']) .layer {
+  transform: none;
+}
+
+/* the compact room label: a paper tag pinned over the stage's top-left */
+.tag {
+  position: absolute;
+  z-index: 70;
+  top: calc(var(--nav-h) + 8px);
+  left: clamp(10px, 2vw, 28px);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px 7px 10px;
+  background: var(--paper);
+  background-image: var(--grain);
+  color: var(--ink);
+  border: var(--stroke) solid var(--ink);
+  border-radius: 6px 14px 14px 6px;
+  box-shadow: var(--shadow-sm);
+  rotate: -2deg;
+  pointer-events: none;
+}
+.tag::before {
+  /* the string hole */
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 2px solid var(--ink);
+  background: var(--canvas-deep);
+  flex: none;
+}
+.tag h1 {
+  pointer-events: auto;
+}
+.tagNote {
+  font-size: var(--fs-xs);
+  color: var(--ink-soft);
+  font-weight: 600;
+  white-space: nowrap;
+}
+@media (max-width: 720px) {
+  .tag {
+    top: calc(var(--nav-h) + 2px);
+    padding: 3px 10px 4px 8px;
+  }
+  .tagNote {
+    display: none;
+  }
+}
+:global(html[data-power='low']) .tag {
+  background-image: none;
+}

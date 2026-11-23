@@ -11,7 +11,7 @@ interface Props {
   /** Accessible heading text. */
   label: string;
   id?: string;
-  size?: 'hero' | 'room';
+  size?: 'hero' | 'room' | 'tag';
   /** Letters dodge the pointer within this radius (px). */
   radius?: number;
   className?: string;
