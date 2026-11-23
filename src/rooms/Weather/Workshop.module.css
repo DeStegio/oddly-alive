@@ -1,0 +1,475 @@
+/* The Weather Workshop (Phase 4): postcard | the valley in its glass box | the barometer. */
+
+.room {
+  background: var(--canvas);
+}
+.far {
+  z-index: 0;
+}
+.wallpaper {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 20% 30%, var(--lavender-l2) 0 2px, transparent 3px) 0 0 / 46px 46px,
+    linear-gradient(to bottom, var(--canvas), var(--canvas-deep));
+  opacity: 0.9;
+}
+
+.layout {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  padding: calc(var(--nav-h) + 56px) clamp(12px, 3vw, 48px) 60px;
+  display: grid;
+  grid-template-columns: minmax(200px, 270px) minmax(0, 1fr) minmax(170px, 230px);
+  grid-template-areas: 'post box baro';
+  gap: clamp(10px, 2vw, 28px);
+  align-items: start;
+}
+
+/* ---------- the postcard ---------- */
+.post {
+  grid-area: post;
+  display: grid;
+  gap: 10px;
+  padding-top: 40px;
+}
+.from {
+  display: grid;
+  gap: 8px;
+  justify-items: start;
+}
+.from :global(.portrait) {
+  filter: drop-shadow(3px 4px 0 var(--shadow-ink));
+  animation: bob 2.8s var(--ease-in-out) infinite alternate;
+}
+@keyframes bob {
+  to {
+    translate: 0 -3px;
+  }
+}
+.say {
+  padding: 10px 12px;
+  background: var(--paper);
+  background-image: var(--grain);
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: var(--fs-md);
+  line-height: 1.25;
+  border: var(--stroke) solid var(--char-ink);
+  border-radius: 4px 12px 12px 12px;
+  box-shadow: var(--shadow-sm);
+  rotate: -1.2deg;
+  animation: drop-in 520ms var(--ease-spring);
+}
+.say[data-empty='true'] {
+  visibility: hidden;
+}
+@keyframes drop-in {
+  from {
+    translate: 0 -40px;
+    rotate: 6deg;
+    opacity: 0;
+  }
+}
+.card {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  padding: 8px 10px;
+  background: var(--yellow-l2);
+  color: #24232b;
+  border: 2px solid var(--char-ink);
+  border-radius: 8px;
+  box-shadow: var(--shadow-sm);
+}
+.card[data-done='true'] {
+  background: var(--mint-l1);
+}
+.hold {
+  display: block;
+  margin-top: 6px;
+  height: 8px;
+  border: 2px solid var(--char-ink);
+  border-radius: 6px;
+  background: var(--paper);
+  overflow: hidden;
+}
+.hold > span {
+  display: block;
+  height: 100%;
+  background: var(--coral);
+  transition: width 300ms linear;
+}
+
+/* ---------- the glass box ---------- */
+.boxWrap {
+  grid-area: box;
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  padding-top: 52px;
+}
+.box {
+  position: relative;
+  width: min(100%, 900px, calc((100svh - var(--nav-h) - 260px) * 2));
+  aspect-ratio: 2 / 1;
+  border: 4px solid var(--char-ink);
+  border-radius: 22px 22px 10px 10px;
+  overflow: hidden;
+  background: linear-gradient(to bottom, #b9d2fb, #e6f0ff 70%);
+  box-shadow:
+    var(--shadow-lg),
+    inset 0 0 0 6px rgb(255 255 255 / 0.35);
+  touch-action: none;
+  outline-offset: 4px;
+}
+:global([data-theme='night']) .box {
+  background: linear-gradient(to bottom, #1c2350, #3e4a86 75%);
+}
+.box::after {
+  /* the glass: a flat highlight, cut from paper */
+  content: '';
+  position: absolute;
+  top: 8%;
+  left: 4%;
+  width: 18%;
+  height: 50%;
+  background: rgb(255 255 255 / 0.18);
+  clip-path: polygon(0 0, 40% 0, 10% 100%, 0 100%);
+  pointer-events: none;
+}
+.box :global(.valley-canvas) {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.scenery {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.placed {
+  position: absolute;
+  width: clamp(30px, 4.4%, 46px);
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: grab;
+  touch-action: none;
+  z-index: 3;
+  filter: drop-shadow(2px 3px 0 var(--shadow-ink));
+}
+.placed svg {
+  width: 100%;
+  height: 100%;
+}
+.placed[data-tool='fan'][data-dir='-1'] svg {
+  rotate: -90deg;
+}
+.placed[data-tool='fan'][data-dir='1'] svg {
+  rotate: 90deg;
+}
+.vane {
+  position: absolute;
+  width: clamp(20px, 3%, 34px);
+  aspect-ratio: 3 / 4;
+  translate: -50% -100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  z-index: 3;
+  transition: scale 300ms var(--ease-spring);
+  transform-origin: 50% 100%;
+}
+.vane[data-up='false'] {
+  scale: 1 0.35;
+}
+.vane svg {
+  width: 100%;
+  height: 100%;
+}
+.cursor {
+  position: absolute;
+  border: 3px dashed var(--blue);
+  border-radius: 6px;
+  pointer-events: none;
+  z-index: 4;
+}
+
+/* Nimbus floats over the box */
+.nimbus {
+  position: absolute;
+  top: -6px;
+  z-index: 6;
+  width: calc(64px * var(--size, 1));
+  height: calc(64px * var(--size, 1));
+  translate: -50% 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: grab;
+  touch-action: none;
+  transition: left 160ms var(--ease-out);
+  animation: bob 2.4s var(--ease-in-out) infinite alternate;
+}
+.nimbus :global(.portrait) {
+  width: 100%;
+  height: 100%;
+}
+.nimbus[data-squeezing='true'] {
+  animation: squeeze 260ms var(--ease-in-out) infinite alternate;
+}
+.nimbus:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+@keyframes squeeze {
+  to {
+    scale: 1.12 0.82;
+  }
+}
+
+/* ---------- the sill ---------- */
+.sill {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: var(--earth-l2);
+  background-image: var(--grain);
+  border: var(--stroke) solid var(--char-ink);
+  border-radius: 10px;
+  box-shadow: var(--shadow-md);
+}
+.tool {
+  width: 52px;
+  height: 52px;
+  padding: 4px;
+  border: 2px solid var(--char-ink);
+  border-radius: 12px;
+  background: var(--paper);
+  cursor: grab;
+  touch-action: none;
+  transition:
+    translate var(--dur-ui) var(--ease-spring),
+    opacity var(--dur-ui);
+}
+.tool svg {
+  width: 100%;
+  height: 100%;
+}
+.tool[data-in='true'] {
+  opacity: 0.4;
+}
+.tool:disabled {
+  opacity: 0.18;
+  cursor: default;
+}
+.tool[data-glance='true'] {
+  animation: glance 1.2s var(--ease-in-out) 3;
+}
+@keyframes glance {
+  50% {
+    translate: 0 -8px;
+  }
+}
+.small {
+  font: 600 var(--fs-xs) var(--font-ui);
+  padding: 4px 10px;
+  border: 2px solid var(--char-ink);
+  border-radius: var(--radius-pill);
+  background: var(--paper);
+  color: var(--ink);
+  cursor: pointer;
+}
+.ghost {
+  position: fixed;
+  z-index: var(--z-overlay);
+  width: 48px;
+  height: 48px;
+  translate: -50% -50%;
+  pointer-events: none;
+  filter: drop-shadow(3px 4px 0 var(--shadow-ink));
+  scale: 1.1;
+}
+
+/* ---------- the barometer ---------- */
+.baro {
+  grid-area: baro;
+  margin-top: 40px;
+  padding: 12px;
+  background: var(--paper);
+  border: var(--stroke) solid var(--char-ink);
+  border-radius: 14px;
+  box-shadow: var(--shadow-md);
+  display: grid;
+  gap: 6px;
+  color: var(--ink);
+}
+.baro svg {
+  width: 100%;
+  max-width: 170px;
+  justify-self: center;
+}
+.baro dl {
+  display: flex;
+  justify-content: space-between;
+  margin: 0;
+  font-size: var(--fs-xs);
+}
+.baro dt {
+  color: var(--ink-soft);
+}
+.baro dd {
+  margin: 0;
+  font-weight: 700;
+}
+.outlook {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: var(--fs-sm);
+}
+
+/* ---------- postcards along the top ---------- */
+.cards {
+  position: absolute;
+  z-index: 20;
+  top: calc(var(--nav-h) + 10px);
+  right: clamp(8px, 2vw, 28px);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 4px;
+  max-width: min(60vw, 480px);
+}
+.peg {
+  width: 32px;
+  height: 24px;
+  padding: 0;
+  font: 700 12px var(--font-ui);
+  color: var(--char-ink);
+  background: var(--paper);
+  border: 2px solid var(--char-ink);
+  border-radius: 3px;
+  box-shadow: 2px 2px 0 var(--shadow-ink);
+  cursor: pointer;
+}
+.peg[data-done='true'] {
+  background: var(--mint-l1);
+}
+.peg[aria-current='true'] {
+  background: var(--yellow);
+  translate: 0 -3px;
+}
+.peg:disabled {
+  opacity: 0.4;
+  box-shadow: none;
+  cursor: default;
+}
+.free {
+  border-radius: 50%;
+  width: 28px;
+}
+.next {
+  position: absolute;
+  z-index: 25;
+  left: 50%;
+  bottom: 14px;
+  translate: -50% 0;
+}
+.almanac {
+  position: absolute;
+  z-index: 40;
+  right: clamp(8px, 3vw, 40px);
+  bottom: 60px;
+  max-width: min(92vw, 520px);
+}
+.status {
+  position: absolute;
+  left: 50%;
+  bottom: 52px;
+  translate: -50% 0;
+  z-index: 15;
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  color: var(--ink);
+  background: var(--paper);
+  border-radius: var(--radius-pill);
+  padding: 2px 12px;
+  white-space: nowrap;
+}
+.status:empty {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .layout {
+    grid-template-columns: 1fr;
+    grid-template-areas: 'post' 'box' 'baro';
+    padding: calc(var(--nav-h) + 40px) 8px 70px;
+    gap: 8px;
+    overflow-y: auto;
+  }
+  .post {
+    padding-top: 0;
+  }
+  .from {
+    grid-template-columns: auto 1fr;
+    align-items: center;
+  }
+  .from :global(.portrait) {
+    width: 50px;
+    height: 50px;
+  }
+  .say {
+    font-size: var(--fs-sm);
+  }
+  .boxWrap {
+    padding-top: 36px;
+  }
+  .box {
+    width: 100%;
+  }
+  .tool {
+    width: 44px;
+    height: 44px;
+  }
+  .baro {
+    margin-top: 0;
+    grid-template-columns: 90px 1fr;
+    align-items: center;
+  }
+  .baro svg {
+    grid-row: span 3;
+  }
+  .cards {
+    top: auto;
+    bottom: 8px;
+    left: 8px;
+    right: 8px;
+    max-width: none;
+    justify-content: center;
+  }
+  .peg {
+    width: 26px;
+    height: 22px;
+  }
+  .status {
+    bottom: 40px;
+  }
+}
+
+[data-motion='reduced'] .nimbus,
+[data-motion='reduced'] .from :global(.portrait) {
+  animation: none;
+}

@@ -23,7 +23,8 @@ export function startWeather(world: World): () => void {
     const s = getWorldState();
     const now = Date.now();
     const pin = s.weatherPin && s.weatherPin.until > now ? s.weatherPin : null;
-    const next = resolveWeather(s.mood, pin, now);
+    // a live pin wins; then whatever the valley is actually doing; then the mood
+    const next = pin ? pin.weather : (s.valleyWeather ?? resolveWeather(s.mood, null, now));
     if (s.weatherPin && !pin) setWorldState({ weatherPin: null });
     document.documentElement.dataset.weather = next;
     // a full almanac is a discovery
@@ -35,7 +36,7 @@ export function startWeather(world: World): () => void {
 
   apply();
   const unsub = useWorldStore.subscribe((s, prev) => {
-    if (s.mood !== prev.mood || s.weatherPin !== prev.weatherPin) apply();
+    if (s.mood !== prev.mood || s.weatherPin !== prev.weatherPin || s.valleyWeather !== prev.valleyWeather) apply();
   });
   // pins run out on their own
   const timer = window.setInterval(() => {

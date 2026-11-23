@@ -41,8 +41,8 @@ export const LETTERS: Letter[] = [
   },
   {
     id: 'mood',
-    place: 'in the mirror’s reflection',
-    hint: 'Hold up the mirror while the rainbow is out.',
+    place: 'in the mirror’s rainbow',
+    hint: 'In the glass valley, hold the mirror up to the lamp while it rains.',
     body: [
       'The rainbow is upside down because I hung the mirror wrong in 1987 and the weather has copied it ever since. I have decided this is charming.',
       'Moods are weather. They come in, they sit on the roof for a bit, they go. Nimbus knows this. Nimbus takes it all very personally, but he knows.',

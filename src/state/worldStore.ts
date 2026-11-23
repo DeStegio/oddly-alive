@@ -24,6 +24,8 @@ export interface WorldStoreState {
   /** The house weather (follows mood unless pinned in the Mood Room). */
   weather: Weather;
   weatherPin: WeatherPin | null;
+  /** What the Weather Workshop valley is doing (null: nothing to report, the mood decides). */
+  valleyWeather: Weather | null;
   /** Nimbus out on a visit to another room (Mood Room "send Nimbus"). */
   nimbusVisit: { room: RoomId; until: number } | null;
   /** The most recently found letter (for its little note). */
@@ -56,6 +58,7 @@ export const initialWorldState = (): WorldStoreState => ({
   moodsSeen: ['neutral'],
   weather: 'clear',
   weatherPin: null,
+  valleyWeather: null,
   nimbusVisit: null,
   lastLetter: null,
   discoveries: {},

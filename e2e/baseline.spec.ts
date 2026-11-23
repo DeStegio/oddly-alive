@@ -33,10 +33,11 @@ test.describe('Phase 3 baseline: what every room already has', () => {
     await expect(page.getByRole('navigation', { name: 'Garden jobs' })).toBeVisible();
   });
 
-  test('Mood Room: the barometer and the windowsill', async ({ page }) => {
+  test('Weather Workshop: the valley, the sill, the barometer gauge (Phase 4)', async ({ page }) => {
     await visit(page, 'mood');
-    await expect(page.getByRole('group', { name: 'Pin the weather' }).or(page.getByLabel('Pin the weather'))).toBeAttached();
-    await expect(page.getByLabel('Things on the windowsill')).toBeAttached();
+    await expect(page.getByRole('group', { name: 'The valley in the glass box' })).toBeVisible();
+    await expect(page.getByLabel('Things on the windowsill')).toBeVisible();
+    await expect(page.getByRole('region', { name: 'Barometer' })).toBeVisible();
   });
 
   test('After Hours: stars, porch light, radio', async ({ page }) => {

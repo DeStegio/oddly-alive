@@ -8,6 +8,7 @@ import { roomFromPath } from './rooms';
 import { startAudio } from './audioSync';
 import { parseShareHash } from './share';
 import { startMemory } from './memorySync';
+import { startValley } from './valley';
 import { startWeather } from './weatherSync';
 import { startWatchers } from './watchers';
 import { getWorld } from './worldInstance';
@@ -48,10 +49,12 @@ export function WorldProvider({ children }: { children: ReactNode }) {
     if (parseShareHash(window.location.hash).night) useSettings.getState().setAfterHours(true);
     world.start();
     const stopWeather = startWeather(world);
+    const stopValley = startValley(world);
     const stopWatchers = startWatchers(world);
     const removeSensors = installSensors(world);
     return () => {
       removeSensors();
+      stopValley();
       stopWeather();
       stopWatchers();
       stopAudio();

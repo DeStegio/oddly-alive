@@ -53,9 +53,9 @@ export const ROOMS: Record<RoomId, RoomMeta> = {
   mood: {
     id: 'mood',
     path: '/mood',
-    label: 'Mood Room',
-    short: 'Mood',
-    blurb: 'The weather in here is an opinion.',
+    label: 'Weather Workshop',
+    short: 'Weather',
+    blurb: 'A valley in a glass box. The weather happens.',
   },
   secret: {
     id: 'secret',
