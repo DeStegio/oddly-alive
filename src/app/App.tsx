@@ -7,7 +7,7 @@ import { WorldProvider } from './WorldProvider';
 const load = {
   living: () => import('../rooms/LivingRoom/LivingRoom'),
   playground: () => import('../rooms/Playground/Playground'),
-  mood: () => import('../rooms/MoodRoom/MoodRoom'),
+  mood: () => import('../rooms/Weather/Workshop'),
   secret: () => import('../rooms/SecretSpace/SecretSpace'),
   memory: () => import('../rooms/MemoryRoom/MemoryRoom'),
   after: () => import('../rooms/AfterHours/AfterHours'),

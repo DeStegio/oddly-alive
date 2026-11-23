@@ -470,26 +470,6 @@ test('the shadow theatre: two hands make a bird; a hand turned upright, a rabbit
 });
 
 test.describe('reactive atmospheres', () => {
-  const pin = (page: Page, w: string) => page.getByRole('group', { name: 'Pin the weather' }).getByRole('button', { name: new RegExp(w, 'i') }).first().click();
-
-  test('Mood Room: rain and tea steam the window up (draw in it); wind takes the papers (catch them)', async ({ page }) => {
-    await page.goto('./#/mood');
-    await pin(page, 'rain');
-    await page.getByRole('button', { name: /Pour some tea/ }).click();
-    const steam = page.getByRole('img', { name: /steamed up/ });
-    await expect(steam).toBeVisible({ timeout: 3000 });
-    await pin(page, 'wind');
-    await page.getByRole('button', { name: /kind letter/ }).click();
-    const scraps = page.getByRole('button', { name: /scrap of paper/ });
-    await expect(scraps).toHaveCount(7, { timeout: 3000 });
-    for (let i = 0; i < 5; i++) {
-      await scraps.first().focus();
-      await page.keyboard.press('Enter');
-    }
-    await expect(scraps).toHaveCount(2);
-    await expect.poll(() => page.evaluate(() => Object.keys(JSON.parse(localStorage.getItem('oddly-alive:memory') || '{}').discoveries ?? {})), { timeout: 5000 }).toContain('paper-chase');
-  });
-
   test('After Hours: a constellation plays as a tune, and lights up as it plays', async ({ page }) => {
     await page.goto('./#/after-hours');
     for (const i of [1, 2, 3, 4, 5, 6]) await page.locator(`button[aria-label^="Star ${i}"]`).first().click();

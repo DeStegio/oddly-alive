@@ -4,7 +4,8 @@ import { LETTERS, LETTER_IDS } from '../content/letters';
 import { Trunk } from '../rooms/Attic/Trunk';
 import Attic from '../rooms/Attic/Attic';
 import { RooftopParty } from '../rooms/AfterHours/RooftopParty';
-import MoodRoom from '../rooms/MoodRoom/MoodRoom';
+import { noticeValley } from '../rooms/Weather/notice';
+import { actOn, makeValley, stepValley } from '../rooms/Weather/sim/valley';
 import { useKeepsakes } from '../state/keepsakes';
 import { useObjects } from '../state/world';
 import { getWorldState, initialWorldState, setWorldState } from '../state/worldStore';
@@ -66,10 +67,14 @@ describe('Great-Aunt Pim’s letters', () => {
     expect(useKeepsakes.getState().letters).toContain('attic');
   });
 
-  it('the mirror hands one over while the rainbow is out', () => {
-    setWorldState({ weather: 'rainbow' });
-    wrap(<MoodRoom />);
-    fireEvent.click(screen.getByRole('button', { name: /mirror/ }));
+  it('the mirror hands one over when it makes a second rainbow in the valley', () => {
+    let v = actOn(makeValley(), { type: 'place', tool: 'teacup', x: 11.5, y: 10.4 });
+    for (let i = 0; i < 60; i++) v = stepValley(v);
+    const one = actOn(v, { type: 'place', tool: 'lamp', x: 12, y: 5 });
+    noticeValley(getWorld(), v, one);
+    expect(useKeepsakes.getState().letters).not.toContain('mood');
+    const two = actOn(one, { type: 'place', tool: 'mirror', x: 10, y: 4 });
+    noticeValley(getWorld(), one, two);
     expect(useKeepsakes.getState().letters).toContain('mood');
   });
 
